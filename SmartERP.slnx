@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SmartERP.Data/SmartERP.Data.csproj" />
+    <Project Path="src/SmartERP.Web/SmartERP.Web.csproj" />
+  </Folder>
+</Solution>
