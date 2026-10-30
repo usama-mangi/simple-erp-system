@@ -1,0 +1,31 @@
+@using SmartERP.Data.Models
+
+@model Department;
+
+<div>
+    <dl>
+        <dt>Department Code</dt>
+        <dd>@Model.Code</dd>
+
+        <dt>Name</dt>
+        <dd>@Model.Name</dd>
+        
+        <dt>Location</dt>
+        <dd>@Model.Location</dd>
+
+        <dt>Established</dt>
+        <dd>@Model.Established.ToString("dd-mm-yyyy")</dd>
+
+        <dt>Last Updated</dt>
+        <dd>
+            @if (Model.UpdatedAt == default)
+            {
+                <span>"Never Updated"</span>
+            }
+            else
+            {
+                <span>@Model.UpdatedAt.ToString("dd-mm-yyyy")</span>
+            }
+        </dd>
+    </dl>
+</div>

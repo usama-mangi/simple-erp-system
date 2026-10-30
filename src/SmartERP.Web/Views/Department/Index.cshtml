@@ -1,0 +1,68 @@
+@using SmartERP.Data.Models;
+
+@model IEnumerable<Department>;
+
+<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+    <h2>Department Registry</h2>
+    <a asp-controller="Department" asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus"></i>
+        Create Department
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error!</strong> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hovered align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col">Code</th>
+                <th scope="col">Name</th>
+                <th scope="col">Location</th>
+                <th scope="col">Established</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var dept in Model)
+            {
+                <tr>
+                    <th scope="col">@dept.Code</th>
+                    <td>@dept.Name</td>
+                    <td>@dept.Location</td>
+                    <td>@dept.Established.ToString("dd-mm-yyyy")</td>
+                    <td class="justify-space-between">
+                        <a asp-controller="Department" asp-action="Details" asp-route-id="@dept.Id">
+                            <i class="bi bi-layout-text-window"></i>
+                        </a>
+                        <a asp-controller="Department" asp-action="Update" asp-route-id="@dept.Id">
+                            <i class="bi bi-pen"></i>
+                        </a>
+                        <form asp-controller="Department" asp-action="Delete" asp-route-id="@dept.Id" method="post"
+                              style="display: inline;" onsubmit="return confirm(" Are you sure you want to delete
+                              department?")">
+                            <button asp-controller="Department" asp-action="Delete" asp-route-id="@dept.Id"
+                                    class="btn bg-transparent border-none text-primary">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
