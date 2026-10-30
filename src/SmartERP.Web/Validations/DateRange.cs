@@ -7,19 +7,26 @@ public class DateRangeInPast(string? _minDate) : ValidationAttribute
     private readonly DateTime now = DateTime.Now;
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
-        if (value is DateTime date)
+        // View models bind both DateTime (Department established) and DateOnly
+        // (Employee date of birth); normalize DateOnly before the range checks.
+        DateTime? date = value switch
         {
-            if (_minDate != null && date < DateTime.Parse(_minDate))
-                return new ValidationResult(
-                    ErrorMessage ?? $"The field must be between {_minDate} and {now}"
-                );
+            DateTime dt => dt,
+            DateOnly d => d.ToDateTime(TimeOnly.MinValue),
+            _ => null
+        };
 
-            if (date > now)
-                return new ValidationResult(ErrorMessage ?? $"The field must be in the past");
+        if (date is null)
+            return new ValidationResult("Invalid date format");
 
-            return ValidationResult.Success;
-        }
+        if (_minDate != null && date < DateTime.Parse(_minDate))
+            return new ValidationResult(
+                ErrorMessage ?? $"The field must be between {_minDate} and {now}"
+            );
 
-        return new ValidationResult("Invalid date format");
+        if (date > now)
+            return new ValidationResult(ErrorMessage ?? $"The field must be in the past");
+
+        return ValidationResult.Success;
     }
 }
