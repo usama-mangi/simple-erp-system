@@ -1,4 +1,20 @@
 {
   "version": 1,
-  "entries": {}
+  "entries": {
+    "employee-updates-current-row-contract": {
+      "text": "Read contract: EmployeeRepository.GetByIdAsync LEFT JOINs employment_details filtered by end_date IS NULL (current open row) and departments; employees without an open job return HasEmploymentDetails=false. UpdateAsync detail statement only touches the open row; zero matches = no-op.",
+      "cat": "architecture",
+      "updated": "2026-10-30T08:30:13.459214+00:00"
+    },
+    "create-smart-routing": {
+      "text": "UI contract: EmployeeCreateViewModel.IncludeEmploymentDetails drives Create POST routing to CreateAsync vs CreateWithDetailsAsync; detail-only validation lives in IValidatableObject so base employees bypass it. View models use DateOnly + DateRangeInPast.",
+      "cat": "pattern",
+      "updated": "2026-10-30T08:30:13.620643+00:00"
+    },
+    "deferred-double-decimal": {
+      "text": "Task deferred: double->decimal refactor for Oracle NUMBER ids across models/repos/controllers; pre-dated all current feature code by design.",
+      "cat": "decision",
+      "updated": "2026-10-30T08:30:13.767222+00:00"
+    }
+  }
 }

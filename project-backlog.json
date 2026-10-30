@@ -7,9 +7,9 @@
     {
       "id": "TASK-01",
       "title": "Fix EmployeeController and EmployeeRepository",
-      "status": "to-do",
+      "status": "testing",
       "dependencies": [],
-      "notes": "GetByIdAsync references employee_details and e.department_id which do not exist in schema; correct join is through employment_details/ed.department_id. Replace double ids with decimal. Complete CRUD list/details/create/update/delete and fix stale README drift."
+      "notes": "Repository bugs fixed (GetByIdAsync join/aliases/null end_date, UpdateAsync detail statement, DeleteAsync nonexistent column, CreateWithDetailsAsync RETURNING id) and EmployeeController completed (create with conditional details routing, update, delete). Awaiting user verification against live Oracle. double->decimal refactor intentionally deferred."
     },
     {
       "id": "TASK-02",
@@ -37,11 +37,46 @@
         "[\"TASK-01\"]"
       ],
       "notes": "README claims 04_triggers.sql but disk has 03_triggers.sql and 04_test.sql. Verify trigger contents, fix README, clarify Oracle connection string storage (missing from appsettings.json; document user-secrets if used)."
+    },
+    {
+      "id": "TASK-05",
+      "title": "Refactor ids from double to decimal across models, repos and controllers",
+      "status": "to-do",
+      "dependencies": [
+        "[\"TASK-01\"]"
+      ],
+      "notes": "Oracle NUMBER maps cleanly to decimal; double risks rounding drift. Touches Employee/Department/EmployeeWithDetails models, repositories, view models, controller parameters in one sweep."
+    },
+    {
+      "id": "TASK-06",
+      "title": "Complete department delete flow (missing Delete.cshtml and GET action)",
+      "status": "to-do",
+      "dependencies": [],
+      "notes": "DepartmentController POST Delete returns View(model) on invalid ModelState but Views/Department/Delete.cshtml does not exist and no GET Delete action is defined. Add confirmation view mirroring Employee Delete."
     }
   ],
   "log": {
-    "last_updated": "2026-10-30T08:01:13.843968+00:00",
+    "last_updated": "2026-10-30T08:30:13.550710+00:00",
     "recent_changes": [
+      {
+        "action": "add",
+        "task": "TASK-06",
+        "status": "to-do",
+        "at": "2026-10-30T08:30:13.550687+00:00"
+      },
+      {
+        "action": "add",
+        "task": "TASK-05",
+        "status": "to-do",
+        "at": "2026-10-30T08:30:13.409086+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-01",
+        "old_status": "to-do",
+        "new_status": "testing",
+        "at": "2026-10-30T08:29:54.085772+00:00"
+      },
       {
         "action": "add",
         "task": "TASK-04",
