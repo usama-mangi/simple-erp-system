@@ -35,7 +35,7 @@ public class DepartmentManagersController(
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
             return RedirectToAction("Index", "Department");
         }
     }
@@ -56,7 +56,7 @@ public class DepartmentManagersController(
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
             return RedirectToAction(nameof(Index), new { departmentId });
         }
     }
@@ -99,7 +99,7 @@ public class DepartmentManagersController(
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            ModelState.AddModelError(string.Empty, ex.Message);
+            ModelState.AddModelError(string.Empty, UserMessages.GenericFailure);
         }
 
         await PopulateSelectLists();
@@ -119,12 +119,12 @@ public class DepartmentManagersController(
         catch (ConstraintException ex)
         {
             _logger.LogError(ex, ex.Message);
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
         }
 
         return RedirectToAction(nameof(Index), new { departmentId = model.DepartmentId });

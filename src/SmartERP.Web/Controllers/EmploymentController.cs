@@ -38,7 +38,7 @@ public class EmploymentController(
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
             return RedirectToAction("Index", "Employee");
         }
     }
@@ -52,6 +52,9 @@ public class EmploymentController(
 
             if (employee == null) return NotFound();
 
+            var details = await _detailsRepository.GetAllByEmployeeAsync(employee.Id);
+
+            ViewData["HasOpenAssignment"] = details.Any(d => d.EndDate is null);
             await PopulateSelectLists();
 
             return View(new EmploymentDetailCreateViewModel { EmployeeId = employee.Id });
@@ -59,7 +62,7 @@ public class EmploymentController(
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
             return RedirectToAction(nameof(Index), new { employeeId });
         }
     }
@@ -76,7 +79,7 @@ public class EmploymentController(
 
         try
         {
-            await _detailsRepository.CreateAsync(new EmploymentDetail
+            var detail = new EmploymentDetail
             {
                 EmployeeId = model.EmployeeId,
                 JobTitle = model.JobTitle,
@@ -88,7 +91,31 @@ public class EmploymentController(
                 DepartmentId = model.DepartmentId,
                 EmploymentTypeId = model.EmploymentTypeId,
                 EmploymentStatusId = model.EmploymentStatusId
-            });
+            };
+
+            // Server re-checks the open row instead of trusting the checkbox:
+            // replacing without one is a stale-link case, not an error path.
+            var openDetails = await _detailsRepository.GetAllByEmployeeAsync(model.EmployeeId);
+            var replacements = openDetails.Count(d => d.EndDate is null) > 0;
+
+            if (replacements)
+            {
+                if (!model.ConfirmReplace)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.ConfirmReplace),
+                        "This employee already has an open assignment. Tick the confirmation box to end it and take over with the new one."
+                    );
+                    await PopulateSelectLists();
+                    return View(model);
+                }
+
+                await _detailsRepository.CreateReplacingCurrentAsync(detail);
+            }
+            else
+            {
+                await _detailsRepository.CreateAsync(detail);
+            }
 
             TempData["SuccessMessage"] = $"Assignment {model.JobTitle} created successfully";
             return RedirectToAction(nameof(Index), new { employeeId = model.EmployeeId });
@@ -96,7 +123,7 @@ public class EmploymentController(
         catch (DuplicateCurrentJobException ex)
         {
             _logger.LogError(ex, ex.Message);
-            ModelState.AddModelError(nameof(model.JobTitle), ex.Message);
+            ModelState.AddModelError(nameof(model.ConfirmReplace), ex.Message);
         }
         catch (ConstraintException ex)
         {
@@ -106,7 +133,7 @@ public class EmploymentController(
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            ModelState.AddModelError(string.Empty, ex.Message);
+            ModelState.AddModelError(string.Empty, UserMessages.GenericFailure);
         }
 
         await PopulateSelectLists();
@@ -126,12 +153,12 @@ public class EmploymentController(
         catch (ConstraintException ex)
         {
             _logger.LogError(ex, ex.Message);
-            TempData["ErrorMessage"] = $"{ex.Message}";
+            TempData["ErrorMessage"] = ex.Message;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
         }
 
         return RedirectToAction(nameof(Index), new { employeeId = model.EmployeeId });

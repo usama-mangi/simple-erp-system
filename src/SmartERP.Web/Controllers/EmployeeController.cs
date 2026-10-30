@@ -26,7 +26,7 @@ public class EmployeeController(
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
             return RedirectToAction(nameof(Index), new List<Employee>());
         }
     }
@@ -47,7 +47,7 @@ public class EmployeeController(
         {
             _logger.LogError(ex, ex.Message);
 
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
             return View(null);
         }
     }
@@ -119,7 +119,7 @@ public class EmployeeController(
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            ModelState.AddModelError(string.Empty, ex.Message);
+            ModelState.AddModelError(string.Empty, UserMessages.GenericFailure);
         }
 
         await PopulateSelectLists();
@@ -141,7 +141,7 @@ public class EmployeeController(
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
             return RedirectToAction(nameof(Index));
         }
     }
@@ -187,7 +187,7 @@ public class EmployeeController(
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            ModelState.AddModelError(string.Empty, ex.Message);
+            ModelState.AddModelError(string.Empty, UserMessages.GenericFailure);
         }
 
         await PopulateSelectLists();
@@ -213,7 +213,7 @@ public class EmployeeController(
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
             return RedirectToAction(nameof(Index));
         }
     }
@@ -249,7 +249,7 @@ public class EmployeeController(
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
         }
 
         return RedirectToAction(nameof(Index));

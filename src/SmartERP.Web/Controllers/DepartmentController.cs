@@ -18,7 +18,7 @@ public class DepartmentController(IDepartmentRepository _context, ILogger<Depart
         catch (Exception ex)
         {
             _logger.LogError(ex.ToString());
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
             return RedirectToAction(nameof(Index));
         }
     }
@@ -37,7 +37,7 @@ public class DepartmentController(IDepartmentRepository _context, ILogger<Depart
         catch (Exception ex)
         {
             _logger.LogError(ex.ToString());
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
             return RedirectToAction(nameof(Index));
         }
     }
@@ -136,7 +136,7 @@ public class DepartmentController(IDepartmentRepository _context, ILogger<Depart
         catch (Exception ex)
         {
             _logger.LogError(ex.ToString());
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
             return RedirectToAction(nameof(Index));
         }
     }

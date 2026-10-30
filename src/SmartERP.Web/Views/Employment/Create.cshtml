@@ -10,9 +10,19 @@
 
 <h2>New Assignment</h2>
 
+@if ((bool)(ViewData["HasOpenAssignment"] ?? false))
+{
+    <div class="alert alert-warning d-flex align-items-center gap-3" role="alert">
+        <div>
+            This employee has an <strong>open assignment</strong>. Creating the new record will
+            end that assignment on the new start date you pick below.
+        </div>
+    </div>
+}
+
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create" method="post">
+        <form asp-action="Create" method="post" id="createForm">
             <input type="hidden" asp-for="EmployeeId" />
 
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -65,6 +75,18 @@
                 <span asp-validation-for="EmploymentStatusId" class="text-danger"></span>
             </div>
 
+            @if ((bool)(ViewData["HasOpenAssignment"] ?? false))
+            {
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" asp-for="ConfirmReplace" id="replaceToggle" />
+                    <label class="form-check-label text-danger" for="replaceToggle">
+                        I understand the current assignment will end on the start date above
+                        and the new record takes its place.
+                    </label>
+                    <span asp-validation-for="ConfirmReplace" class="text-danger"></span>
+                </div>
+            }
+
             <div class="form-group">
                 <button type="submit" class="btn btn-primary">Create Assignment</button>
                 <a asp-action="Index" asp-route-employeeId="@Model.EmployeeId"
@@ -78,4 +100,23 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        (function () {
+            var form = document.getElementById('createForm');
+            var toggle = document.getElementById('replaceToggle');
+            if (!form || !toggle) return;
+
+            var startDate = document.querySelector('input[name="StartDate"]');
+
+            form.addEventListener('submit', function (event) {
+                if (!toggle.checked) return;
+
+                var message = 'The current assignment will be ended'
+                    + (startDate && startDate.value ? ' on ' + startDate.value : '')
+                    + ' and replaced by the new record. Continue?';
+
+                if (!window.confirm(message)) event.preventDefault();
+            });
+        })();
+    </script>
 }

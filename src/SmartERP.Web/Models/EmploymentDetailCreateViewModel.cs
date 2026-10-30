@@ -27,6 +27,12 @@ public class EmploymentDetailCreateViewModel : IValidatableObject
     [DateRangeInPast(null, ErrorMessage = "End date must be today or a past date.")]
     public DateOnly? EndDate { get; set; }
 
+    // Visible only when the employee still holds an open assignment.
+    // Server re-checks the open row on POST: replacing without this flag
+    // rejected, confirming without an open row behaves like a plain create.
+    [Display(Name = "End the current assignment and replace it")]
+    public bool ConfirmReplace { get; set; }
+
     [Display(Name = "Department")]
     [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a department.")]
     public double DepartmentId { get; set; }
