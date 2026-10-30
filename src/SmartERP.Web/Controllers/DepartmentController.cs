@@ -1,11 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using SmartERP.Data.Models;
 using SmartERP.Data.Repositories;
 using SmartERP.Web.Models;
 
 namespace SmartERP.Web.Controllers;
 
-public class DepartmentController(IDepartmentRepository _context, ILogger<DepartmentController> _logger) : Controller
+public class DepartmentController(
+    IDepartmentRepository _context,
+    IDepartmentManagerRepository _managersRepository,
+    IEmployeeRepository _employeeRepository,
+    ILogger<DepartmentController> _logger
+) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index()
@@ -32,7 +38,21 @@ public class DepartmentController(IDepartmentRepository _context, ILogger<Depart
 
             if (department == null) return NotFound();
 
-            return View(department);
+            var managers = await _managersRepository.GetHistoryAsync(id);
+
+            // The assign form lists every non-deleted employee (soft-delete is
+            // already filtered out by the repository read contract).
+            var employees = await _employeeRepository.GetAllAsync();
+
+            return View(new DepartmentDetailsViewModel
+            {
+                Department = department,
+                Managers = managers,
+                ManagerOptions = employees
+                    .OrderBy(e => e.LastName)
+                    .ThenBy(e => e.FirstName)
+                    .Select(e => new SelectListItem($"{e.FirstName} {e.LastName}", e.Id.ToString()))
+            });
         }
         catch (Exception ex)
         {

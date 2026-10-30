@@ -1,6 +1,7 @@
 @using SmartERP.Data.Models
+@using SmartERP.Web.Models
 
-@model EmployeeWithDetails;
+@model EmployeeDetailsViewModel;
 
 @functions {
     private static string Title(Dictionary<double, string>? titles, double id)
@@ -8,87 +9,81 @@
 }
 
 @{
+    ViewData["Title"] = $"Employee - {Model.Employee.FirstName} {Model.Employee.LastName}";
     var genderTitles = ViewData["GenderTitles"] as Dictionary<double, string>;
     var departmentTitles = ViewData["DepartmentTitles"] as Dictionary<double, string>;
     var employmentTypeTitles = ViewData["EmploymentTypeTitles"] as Dictionary<double, string>;
     var employmentStatusTitles = ViewData["EmploymentStatusTitles"] as Dictionary<double, string>;
 }
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error!</strong> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<h2>Employee Details</h2>
+
 <div>
     <dl>
         <dt>Employee ID</dt>
-        <dd>@Model.Id</dd>
+        <dd>@Model.Employee.Id</dd>
 
         <dt>First Name</dt>
-        <dd>@Model.FirstName</dd>
+        <dd>@Model.Employee.FirstName</dd>
 
         <dt>Last Name</dt>
-        <dd>@Model.LastName</dd>
+        <dd>@Model.Employee.LastName</dd>
 
         <dt>Email</dt>
-        <dd>@Model.Email</dd>
+        <dd>@Model.Employee.Email</dd>
 
         <dt>Phone</dt>
-        <dd>@Model.Phone</dd>
+        <dd>@Model.Employee.Phone</dd>
 
         <dt>Date of Birth</dt>
-        <dd>@Model.DateOfBirth.ToShortDateString()</dd>
+        <dd>@Model.Employee.DateOfBirth.ToShortDateString()</dd>
 
         <dt>Gender</dt>
-        <dd>@Title(genderTitles, Model.GenderId)</dd>
+        <dd>@Title(genderTitles, Model.Employee.GenderId)</dd>
 
         <dt>Address</dt>
-        <dd>@Model.Address</dd>
-
-        @if (Model.HasEmploymentDetails)
-        {
-            <dt>Job Title</dt>
-            <dd>@Model.JobTitle</dd>
-
-            <dt>Salary</dt>
-            <dd>@Model.Salary.ToString("N")</dd>
-
-            <dt>Department</dt>
-            <dd>@Title(departmentTitles, Model.DepartmentId)</dd>
-
-            <dt>Employment Type</dt>
-            <dd>@Title(employmentTypeTitles, Model.EmploymentTypeId)</dd>
-
-            <dt>Employment Status</dt>
-            <dd>@Title(employmentStatusTitles, Model.EmploymentStatusId)</dd>
-
-            <dt>Start Date</dt>
-            <dd>@Model.StartDate.ToShortDateString()</dd>
-
-            <dt>End Date</dt>
-            <dd>
-                @if (Model.EndDate is null)
-                {
-                    <span>Current employment</span>
-                }
-                else
-                {
-                    <span>@Model.EndDate.Value.ToShortDateString()</span>
-                }
-            </dd>
-        }
+        <dd>@Model.Employee.Address</dd>
 
         <dt>Last Updated</dt>
         <dd>
-            @if (Model.UpdatedAt == default)
+            @if (Model.Employee.UpdatedAt == default)
             {
                 <span>Never Updated</span>
             }
             else
             {
-                <span>@Model.UpdatedAt.ToString("dd MMM yyyy")</span>
+                <span>@Model.Employee.UpdatedAt.ToString("dd MMM yyyy")</span>
             }
         </dd>
     </dl>
 </div>
 
 <div>
-    <a asp-controller="Employee" asp-action="Update" asp-route-id="@Model.Id" class="btn btn-warning">Update</a>
-    <a asp-controller="Employee" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
+    <a asp-controller="Employee" asp-action="Update" asp-route-id="@Model.Employee.Id" class="btn btn-warning">Update</a>
+    <a asp-controller="Employee" asp-action="Delete" asp-route-id="@Model.Employee.Id" class="btn btn-danger">Delete</a>
     <a asp-controller="Employee" asp-action="Index" class="btn btn-secondary">Back to List</a>
 </div>
+
+<h3 class="mt-4">Employment History</h3>
+
+@{
+    // The partial owns the table plus the "Add job" / "change department" zone.
+    ViewData["ShowActions"] = true;
+}
+<partial name="_EmploymentHistory" model="Model.History" />

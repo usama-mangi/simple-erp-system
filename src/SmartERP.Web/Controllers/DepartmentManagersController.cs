@@ -9,7 +9,7 @@ using SmartERP.Web.Models;
 namespace SmartERP.Web.Controllers;
 
 public class DepartmentManagersController(
-    IDepartmentManagersRepository _managersRepository,
+    IDepartmentManagerRepository _managersRepository,
     IDepartmentRepository _departmentRepository,
     IEmployeeRepository _employeeRepository,
     ILogger<DepartmentManagersController> _logger
@@ -24,7 +24,7 @@ public class DepartmentManagersController(
 
             if (department == null) return NotFound();
 
-            var managers = await _managersRepository.GetAllByDepartmentAsync(departmentId);
+            var managers = await _managersRepository.GetHistoryAsync(departmentId);
 
             return View(new DepartmentManagerIndexViewModel
             {
@@ -73,7 +73,10 @@ public class DepartmentManagersController(
 
         try
         {
-            await _managersRepository.CreateAsync(new DepartmentManager
+            // Both assign paths for this repo end the current assignment before
+            // inserting: AssignAsync routes to sp_assign_manager (open
+            // assignments) or to the .NET transaction pair (dated backfill).
+            await _managersRepository.AssignAsync(new DepartmentManager
             {
                 DepartmentId = model.DepartmentId,
                 ManagerId = model.ManagerId,
@@ -108,18 +111,54 @@ public class DepartmentManagersController(
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    // Spec's quick-assign form: one submit ends the current assignment and
+    // starts the new one effective today (sp_assign_manager).
+    public async Task<IActionResult> Assign(DepartmentManagerAssignViewModel model)
+    {
+        try
+        {
+            await _managersRepository.AssignAsync(new DepartmentManager
+            {
+                DepartmentId = model.DepartmentId,
+                ManagerId = model.ManagerId,
+                StartDate = DateTime.Today
+            });
+
+            TempData["SuccessMessage"] = "Manager assigned successfully";
+        }
+        catch (DuplicateCurrentManagerException ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+        }
+        catch (ConstraintException ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
+        }
+
+        return RedirectToAction("Details", "Department", new { id = model.DepartmentId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Close(DepartmentManagerCloseViewModel model)
     {
         try
         {
-            await _managersRepository.CloseAsync(model.Id, model.EndDate);
+            await _managersRepository.EndCurrentAsync(model.DepartmentId, model.EndDate);
 
             TempData["SuccessMessage"] = "Manager assignment closed successfully";
         }
         catch (ConstraintException ex)
         {
             _logger.LogError(ex, ex.Message);
-            TempData["ErrorMessage"] = UserMessages.GenericFailure;
+            TempData["ErrorMessage"] = ex.Message;
         }
         catch (Exception ex)
         {

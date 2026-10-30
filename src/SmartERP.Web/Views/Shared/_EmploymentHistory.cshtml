@@ -1,0 +1,103 @@
+@using SmartERP.Data.Models
+@using SmartERP.Web.Models
+
+@model EmploymentIndexViewModel;
+
+@functions {
+    private static string Title(Dictionary<double, string>? titles, double id)
+        => titles is not null && titles.TryGetValue(id, out var title) ? title : "Unknown";
+}
+
+@{
+    var departmentTitles = ViewData["DepartmentTitles"] as Dictionary<double, string>;
+    var employmentTypeTitles = ViewData["EmploymentTypeTitles"] as Dictionary<double, string>;
+    var employmentStatusTitles = ViewData["EmploymentStatusTitles"] as Dictionary<double, string>;
+
+    // Only the employee details page sets this: it owns the "Add job" and
+    // "change department" composition. Plain history pages keep their own
+    // header-level actions.
+    var showActions = (bool)(ViewData["ShowActions"] ?? false);
+}
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Job Title</th>
+                <th scope="col">Salary</th>
+                <th scope="col">Department</th>
+                <th scope="col">Type</th>
+                <th scope="col">Status</th>
+                <th scope="col">Start</th>
+                <th scope="col">End</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Details.Any())
+            {
+                <tr><td colspan="8" class="text-center">No assignments recorded yet.</td></tr>
+            }
+            @foreach (var detail in Model.Details)
+            {
+                <tr>
+                    <td>@detail.JobTitle</td>
+                    <td>@detail.Salary.ToString("N")</td>
+                    <td>@Title(departmentTitles, detail.DepartmentId)</td>
+                    <td>@Title(employmentTypeTitles, detail.EmploymentTypeId)</td>
+                    <td>@Title(employmentStatusTitles, detail.EmploymentStatusId)</td>
+                    <td>@detail.StartDate.ToShortDateString()</td>
+                    <td>
+                        @if (detail.EndDate is null)
+                        {
+                            <span class="badge bg-success">Current</span>
+                        }
+                        else
+                        {
+                            <span>@detail.EndDate.Value.ToShortDateString()</span>
+                        }
+                    </td>
+                    <td>
+                        @if (detail.EndDate is null)
+                        {
+                            <form asp-controller="Employment" asp-action="Close" method="post"
+                                  class="d-flex align-items-center gap-2">
+                                <input type="date" name="EndDate" required
+                                       class="form-control form-control-sm" />
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">Close</button>
+                                <input type="hidden" name="EmployeeId" value="@Model.Employee.Id" />
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Closed</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (showActions)
+{
+    <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+        <a asp-controller="Employment" asp-action="Create" asp-route-employeeId="@Model.Employee.Id"
+           class="btn btn-primary">Add job</a>
+
+        @if (Model.DepartmentOptions is not null)
+        {
+            <form asp-controller="Employment" asp-action="TransferDepartment" method="post"
+                  class="d-flex align-items-center gap-2">
+                <label class="col-form-label" for="transfer-department">Change department</label>
+                <select id="transfer-department" name="DepartmentId" required
+                        asp-items="Model.DepartmentOptions"
+                        class="form-select form-select-sm" style="width: auto;">
+                    <option value="">Select department</option>
+                </select>
+                <button type="submit" class="btn btn-outline-primary btn-sm">Transfer</button>
+                <input type="hidden" name="EmployeeId" value="@Model.Employee.Id" />
+            </form>
+        }
+    </div>
+}

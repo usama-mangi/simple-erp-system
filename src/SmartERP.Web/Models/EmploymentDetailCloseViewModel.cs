@@ -3,11 +3,10 @@ using SmartERP.Web.Validations;
 
 namespace SmartERP.Web.Models;
 
+// Employee-scoped close: the employee's open assignment is ended with the
+// chosen date; closed history rows are never rewritten.
 public class EmploymentDetailCloseViewModel
 {
-    [Required(ErrorMessage = "Invalid assignment provided.")]
-    public double Id { get; set; }
-
     [Required(ErrorMessage = "Invalid employee provided.")]
     public double EmployeeId { get; set; }
 

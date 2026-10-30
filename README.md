@@ -16,10 +16,11 @@ SmartERP.slnx
     ├── 01_schema.sql     # Tables, constraints, unique indexes
     ├── 02_seed.sql       # Reference and sample data
     ├── 03_triggers.sql   # Triggers that stamp updated_at on row updates
-    └── 04_test.sql       # Empty placeholder for ad-hoc test queries
+    ├── 04_test.sql       # Empty placeholder for ad-hoc test queries
+    └── 05_procedures.sql # KV stored procedures: sp_assign_manager (atomic end-then-insert manager assignment)
 ```
 
-Rebuild the database after every schema change: run all five scripts in filename order against an Oracle instance. Dropping a table drops its identity sequence too, so ids restart at 1 per rebuild; anyone hard-coding lookup or row ids in code instead of reading them from queries will drift.
+Rebuild the database after every schema change: run all six scripts in filename order against an Oracle instance. Dropping a table drops its identity sequence too, so ids restart at 1 per rebuild; anyone hard-coding lookup or row ids in code instead of reading them from queries will drift.
 
 ## Data model
 
@@ -67,7 +68,7 @@ The diagram above (generated with dbdiagram.io) shows the same model with column
 
 ## Running the database
 
-Execute the scripts in `db/` in filename order against an Oracle instance: `00_drop`, `01_schema`, `02_seed`, `03_triggers`, `04_test`.
+Execute the scripts in `db/` in filename order against an Oracle instance: `00_drop`, `01_schema`, `02_seed`, `03_triggers`, `04_test`, `05_procedures`.
 
 ## Running the web app
 
@@ -77,7 +78,7 @@ dotnet run --project src/SmartERP.Web
 
 Requires the .NET SDK and:
 
-1. The five `db/` scripts executed (see above).
+1. The six `db/` scripts executed (see above).
 2. The Oracle connection string under `ConnectionStrings:Oracle`. It lives in no appsettings file on purpose; provide it either with user secrets:
 
 ```bash

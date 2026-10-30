@@ -9,7 +9,7 @@ using SmartERP.Web.Models;
 namespace SmartERP.Web.Controllers;
 
 public class EmploymentController(
-    IEmploymentDetailsRepository _detailsRepository,
+    IEmploymentRepository _employmentRepository,
     IEmployeeRepository _employeeRepository,
     IDepartmentRepository _departmentRepository,
     ILookupRepository _lookupRepository,
@@ -26,7 +26,7 @@ public class EmploymentController(
 
             if (employee == null) return NotFound();
 
-            var details = await _detailsRepository.GetAllByEmployeeAsync(employeeId);
+            var details = await _employmentRepository.GetByEmployeeAsync(employeeId);
             await PopulateTitlesAsync();
 
             return View(new EmploymentIndexViewModel
@@ -52,9 +52,9 @@ public class EmploymentController(
 
             if (employee == null) return NotFound();
 
-            var details = await _detailsRepository.GetAllByEmployeeAsync(employee.Id);
+            var currentAssignment = await _employmentRepository.GetCurrentAsync(employee.Id);
 
-            ViewData["HasOpenAssignment"] = details.Any(d => d.EndDate is null);
+            ViewData["HasOpenAssignment"] = currentAssignment is not null;
             await PopulateSelectLists();
 
             return View(new EmploymentDetailCreateViewModel { EmployeeId = employee.Id });
@@ -93,13 +93,26 @@ public class EmploymentController(
                 EmploymentStatusId = model.EmploymentStatusId
             };
 
+            // App-level gate first: a replacing assignment must start after the
+            // one it ends, otherwise the old row's chk_det_end_date check would
+            // reject the close mid-transaction. Reading the current row directly
+            // (instead of the full history) keeps this check a single lookup.
+            var currentAssignment = await _employmentRepository.GetCurrentAsync(model.EmployeeId);
+
             // Server re-checks the open row instead of trusting the checkbox:
             // replacing without one is a stale-link case, not an error path.
-            var openDetails = await _detailsRepository.GetAllByEmployeeAsync(model.EmployeeId);
-            var replacements = openDetails.Count(d => d.EndDate is null) > 0;
-
-            if (replacements)
+            if (currentAssignment is not null)
             {
+                if (detail.StartDate <= currentAssignment.StartDate)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.StartDate),
+                        $"The new assignment must start after the current one started ({currentAssignment.StartDate.ToShortDateString()})."
+                    );
+                    await PopulateSelectLists();
+                    return View(model);
+                }
+
                 if (!model.ConfirmReplace)
                 {
                     ModelState.AddModelError(
@@ -110,11 +123,11 @@ public class EmploymentController(
                     return View(model);
                 }
 
-                await _detailsRepository.CreateReplacingCurrentAsync(detail);
+                await _employmentRepository.CreateReplacingCurrentAsync(detail);
             }
             else
             {
-                await _detailsRepository.CreateAsync(detail);
+                await _employmentRepository.CreateAsync(detail);
             }
 
             TempData["SuccessMessage"] = $"Assignment {model.JobTitle} created successfully";
@@ -146,7 +159,7 @@ public class EmploymentController(
     {
         try
         {
-            await _detailsRepository.CloseAsync(model.Id, model.EndDate);
+            await _employmentRepository.EndCurrentAsync(model.EmployeeId, model.EndDate);
 
             TempData["SuccessMessage"] = "Assignment closed successfully";
         }
@@ -162,6 +175,39 @@ public class EmploymentController(
         }
 
         return RedirectToAction(nameof(Index), new { employeeId = model.EmployeeId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> TransferDepartment(EmploymentTransferDepartmentViewModel model)
+    {
+        try
+        {
+            var currentAssignment = await _employmentRepository.GetCurrentAsync(model.EmployeeId);
+
+            if (currentAssignment == null)
+            {
+                TempData["ErrorMessage"] = "This employee has no open assignment to transfer.";
+            }
+            else
+            {
+                await _employmentRepository.TransferCurrentDepartmentAsync(model.EmployeeId, model.DepartmentId);
+
+                TempData["SuccessMessage"] = "Department changed successfully";
+            }
+        }
+        catch (ConstraintException ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
+        }
+
+        return RedirectToAction("Details", "Employee", new { id = model.EmployeeId });
     }
 
     private static string FieldErrorKey(string fieldName) => fieldName switch

@@ -9,6 +9,7 @@ namespace SmartERP.Web.Controllers;
 
 public class EmployeeController(
     IEmployeeRepository _repository,
+    IEmploymentRepository _employmentRepository,
     IDepartmentRepository _departmentRepository,
     ILookupRepository _lookupRepository,
     ILogger<EmployeeController> _logger
@@ -36,12 +37,30 @@ public class EmployeeController(
     {
         try
         {
-            var detEmployee = await _repository.GetByIdAsync(id);
+            var employee = await _repository.GetByIdAsync(id);
 
-            if (detEmployee == null) return NotFound();
+            if (employee == null) return NotFound();
 
-            await PopulateLookupTitlesAsync(detEmployee.HasEmploymentDetails);
-            return View(detEmployee);
+            await PopulateLookupTitlesAsync(includeEmploymentLookups: true);
+
+            var details = await _employmentRepository.GetByEmployeeAsync(id);
+            var departments = await _departmentRepository.GetAllAsync();
+
+            return View(new EmployeeDetailsViewModel
+            {
+                Employee = employee,
+                History = new EmploymentIndexViewModel
+                {
+                    Employee = employee,
+                    Details = details,
+
+                    // Drives the inline "change department" form rendered from
+                    // the history partial on this composed page.
+                    DepartmentOptions = departments
+                        .OrderBy(d => d.Name)
+                        .Select(d => new SelectListItem(d.Name, d.Id.ToString()))
+                }
+            });
         }
         catch (Exception ex)
         {

@@ -1,18 +1,9 @@
-@using SmartERP.Data.Models
 @using SmartERP.Web.Models
 
 @model EmploymentIndexViewModel;
 
-@functions {
-    private static string Title(Dictionary<double, string>? titles, double id)
-        => titles is not null && titles.TryGetValue(id, out var title) ? title : "Unknown";
-}
-
 @{
     ViewData["Title"] = $"Employment History - {Model.Employee.FirstName} {Model.Employee.LastName}";
-    var departmentTitles = ViewData["DepartmentTitles"] as Dictionary<double, string>;
-    var employmentTypeTitles = ViewData["EmploymentTypeTitles"] as Dictionary<double, string>;
-    var employmentStatusTitles = ViewData["EmploymentStatusTitles"] as Dictionary<double, string>;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -37,67 +28,7 @@
     </div>
 }
 
-<div class="table-responsive">
-    <table class="table table-bordered table-hover">
-        <thead>
-            <tr>
-                <th scope="col">Job Title</th>
-                <th scope="col">Salary</th>
-                <th scope="col">Department</th>
-                <th scope="col">Type</th>
-                <th scope="col">Status</th>
-                <th scope="col">Start</th>
-                <th scope="col">End</th>
-                <th scope="col">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (!Model.Details.Any())
-            {
-                <tr><td colspan="8" class="text-center">No assignments recorded yet.</td></tr>
-            }
-            @foreach (var detail in Model.Details)
-            {
-                <tr>
-                    <td>@detail.JobTitle</td>
-                    <td>@detail.Salary.ToString("N")</td>
-                    <td>@Title(departmentTitles, detail.DepartmentId)</td>
-                    <td>@Title(employmentTypeTitles, detail.EmploymentTypeId)</td>
-                    <td>@Title(employmentStatusTitles, detail.EmploymentStatusId)</td>
-                    <td>@detail.StartDate.ToShortDateString()</td>
-                    <td>
-                        @if (detail.EndDate is null)
-                        {
-                            <span class="badge bg-success">Current</span>
-                        }
-                        else
-                        {
-                            <span>@detail.EndDate.Value.ToShortDateString()</span>
-                        }
-                    </td>
-                    <td>
-                        @if (detail.EndDate is null)
-                        {
-                            <form asp-controller="Employment" asp-action="Close" asp-route-id="@detail.Id"
-                                  asp-route-employeeId="@Model.Employee.Id" method="post"
-                                  class="d-flex align-items-center gap-2">
-                                <input type="date" name="EndDate" required
-                                       class="form-control form-control-sm" />
-                                <button type="submit" class="btn btn-outline-secondary btn-sm">Close</button>
-                                <input type="hidden" name="Id" value="@detail.Id" />
-                                <input type="hidden" name="EmployeeId" value="@Model.Employee.Id" />
-                            </form>
-                        }
-                        else
-                        {
-                            <span class="text-muted">Closed</span>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+<partial name="_EmploymentHistory" model="Model" />
 
 <div>
     <a asp-controller="Employee" asp-action="Index" class="btn btn-secondary">Back to Employees</a>

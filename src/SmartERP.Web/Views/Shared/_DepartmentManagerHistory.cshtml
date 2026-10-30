@@ -1,0 +1,55 @@
+@using SmartERP.Web.Models
+
+@model DepartmentManagerIndexViewModel;
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Manager</th>
+                <th scope="col">Start</th>
+                <th scope="col">End</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Managers.Any())
+            {
+                <tr><td colspan="4" class="text-center">No manager assignments recorded yet.</td></tr>
+            }
+            @foreach (var assignment in Model.Managers)
+            {
+                <tr>
+                    <td>@assignment.ManagerName</td>
+                    <td>@assignment.StartDate.ToShortDateString()</td>
+                    <td>
+                        @if (assignment.EndDate is null)
+                        {
+                            <span class="badge bg-success">Current</span>
+                        }
+                        else
+                        {
+                            <span>@assignment.EndDate.Value.ToShortDateString()</span>
+                        }
+                    </td>
+                    <td>
+                        @if (assignment.EndDate is null)
+                        {
+                            <form asp-controller="DepartmentManagers" asp-action="Close" method="post"
+                                  class="d-flex align-items-center gap-2">
+                                <input type="date" name="EndDate" required
+                                       class="form-control form-control-sm" />
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">Close</button>
+                                <input type="hidden" name="DepartmentId" value="@Model.Department.Id" />
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Closed</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

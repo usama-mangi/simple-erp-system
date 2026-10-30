@@ -3,11 +3,10 @@ using SmartERP.Web.Validations;
 
 namespace SmartERP.Web.Models;
 
+// Department-scoped close: the department's open manager assignment is
+// ended with the chosen date; closed history rows are never rewritten.
 public class DepartmentManagerCloseViewModel
 {
-    [Required(ErrorMessage = "Invalid assignment provided.")]
-    public double Id { get; set; }
-
     [Required(ErrorMessage = "Invalid department provided.")]
     public double DepartmentId { get; set; }
 
