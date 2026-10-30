@@ -71,11 +71,34 @@
         "[\"TASK-02\"]"
       ],
       "notes": "Constraint-name matching root-fixture, generic error wrapper at repo boundary, replace-with-confirm on employment create. Awaiting live verification."
+    },
+    {
+      "id": "TASK-09",
+      "title": "Adhere to Step 8 spec: LOWER(email) index, sp_assign_manager, spec-named repo contracts, async tx pattern, composed pages",
+      "status": "active",
+      "dependencies": [
+        "[\"TASK-02\"",
+        "\"TASK-03\"]"
+      ],
+      "notes": "Per session spec Step 8 audit."
     }
   ],
   "log": {
-    "last_updated": "2026-10-30T12:08:04.142162+00:00",
+    "last_updated": "2026-10-30T12:29:59.471367+00:00",
     "recent_changes": [
+      {
+        "action": "update",
+        "task": "TASK-09",
+        "old_status": "to-do",
+        "new_status": "active",
+        "at": "2026-10-30T12:29:59.471341+00:00"
+      },
+      {
+        "action": "add",
+        "task": "TASK-09",
+        "status": "to-do",
+        "at": "2026-10-30T12:29:59.352410+00:00"
+      },
       {
         "action": "update",
         "task": "TASK-08",
@@ -116,20 +139,6 @@
         "old_status": "active",
         "new_status": "testing",
         "at": "2026-10-30T11:45:09.851974+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-03",
-        "old_status": "to-do",
-        "new_status": "active",
-        "at": "2026-10-30T11:42:43.626368+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-02",
-        "old_status": "active",
-        "new_status": "testing",
-        "at": "2026-10-30T11:31:13.860953+00:00"
       }
     ]
   }
