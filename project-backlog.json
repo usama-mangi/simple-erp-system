@@ -23,20 +23,20 @@
     {
       "id": "TASK-03",
       "title": "Build department_managers feature",
-      "status": "to-do",
+      "status": "testing",
       "dependencies": [
         "[\"TASK-01\"]"
       ],
-      "notes": "Repository and UI for assigning a manager to a department with start_date, closing with end_date. uq_dept_current_manager must surface as a typed duplicate-current-assignment exception."
+      "notes": "Implemented per docs/plans/TASK-03.md. Awaiting live verification."
     },
     {
       "id": "TASK-04",
       "title": "Sync docs and db scripts with actual codebase",
-      "status": "to-do",
+      "status": "testing",
       "dependencies": [
         "[\"TASK-01\"]"
       ],
-      "notes": "README claims 04_triggers.sql but disk has 03_triggers.sql and 04_test.sql. Verify trigger contents, fix README, clarify Oracle connection string storage (missing from appsettings.json; document user-secrets if used)."
+      "notes": "README and AGENTS.md synced with actual layout; check both files live."
     },
     {
       "id": "TASK-05",
@@ -65,8 +65,36 @@
     }
   ],
   "log": {
-    "last_updated": "2026-10-30T11:31:13.861014+00:00",
+    "last_updated": "2026-10-30T11:47:29.342231+00:00",
     "recent_changes": [
+      {
+        "action": "update",
+        "task": "TASK-04",
+        "old_status": "active",
+        "new_status": "testing",
+        "at": "2026-10-30T11:47:29.342212+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-04",
+        "old_status": "to-do",
+        "new_status": "active",
+        "at": "2026-10-30T11:45:34.037093+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-03",
+        "old_status": "active",
+        "new_status": "testing",
+        "at": "2026-10-30T11:45:09.851974+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-03",
+        "old_status": "to-do",
+        "new_status": "active",
+        "at": "2026-10-30T11:42:43.626368+00:00"
+      },
       {
         "action": "update",
         "task": "TASK-02",
@@ -93,31 +121,6 @@
         "task": "TASK-07",
         "status": "to-do",
         "at": "2026-10-30T10:42:58.345260+00:00"
-      },
-      {
-        "action": "add",
-        "task": "TASK-06",
-        "status": "to-do",
-        "at": "2026-10-30T08:30:13.550687+00:00"
-      },
-      {
-        "action": "add",
-        "task": "TASK-05",
-        "status": "to-do",
-        "at": "2026-10-30T08:30:13.409086+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-01",
-        "old_status": "to-do",
-        "new_status": "testing",
-        "at": "2026-10-30T08:29:54.085772+00:00"
-      },
-      {
-        "action": "add",
-        "task": "TASK-04",
-        "status": "to-do",
-        "at": "2026-10-30T08:01:13.843950+00:00"
       }
     ]
   }

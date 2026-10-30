@@ -25,6 +25,11 @@
       "text": "Lookup contract: all dropdown ids/titles come from ILookupRepository (genders, employment_types, employment_status read as LookupItem(Id,Title)); enum positions ( Gender/EmploymentType/Status enums) must never be assumed in UI binding. Present-date-only validations: Range(1, decimal.MaxValue) for presence + conditional IValidatableObject checks.",
       "cat": "architecture",
       "updated": "2026-10-30T11:31:13.680913+00:00"
+    },
+    "db-rebuild-identity-reset": {
+      "text": "Verified fact: dropping Oracle tables drops their identity sequences, so ids restart at 1 per rebuild via db/ scripts. Lookup ids are therefore never hard-coded; all UI ids come from ILookupRepository reads.",
+      "cat": "fact",
+      "updated": "2026-10-30T11:47:29.461390+00:00"
     }
   }
 }
