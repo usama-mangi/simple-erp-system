@@ -1,4 +1,5 @@
 using System.Data;
+using System.Globalization;
 using Oracle.ManagedDataAccess.Client;
 using SmartERP.Data.Abstractions;
 using SmartERP.Data.ExceptionHandlers;
@@ -137,7 +138,8 @@ public class EmployeeRepository(
             INSERT INTO
                 employees (first_name, last_name, email, phone, date_of_birth, gender_id, address)
             VALUES
-                (:FirstName, :LastName, :Email, :Phone, :DateOfBirth, :GenderId, :Address)";
+                (:FirstName, :LastName, :Email, :Phone, :DateOfBirth, :GenderId, :Address)
+            RETURNING id INTO :NewId";
         string detQuery = @"
             INSERT INTO
                 employment_details (employee_id, job_title, salary, start_date, end_date, department_id, employment_type_id, employment_status_id)
@@ -162,21 +164,29 @@ public class EmployeeRepository(
                 empCommand.Parameters.Add(":DateOfBirth", OracleDbType.Date, employee.DateOfBirth, ParameterDirection.Input);
                 empCommand.Parameters.Add(":GenderId", OracleDbType.Double, employee.GenderId, ParameterDirection.Input);
                 empCommand.Parameters.Add(":Address", OracleDbType.Varchar2, employee.Address, ParameterDirection.Input);
+                var newIdParam = empCommand.Parameters.Add(
+                    new OracleParameter(":NewId", OracleDbType.Int64) { Direction = ParameterDirection.Output }
+                );
 
                 var detCommand = new OracleCommand(detQuery, (OracleConnection)connection)
                 {
                     BindByName = true
                 };
-                detCommand.Parameters.Add(":EmployeeId", OracleDbType.Double, employee.Id, ParameterDirection.Input);
                 detCommand.Parameters.Add(":JobTitle", OracleDbType.Varchar2, employee.JobTitle, ParameterDirection.Input);
                 detCommand.Parameters.Add(":Salary", OracleDbType.Double, employee.Salary, ParameterDirection.Input);
                 detCommand.Parameters.Add(":StartDate", OracleDbType.Date, employee.StartDate, ParameterDirection.Input);
-                detCommand.Parameters.Add(":EndDate", OracleDbType.Date, employee.EndDate, ParameterDirection.Input);
+                detCommand.Parameters.Add(":EndDate", OracleDbType.Date, (object?)employee.EndDate ?? DBNull.Value, ParameterDirection.Input);
                 detCommand.Parameters.Add(":DepartmentId", OracleDbType.Double, employee.DepartmentId, ParameterDirection.Input);
                 detCommand.Parameters.Add(":EmploymentTypeId", OracleDbType.Double, employee.EmploymentTypeId, ParameterDirection.Input);
                 detCommand.Parameters.Add(":EmploymentStatusId", OracleDbType.Double, employee.EmploymentStatusId, ParameterDirection.Input);
 
                 await empCommand.ExecuteNonQueryAsync();
+
+                // Identity PK is issued by Oracle and only known after the insert;
+                // feed it into the detail row instead of trusting the caller's Id.
+                employee.Id = Convert.ToDouble(newIdParam.Value, CultureInfo.InvariantCulture);
+                detCommand.Parameters.Add(":EmployeeId", OracleDbType.Double, employee.Id, ParameterDirection.Input);
+
                 await detCommand.ExecuteNonQueryAsync();
 
                 transaction.Commit();
