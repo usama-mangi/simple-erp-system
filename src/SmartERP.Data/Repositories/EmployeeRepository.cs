@@ -49,17 +49,20 @@ public class EmployeeRepository(
 
     public async Task<EmployeeWithDetails?> GetByIdAsync(double id)
     {
+        // LEFT JOIN: an employee may exist without any employment details row yet.
+        // The end_date IS NULL filter pins the join to the current assignment;
+        // uq_det_current_job guarantees at most one open row per employee.
         string query = @"
             SELECT
                 e.id as employee_id, e.first_name, e.last_name, e.email, e.phone, e.date_of_birth, e.gender_id, e.address, e.created_at, e.updated_at as emp_updated_at,
-                ed.job_title, ed.salary, ed.start_date, ed.end_date, ed.employment_type_id, ed.employment_status_id, ed.updated_at as dep_updated_at,
+                ed.job_title, ed.salary, ed.start_date, ed.end_date, ed.employment_type_id, ed.employment_status_id, ed.updated_at as det_updated_at,
                 d.id as department_id, d.name as department_name
             FROM
                 employees e
-            JOIN
-                employee_details ed ON ed.employee_id = e.id
-            JOIN
-                departments d ON e.department_id = d.id 
+            LEFT JOIN
+                employment_details ed ON ed.employee_id = e.id AND ed.end_date IS NULL
+            LEFT JOIN
+                departments d ON ed.department_id = d.id
             WHERE
                 e.id = :Id";
 
@@ -69,7 +72,7 @@ public class EmployeeRepository(
             using var command = new OracleCommand(query, (OracleConnection)connection);
 
             command.BindByName = true;
-            command.Parameters.Add(new OracleParameter(":Id", OracleDbType.Double) { Value = id });
+            command.Parameters.Add(new OracleParameter(":Id", OracleDbType.Int64) { Value = (long)id });
 
             using var reader = await command.ExecuteReaderAsync();
 
@@ -332,21 +335,32 @@ public class EmployeeRepository(
 
     private static EmployeeWithDetails MapToEmployeeWithDetails(OracleDataReader reader)
     {
-        var empUpdatedAtOrdinal = reader.GetOrdinal("emp_updated_at");
         var detUpdatedAtOrdinal = reader.GetOrdinal("det_updated_at");
 
-        DateTime updatedAt;
+        bool hasDetails = !reader.IsDBNull(reader.GetOrdinal("job_title"));
 
-        updatedAt = reader.IsDBNull(empUpdatedAtOrdinal) ? default : reader.GetDateTime(empUpdatedAtOrdinal);
-        if (!reader.IsDBNull(detUpdatedAtOrdinal) && updatedAt != default)
+        DateTime updatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"));
+
+        if (hasDetails && !reader.IsDBNull(detUpdatedAtOrdinal))
         {
+            var empUpdatedAtOrdinal = reader.GetOrdinal("emp_updated_at");
             var detUpdatedAt = reader.GetDateTime(detUpdatedAtOrdinal);
-            updatedAt = detUpdatedAt > updatedAt ? detUpdatedAt : updatedAt;
+
+            if (!reader.IsDBNull(empUpdatedAtOrdinal) && detUpdatedAt < reader.GetDateTime(empUpdatedAtOrdinal))
+            {
+                updatedAt = reader.GetDateTime(empUpdatedAtOrdinal);
+            }
+            else
+            {
+                updatedAt = detUpdatedAt;
+            }
         }
+
+        int endDateOrdinal = reader.GetOrdinal("end_date");
 
         return new EmployeeWithDetails
         {
-            Id = reader.GetDouble(reader.GetOrdinal("id")),
+            Id = reader.GetDouble(reader.GetOrdinal("employee_id")),
             FirstName = reader.GetString(reader.GetOrdinal("first_name")),
             LastName = reader.GetString(reader.GetOrdinal("last_name")),
             Email = reader.GetString(reader.GetOrdinal("email")),
@@ -354,14 +368,15 @@ public class EmployeeRepository(
             DateOfBirth = reader.GetDateTime(reader.GetOrdinal("date_of_birth")),
             GenderId = reader.GetDouble(reader.GetOrdinal("gender_id")),
             Address = reader.GetString(reader.GetOrdinal("address")),
-            JobTitle = reader.GetString(reader.GetOrdinal("job_title")),
-            Salary = reader.GetDouble(reader.GetOrdinal("salary")),
-            StartDate = reader.GetDateTime(reader.GetOrdinal("start_date")),
-            EndDate = reader.GetDateTime(reader.GetOrdinal("end_date")),
-            DepartmentId = reader.GetDouble(reader.GetOrdinal("department_id")),
-            DepartmentName = reader.GetString(reader.GetOrdinal("department_name")),
-            EmploymentTypeId = reader.GetDouble(reader.GetOrdinal("employment_type_id")),
-            EmploymentStatusId = reader.GetDouble(reader.GetOrdinal("employment_status_id")),
+            HasEmploymentDetails = hasDetails,
+            JobTitle = hasDetails ? reader.GetString(reader.GetOrdinal("job_title")) : string.Empty,
+            Salary = hasDetails ? reader.GetDouble(reader.GetOrdinal("salary")) : 0,
+            StartDate = hasDetails ? reader.GetDateTime(reader.GetOrdinal("start_date")) : default,
+            EndDate = !hasDetails || reader.IsDBNull(endDateOrdinal) ? null : reader.GetDateTime(endDateOrdinal),
+            DepartmentId = hasDetails ? reader.GetDouble(reader.GetOrdinal("department_id")) : 0,
+            DepartmentName = hasDetails ? reader.GetString(reader.GetOrdinal("department_name")) : string.Empty,
+            EmploymentTypeId = hasDetails ? reader.GetDouble(reader.GetOrdinal("employment_type_id")) : 0,
+            EmploymentStatusId = hasDetails ? reader.GetDouble(reader.GetOrdinal("employment_status_id")) : 0,
             CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
             UpdatedAt = updatedAt
         };

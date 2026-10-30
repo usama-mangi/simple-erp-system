@@ -18,6 +18,8 @@ public class EmployeeWithDetails
     public string DepartmentName { get; set; } = string.Empty;
     public double EmploymentTypeId { get; set; }
     public double EmploymentStatusId { get; set; }
+    /// <summary>True when employee has an open (current) row in employment_details table.</summary>
+    public bool HasEmploymentDetails { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; } = default;
 }
