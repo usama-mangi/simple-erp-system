@@ -41,6 +41,7 @@ create table if not exists employees (
    date_of_birth date not null,
    gender_id     number not null,
    address       varchar2(100) not null,
+   is_deleted    number(1) default 0 not null,
    created_at    timestamp default systimestamp not null,
    updated_at    timestamp,
    constraint pk_employee_id primary key ( id ),
