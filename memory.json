@@ -30,6 +30,11 @@
       "text": "Verified fact: dropping Oracle tables drops their identity sequences, so ids restart at 1 per rebuild via db/ scripts. Lookup ids are therefore never hard-coded; all UI ids come from ILookupRepository reads.",
       "cat": "fact",
       "updated": "2026-10-30T11:47:29.461390+00:00"
+    },
+    "constraint-name-mapping": {
+      "text": "Exception mapping rule: typed ConstraintException carries schema constraint name (uq_det_current_job etc); OracleExceptionHandler matches ORA message by it. Function-based indexes print SYS_NC synthetic columns, so field-name text matching fails. Unmapped OracleException becomes DatabaseAccessException with generic message; controllers never render ex.Message for non-typed exceptions (UserMessages.GenericFailure).",
+      "cat": "architecture",
+      "updated": "2026-10-30T12:08:04.271806+00:00"
     }
   }
 }

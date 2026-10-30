@@ -62,11 +62,40 @@
         "[\"TASK-01\"]"
       ],
       "notes": "Implemented per docs/plans/TASK-07.md. Rebuild required: run db/00_drop then 01_schema, 02_seed, 03_triggers. Awaiting user live verification."
+    },
+    {
+      "id": "TASK-08",
+      "title": "Replace-current assignment flow with confirmation; sanitize all user-facing errors",
+      "status": "testing",
+      "dependencies": [
+        "[\"TASK-02\"]"
+      ],
+      "notes": "Constraint-name matching root-fixture, generic error wrapper at repo boundary, replace-with-confirm on employment create. Awaiting live verification."
     }
   ],
   "log": {
-    "last_updated": "2026-10-30T11:47:29.342231+00:00",
+    "last_updated": "2026-10-30T12:08:04.142162+00:00",
     "recent_changes": [
+      {
+        "action": "update",
+        "task": "TASK-08",
+        "old_status": "active",
+        "new_status": "testing",
+        "at": "2026-10-30T12:08:04.142144+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-08",
+        "old_status": "to-do",
+        "new_status": "active",
+        "at": "2026-10-30T12:04:12.058065+00:00"
+      },
+      {
+        "action": "add",
+        "task": "TASK-08",
+        "status": "to-do",
+        "at": "2026-10-30T12:04:11.930903+00:00"
+      },
       {
         "action": "update",
         "task": "TASK-04",
@@ -101,26 +130,6 @@
         "old_status": "active",
         "new_status": "testing",
         "at": "2026-10-30T11:31:13.860953+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-02",
-        "old_status": "to-do",
-        "new_status": "active",
-        "at": "2026-10-30T11:24:02.124818+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-07",
-        "old_status": "to-do",
-        "new_status": "testing",
-        "at": "2026-10-30T10:48:32.683208+00:00"
-      },
-      {
-        "action": "add",
-        "task": "TASK-07",
-        "status": "to-do",
-        "at": "2026-10-30T10:42:58.345260+00:00"
       }
     ]
   }
