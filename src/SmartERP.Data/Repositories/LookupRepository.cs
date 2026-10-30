@@ -1,6 +1,7 @@
 using System.Data;
 using Oracle.ManagedDataAccess.Client;
 using SmartERP.Data.Abstractions;
+using SmartERP.Data.Exceptions;
 using SmartERP.Data.ExceptionHandlers;
 using SmartERP.Data.Models;
 
@@ -66,7 +67,7 @@ public class LookupRepository(
                 .HandlePermissionExceptions(ex)
                 .HandleReadExceptions(ex);
 
-            throw;
+            throw new DatabaseAccessException(ex);
         }
     }
 }

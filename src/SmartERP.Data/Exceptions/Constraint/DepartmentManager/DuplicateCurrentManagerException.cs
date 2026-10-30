@@ -7,8 +7,9 @@ namespace SmartERP.Data.Exceptions.Constraint.DepartmentManager;
 // department on an open (end_date IS NULL) assignment and may not head a second.
 public class DuplicateCurrentManagerException(Exception exception)
     : ConstraintException(
+        constraintName: "UQ_DEPT_CURRENT_MANAGER",
         fieldName: "ManagerId",
         fieldException: exception,
-        message: "This employee already heads a department. Close that assignment before adding a new one."
+        message: "This employee already heads a department."
     )
 { }

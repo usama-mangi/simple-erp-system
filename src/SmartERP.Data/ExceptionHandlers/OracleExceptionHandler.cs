@@ -24,7 +24,13 @@ public class OracleExceptionHandler()
     public OracleExceptionHandler HandleConstraintExceptions(OracleException ex, ConstraintException[] constraintException)
     {
         foreach (var constraint in constraintException)
-            if (ex.Message.ToLower().Contains(constraint.FieldName.ToLower())) throw constraint.FieldException;
+        {
+            if (ex.Message.ToLower().Replace('_', ' ').Contains(
+                    constraint.ConstraintName.ToLower().Replace('_', ' ')))
+            {
+                throw constraint.FieldException;
+            }
+        }
 
         return this;
     }

@@ -2,6 +2,7 @@ using System.Data;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 using SmartERP.Data.Abstractions;
+using SmartERP.Data.Exceptions;
 using SmartERP.Data.ExceptionHandlers;
 using SmartERP.Data.Exceptions.Constraint.Employee;
 using SmartERP.Data.Exceptions.Constraint.EmployeeDetail;
@@ -46,7 +47,7 @@ public class EmployeeRepository(
                 .HandlePermissionExceptions(ex)
                 .HandleReadExceptions(ex);
 
-            throw;
+            throw new DatabaseAccessException(ex);
         }
     }
 
@@ -93,7 +94,7 @@ public class EmployeeRepository(
                 .HandlePermissionExceptions(ex)
                 .HandleReadExceptions(ex);
 
-            throw;
+            throw new DatabaseAccessException(ex);
         }
     }
 
@@ -131,7 +132,7 @@ public class EmployeeRepository(
                     new DuplicatePhoneException(ex)
                 ])
                 .HandleCreateExceptions(ex);
-            throw;
+            throw new DatabaseAccessException(ex);
         }
     }
 
@@ -218,7 +219,7 @@ public class EmployeeRepository(
                     new InvalidSalaryException(ex)
                 ])
                 .HandleCreateExceptions(ex);
-            throw;
+            throw new DatabaseAccessException(ex);
         }
     }
 
@@ -307,7 +308,7 @@ public class EmployeeRepository(
                     new EndDateOlderThanStartDateException(ex)
                 ])
                 .HandleUpdateExceptions(ex);
-            throw;
+            throw new DatabaseAccessException(ex);
         }
     }
 
@@ -355,7 +356,7 @@ public class EmployeeRepository(
                 .HandlePermissionExceptions(ex)
                 .HandleReadExceptions(ex);
 
-            throw;
+            throw new DatabaseAccessException(ex);
         }
     }
 
@@ -386,7 +387,7 @@ public class EmployeeRepository(
             _oracleExceptionHandler
                 .HandlePermissionExceptions(ex)
                 .HandleUpdateExceptions(ex);
-            throw;
+            throw new DatabaseAccessException(ex);
         }
     }
 
@@ -453,7 +454,7 @@ public class EmployeeRepository(
             _oracleExceptionHandler
                 .HandlePermissionExceptions(ex)
                 .HandleDeleteExceptions(ex);
-            throw;
+            throw new DatabaseAccessException(ex);
         }
     }
 

@@ -1,6 +1,7 @@
 using System.Data;
 using Oracle.ManagedDataAccess.Client;
 using SmartERP.Data.Abstractions;
+using SmartERP.Data.Exceptions;
 using SmartERP.Data.ExceptionHandlers;
 using SmartERP.Data.Exceptions.Create;
 using SmartERP.Data.Exceptions.Constraint;
@@ -60,7 +61,7 @@ public class EmploymentDetailsRepository(
                 .HandlePermissionExceptions(ex)
                 .HandleReadExceptions(ex);
 
-            throw;
+            throw new DatabaseAccessException(ex);
         }
     }
 
@@ -102,7 +103,7 @@ public class EmploymentDetailsRepository(
                 .HandlePermissionExceptions(ex)
                 .HandleReadExceptions(ex);
 
-            throw;
+            throw new DatabaseAccessException(ex);
         }
     }
 
@@ -148,7 +149,84 @@ public class EmploymentDetailsRepository(
                     new InvalidSalaryException(ex)
                 ])
                 .HandleCreateExceptions(ex);
-            throw;
+            throw new DatabaseAccessException(ex);
+        }
+    }
+
+    public async Task CreateReplacingCurrentAsync(EmploymentDetail detail)
+    {
+        // Replaces an open assignment under one transaction: the open row ends
+        // (its end_date becomes the new assignment's start date, satisfying the
+        // chk_det_end_date check of the OLD row since old start < new start),
+        // then the new row inserts into the slot uq_det_current_job frees up.
+        // If the insert fails, the close rolls back too.
+        string closeQuery = @"
+            UPDATE
+                employment_details
+            SET
+                end_date = :CloseOn
+            WHERE
+                employee_id = :EmployeeId
+              AND end_date IS NULL";
+
+        string detQuery = @"
+            INSERT INTO
+                employment_details (employee_id, job_title, salary, start_date, end_date, department_id, employment_type_id, employment_status_id)
+            VALUES
+                (:EmployeeId, :JobTitle, :Salary, :StartDate, :EndDate, :DepartmentId, :EmploymentTypeId, :EmploymentStatusId)";
+
+        try
+        {
+            using var connection = await _dbConnection.CreateOpenConnectionAsync();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                using var closeCommand = new OracleCommand(closeQuery, (OracleConnection)connection)
+                {
+                    BindByName = true
+                };
+                closeCommand.Parameters.Add(":CloseOn", OracleDbType.Date, detail.StartDate, ParameterDirection.Input);
+                closeCommand.Parameters.Add(":EmployeeId", OracleDbType.Double, detail.EmployeeId, ParameterDirection.Input);
+                await closeCommand.ExecuteNonQueryAsync();
+
+                using var insertCommand = new OracleCommand(detQuery, (OracleConnection)connection)
+                {
+                    BindByName = true
+                };
+                insertCommand.Parameters.Add(":EmployeeId", OracleDbType.Double, detail.EmployeeId, ParameterDirection.Input);
+                insertCommand.Parameters.Add(":JobTitle", OracleDbType.Varchar2, detail.JobTitle, ParameterDirection.Input);
+                insertCommand.Parameters.Add(":Salary", OracleDbType.Double, detail.Salary, ParameterDirection.Input);
+                insertCommand.Parameters.Add(":StartDate", OracleDbType.Date, detail.StartDate, ParameterDirection.Input);
+                insertCommand.Parameters.Add(
+                    ":EndDate",
+                    OracleDbType.Date,
+                    detail.EndDate is { } endDate ? endDate : DBNull.Value,
+                    ParameterDirection.Input
+                );
+                insertCommand.Parameters.Add(":DepartmentId", OracleDbType.Double, detail.DepartmentId, ParameterDirection.Input);
+                insertCommand.Parameters.Add(":EmploymentTypeId", OracleDbType.Double, detail.EmploymentTypeId, ParameterDirection.Input);
+                insertCommand.Parameters.Add(":EmploymentStatusId", OracleDbType.Double, detail.EmploymentStatusId, ParameterDirection.Input);
+                await insertCommand.ExecuteNonQueryAsync();
+
+                transaction.Commit();
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+        catch (OracleException ex)
+        {
+            _oracleExceptionHandler
+                .HandlePermissionExceptions(ex)
+                .HandleConstraintExceptions(ex, [
+                    new EndDateOlderThanStartDateException(ex),
+                    new InvalidSalaryException(ex)
+                ])
+                .HandleCreateExceptions(ex);
+            throw new DatabaseAccessException(ex);
         }
     }
 
@@ -191,7 +269,7 @@ public class EmploymentDetailsRepository(
                 .HandlePermissionExceptions(ex)
                 .HandleConstraintExceptions(ex, [new EndDateOlderThanStartDateException(ex)])
                 .HandleUpdateExceptions(ex);
-            throw;
+            throw new DatabaseAccessException(ex);
         }
     }
 
