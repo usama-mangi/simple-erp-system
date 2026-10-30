@@ -14,11 +14,11 @@
     {
       "id": "TASK-02",
       "title": "Build employment_details feature: lookup repos, repository, controller, views",
-      "status": "to-do",
+      "status": "testing",
       "dependencies": [
         "[\"TASK-01\"]"
       ],
-      "notes": "New EmploymentDetailsRepository: create guarding uq_det_current_job via typed exception, close/update with end_date, list by employee. LookupRepository for genders, employment_types, employment_status dropdowns. Views under Views/Employment."
+      "notes": "Phases 1+2 implemented per docs/plans/TASK-02.md: DB-driven lookups (fixes FK_EMP_GENDER drift), employment history pages with inline close, assignment create, DuplicateCurrentJobException. Awaiting live verification."
     },
     {
       "id": "TASK-03",
@@ -65,8 +65,22 @@
     }
   ],
   "log": {
-    "last_updated": "2026-10-30T10:48:32.683232+00:00",
+    "last_updated": "2026-10-30T11:31:13.861014+00:00",
     "recent_changes": [
+      {
+        "action": "update",
+        "task": "TASK-02",
+        "old_status": "active",
+        "new_status": "testing",
+        "at": "2026-10-30T11:31:13.860953+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-02",
+        "old_status": "to-do",
+        "new_status": "active",
+        "at": "2026-10-30T11:24:02.124818+00:00"
+      },
       {
         "action": "update",
         "task": "TASK-07",
@@ -104,18 +118,6 @@
         "task": "TASK-04",
         "status": "to-do",
         "at": "2026-10-30T08:01:13.843950+00:00"
-      },
-      {
-        "action": "add",
-        "task": "TASK-03",
-        "status": "to-do",
-        "at": "2026-10-30T08:01:13.730145+00:00"
-      },
-      {
-        "action": "add",
-        "task": "TASK-02",
-        "status": "to-do",
-        "at": "2026-10-30T08:01:13.606865+00:00"
       }
     ]
   }

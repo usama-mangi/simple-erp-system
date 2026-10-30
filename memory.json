@@ -20,6 +20,11 @@
       "text": "Delete contract: soft delete writes employees.is_deleted=1 (rows hidden by is_deleted=0 filter in GetAll/GetById); DeleteWithDetailsAsync purges employment_details then department_managers then employees in one transaction; HasDependenciesAsync sums both child counts in one scalar query. View shows destructive button only when dependencies exist, gated by checkbox + native confirm.",
       "cat": "architecture",
       "updated": "2026-10-30T10:48:32.803827+00:00"
+    },
+    "lookup-db-driven-contract": {
+      "text": "Lookup contract: all dropdown ids/titles come from ILookupRepository (genders, employment_types, employment_status read as LookupItem(Id,Title)); enum positions ( Gender/EmploymentType/Status enums) must never be assumed in UI binding. Present-date-only validations: Range(1, decimal.MaxValue) for presence + conditional IValidatableObject checks.",
+      "cat": "architecture",
+      "updated": "2026-10-30T11:31:13.680913+00:00"
     }
   }
 }
