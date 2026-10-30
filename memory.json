@@ -35,6 +35,11 @@
       "text": "Exception mapping rule: typed ConstraintException carries schema constraint name (uq_det_current_job etc); OracleExceptionHandler matches ORA message by it. Function-based indexes print SYS_NC synthetic columns, so field-name text matching fails. Unmapped OracleException becomes DatabaseAccessException with generic message; controllers never render ex.Message for non-typed exceptions (UserMessages.GenericFailure).",
       "cat": "architecture",
       "updated": "2026-10-30T12:08:04.271806+00:00"
+    },
+    "step8-tx-ownership": {
+      "text": "sp_assign_manager (db/05_procedures.sql) holds no COMMIT; the .NET caller owns commit/rollback - AssignWithStoredProcedureAsync wraps the proc call in an explicit transaction, AssignWithNetTransactionAsync covers dated backfills. Contracts renamed per spec: IEmploymentRepository / IDepartmentManagerRepository. Multi-statement flows use: await using var tx = await connection.BeginTransactionAsync(); commands bound via Transaction = (OracleTransaction)tx; helper DbConnectionExtensions bridges IDbConnection (factory return) to the async API. Employment create gates replacements on GetCurrentAsync (new start must be after current start) before CreateReplacingCurrentAsync; close view models are employee/department-scoped (EndCurrentAsync), no row-id closes.",
+      "cat": "codebase",
+      "updated": "2026-10-30T12:43:25.807360+00:00"
     }
   }
 }
