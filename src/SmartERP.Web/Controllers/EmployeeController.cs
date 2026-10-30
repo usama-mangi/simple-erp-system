@@ -202,7 +202,8 @@ public class EmployeeController(
             return View(new EmployeeDeleteViewModel
             {
                 Id = employee.Id,
-                DisplayName = $"{employee.FirstName} {employee.LastName}"
+                DisplayName = $"{employee.FirstName} {employee.LastName}",
+                HasDependencies = await _repository.HasDependenciesAsync(id)
             });
         }
         catch (Exception ex)
@@ -222,11 +223,24 @@ public class EmployeeController(
             return RedirectToAction(nameof(Index));
         }
 
+        var softDeleteMessage = model.HasDependencies
+            ? $"{model.DisplayName} and all dependent records"
+            : model.DisplayName;
+
         try
         {
-            await _repository.DeleteAsync(model.Id);
+            // Dependencies present -> explicit destructive purge of the employee
+            // and every dependent record; otherwise a reversible soft delete.
+            if (model.HasDependencies)
+            {
+                await _repository.DeleteWithDetailsAsync(model.Id);
+            }
+            else
+            {
+                await _repository.DeleteAsync(model.Id);
+            }
 
-            TempData["SuccessMessage"] = $"Employee {model.DisplayName} deleted successfully";
+            TempData["SuccessMessage"] = $"Employee {softDeleteMessage} deleted successfully";
         }
         catch (Exception ex)
         {
@@ -267,10 +281,10 @@ public class EmployeeController(
 
     private static string FieldErrorKey(string fieldName) => fieldName switch
     {
-        "Email" => nameof(SmartERP.Web.Models.EmployeeCreateViewModel.Email),
-        "Phone" => nameof(SmartERP.Web.Models.EmployeeCreateViewModel.Phone),
-        "Salary" => nameof(SmartERP.Web.Models.EmployeeCreateViewModel.Salary),
-        "EndDate" => nameof(SmartERP.Web.Models.EmployeeCreateViewModel.StartDate),
+        "Email" => nameof(EmployeeCreateViewModel.Email),
+        "Phone" => nameof(EmployeeCreateViewModel.Phone),
+        "Salary" => nameof(EmployeeCreateViewModel.Salary),
+        "EndDate" => nameof(EmployeeCreateViewModel.StartDate),
         _ => string.Empty
     };
 
