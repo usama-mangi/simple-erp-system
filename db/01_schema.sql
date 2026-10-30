@@ -117,3 +117,8 @@ create unique index uq_dept_current_manager on
             null
       end
    );
+
+-- Case-insensitive uniqueness on top of the exact-match unique key:
+-- Ora@x.com vs ora@x.com is one subscriber, not two.
+create unique index uq_employees_email_lower on
+   employees ( lower(email) );
