@@ -1,0 +1,71 @@
+{
+  "project": {
+    "name": "SmartERP",
+    "description": "HR-domain ERP learning project: ASP.NET Core MVC over a hand-built Oracle schema"
+  },
+  "tasks": [
+    {
+      "id": "TASK-01",
+      "title": "Fix EmployeeController and EmployeeRepository",
+      "status": "to-do",
+      "dependencies": [],
+      "notes": "GetByIdAsync references employee_details and e.department_id which do not exist in schema; correct join is through employment_details/ed.department_id. Replace double ids with decimal. Complete CRUD list/details/create/update/delete and fix stale README drift."
+    },
+    {
+      "id": "TASK-02",
+      "title": "Build employment_details feature: lookup repos, repository, controller, views",
+      "status": "to-do",
+      "dependencies": [
+        "[\"TASK-01\"]"
+      ],
+      "notes": "New EmploymentDetailsRepository: create guarding uq_det_current_job via typed exception, close/update with end_date, list by employee. LookupRepository for genders, employment_types, employment_status dropdowns. Views under Views/Employment."
+    },
+    {
+      "id": "TASK-03",
+      "title": "Build department_managers feature",
+      "status": "to-do",
+      "dependencies": [
+        "[\"TASK-01\"]"
+      ],
+      "notes": "Repository and UI for assigning a manager to a department with start_date, closing with end_date. uq_dept_current_manager must surface as a typed duplicate-current-assignment exception."
+    },
+    {
+      "id": "TASK-04",
+      "title": "Sync docs and db scripts with actual codebase",
+      "status": "to-do",
+      "dependencies": [
+        "[\"TASK-01\"]"
+      ],
+      "notes": "README claims 04_triggers.sql but disk has 03_triggers.sql and 04_test.sql. Verify trigger contents, fix README, clarify Oracle connection string storage (missing from appsettings.json; document user-secrets if used)."
+    }
+  ],
+  "log": {
+    "last_updated": "2026-10-30T08:01:13.843968+00:00",
+    "recent_changes": [
+      {
+        "action": "add",
+        "task": "TASK-04",
+        "status": "to-do",
+        "at": "2026-10-30T08:01:13.843950+00:00"
+      },
+      {
+        "action": "add",
+        "task": "TASK-03",
+        "status": "to-do",
+        "at": "2026-10-30T08:01:13.730145+00:00"
+      },
+      {
+        "action": "add",
+        "task": "TASK-02",
+        "status": "to-do",
+        "at": "2026-10-30T08:01:13.606865+00:00"
+      },
+      {
+        "action": "add",
+        "task": "TASK-01",
+        "status": "to-do",
+        "at": "2026-10-30T08:01:13.489639+00:00"
+      }
+    ]
+  }
+}
