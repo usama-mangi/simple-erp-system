@@ -1,6 +1,6 @@
 using System.Data;
-using System.Globalization;
 using Oracle.ManagedDataAccess.Client;
+using Oracle.ManagedDataAccess.Types;
 using SmartERP.Data.Abstractions;
 using SmartERP.Data.ExceptionHandlers;
 using SmartERP.Data.Exceptions.Constraint.Employee;
@@ -184,7 +184,14 @@ public class EmployeeRepository(
 
                 // Identity PK is issued by Oracle and only known after the insert;
                 // feed it into the detail row instead of trusting the caller's Id.
-                employee.Id = Convert.ToDouble(newIdParam.Value, CultureInfo.InvariantCulture);
+                // ODP.NET returns the output binding as OracleDecimal, which does
+                // not implement IConvertible - cast through the type directly.
+                var returnedId = (OracleDecimal)newIdParam.Value;
+
+                if (returnedId.IsNull)
+                    throw new InvalidOperationException("Employee insert did not return the generated identity id.");
+
+                employee.Id = (double)returnedId;
                 detCommand.Parameters.Add(":EmployeeId", OracleDbType.Double, employee.Id, ParameterDirection.Input);
 
                 await detCommand.ExecuteNonQueryAsync();
