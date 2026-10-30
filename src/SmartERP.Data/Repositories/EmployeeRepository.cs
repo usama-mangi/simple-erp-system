@@ -219,14 +219,16 @@ public class EmployeeRepository(
                 id = :Id";
         string detQuery = @"
             UPDATE
-                employees
+                employment_details
             SET
                 job_title = :JobTitle,
                 salary = :Salary,
                 start_date = :StartDate,
                 department_id = :DepartmentId,
-                employment_type_id = :EmployementTypeId,
-                employment_status_id = :EmploymentStatusId";
+                employment_type_id = :EmploymentTypeId,
+                employment_status_id = :EmploymentStatusId
+            WHERE
+                employee_id = :Id";
 
         try
         {
@@ -257,7 +259,11 @@ public class EmployeeRepository(
                 detCommand.Parameters.Add(":DepartmentId", OracleDbType.Double, employee.DepartmentId, ParameterDirection.Input);
                 detCommand.Parameters.Add(":EmploymentTypeId", OracleDbType.Double, employee.EmploymentTypeId, ParameterDirection.Input);
                 detCommand.Parameters.Add(":EmploymentStatusId", OracleDbType.Double, employee.EmploymentStatusId, ParameterDirection.Input);
+                detCommand.Parameters.Add(":Id", OracleDbType.Double, employee.Id, ParameterDirection.Input);
 
+                // Updates only the open employment_details row (end_date IS NULL is the
+                // history boundary; uq_det_current_job guarantees a single candidate row).
+                // An employee without an open row matches zero rows and stays unchanged.
                 await empCommand.ExecuteNonQueryAsync();
                 await detCommand.ExecuteNonQueryAsync();
 
