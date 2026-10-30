@@ -7,8 +7,64 @@
 
 <h4 class="text-danger">Are you sure you want to delete @Model.DisplayName?</h4>
 
-<form asp-action="Delete" method="post">
+@if (Model.HasDependencies)
+{
+    <div class="alert alert-warning" role="alert">
+        <strong>The employee has dependent records.</strong> Employment history and management
+        assignments point to this employee. Deleting them in the same action is permanent and
+        cannot be reversed.
+    </div>
+}
+
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
     <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Delete</button>
+    <input type="hidden" asp-for="DisplayName" />
+
+    <button type="submit" class="btn btn-danger" id="softDeleteButton">Delete</button>
     <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </form>
+
+@if (Model.HasDependencies)
+{
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" id="hardDeleteForm" class="mt-3 border border-danger rounded p-3">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="DisplayName" />
+        <input type="hidden" asp-for="HasDependencies" value="true" />
+
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="confirmCheckbox"
+                   aria-describedby="hardDeleteHelp" />
+            <label class="form-check-label text-danger" for="confirmCheckbox">
+                I understand this <strong>permanently removes</strong> @Model.DisplayName
+                and every dependent record.
+            </label>
+        </div>
+        <p id="hardDeleteHelp" class="form-text">Employment records and management assignments will be deleted too.</p>
+
+        <button type="submit" class="btn btn-outline-danger" id="hardDeleteButton" disabled>
+            Delete With Dependencies
+        </button>
+    </form>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            var checkbox = document.getElementById('confirmCheckbox');
+            if (!checkbox) return;
+
+            var button = document.getElementById('hardDeleteButton');
+            var form = document.getElementById('hardDeleteForm');
+
+            checkbox.addEventListener('change', function () {
+                button.disabled = !checkbox.checked;
+            });
+
+            form.addEventListener('submit', function (event) {
+                if (!window.confirm('This permanently deletes @Model.DisplayName and all dependent records. Continue?')) {
+                    event.preventDefault();
+                }
+            });
+        })();
+    </script>
+}
