@@ -49,6 +49,9 @@
                         <a asp-controller="Department" asp-action="Details" asp-route-id="@dept.Id">
                             <i class="bi bi-layout-text-window"></i>
                         </a>
+                        <a asp-controller="DepartmentManagers" asp-action="Index" asp-route-departmentId="@dept.Id">
+                            <i class="bi bi-people"></i>
+                        </a>
                         <a asp-controller="Department" asp-action="Update" asp-route-id="@dept.Id">
                             <i class="bi bi-pen"></i>
                         </a>

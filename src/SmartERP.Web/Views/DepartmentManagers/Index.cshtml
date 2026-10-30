@@ -1,0 +1,87 @@
+@using SmartERP.Data.Models
+@using SmartERP.Web.Models
+
+@model DepartmentManagerIndexViewModel;
+
+@{
+    ViewData["Title"] = $"Managers of {Model.Department.Name}";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Managers of @Model.Department.Name (@Model.Department.Code)</h2>
+    <a asp-controller="DepartmentManagers" asp-action="Create" asp-route-departmentId="@Model.Department.Id"
+       class="btn btn-primary">Assign Manager</a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error!</strong> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Manager</th>
+                <th scope="col">Start</th>
+                <th scope="col">End</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Managers.Any())
+            {
+                <tr><td colspan="4" class="text-center">No manager assignments recorded yet.</td></tr>
+            }
+            @foreach (var assignment in Model.Managers)
+            {
+                <tr>
+                    <td>@assignment.ManagerName</td>
+                    <td>@assignment.StartDate.ToShortDateString()</td>
+                    <td>
+                        @if (assignment.EndDate is null)
+                        {
+                            <span class="badge bg-success">Current</span>
+                        }
+                        else
+                        {
+                            <span>@assignment.EndDate.Value.ToShortDateString()</span>
+                        }
+                    </td>
+                    <td>
+                        @if (assignment.EndDate is null)
+                        {
+                            <form asp-controller="DepartmentManagers" asp-action="Close" method="post"
+                                  class="d-flex align-items-center gap-2">
+                                <input type="date" name="EndDate" required
+                                       class="form-control form-control-sm" />
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">Close</button>
+                                <input type="hidden" name="Id" value="@assignment.Id" />
+                                <input type="hidden" name="DepartmentId" value="@Model.Department.Id" />
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Closed</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div>
+    <a asp-controller="Department" asp-action="Index" class="btn btn-secondary">Back to Departments</a>
+</div>

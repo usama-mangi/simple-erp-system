@@ -14,6 +14,7 @@ builder.Services.AddSingleton<OracleExceptionHandler>();
 builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmploymentDetailsRepository, EmploymentDetailsRepository>();
+builder.Services.AddScoped<IDepartmentManagersRepository, DepartmentManagersRepository>();
 builder.Services.AddScoped<ILookupRepository, LookupRepository>();
 
 var app = builder.Build();
