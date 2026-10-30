@@ -153,13 +153,16 @@ public class EmployeeRepository(
         try
         {
             using var connection = await _dbConnection.CreateOpenConnectionAsync();
-            using var transaction = connection.BeginTransaction();
+            // Spec transaction pattern: await using, async begin/commit/rollback,
+            // commands explicitly bound to the transaction.
+            await using var transaction = await connection.BeginTransactionAsync();
 
             try
             {
                 var empCommand = new OracleCommand(empQuery, (OracleConnection)connection)
                 {
-                    BindByName = true
+                    BindByName = true,
+                    Transaction = (OracleTransaction)transaction
                 };
                 empCommand.Parameters.Add(":FirstName", OracleDbType.Varchar2, employee.FirstName, ParameterDirection.Input);
                 empCommand.Parameters.Add(":LastName", OracleDbType.Varchar2, employee.LastName, ParameterDirection.Input);
@@ -174,7 +177,8 @@ public class EmployeeRepository(
 
                 var detCommand = new OracleCommand(detQuery, (OracleConnection)connection)
                 {
-                    BindByName = true
+                    BindByName = true,
+                    Transaction = (OracleTransaction)transaction
                 };
                 detCommand.Parameters.Add(":JobTitle", OracleDbType.Varchar2, employee.JobTitle, ParameterDirection.Input);
                 detCommand.Parameters.Add(":Salary", OracleDbType.Double, employee.Salary, ParameterDirection.Input);
@@ -200,11 +204,11 @@ public class EmployeeRepository(
 
                 await detCommand.ExecuteNonQueryAsync();
 
-                transaction.Commit();
+                await transaction.CommitAsync();
             }
-            catch (Exception)
+            catch
             {
-                transaction.Rollback();
+                await transaction.RollbackAsync();
                 throw;
             }
         }
@@ -254,13 +258,17 @@ public class EmployeeRepository(
         try
         {
             using var connection = await _dbConnection.CreateOpenConnectionAsync();
-            using var transaction = connection.BeginTransaction();
+
+            // Spec transaction pattern: await using, async begin/commit/rollback,
+            // commands explicitly bound to the transaction.
+            await using var transaction = await connection.BeginTransactionAsync();
 
             try
             {
                 using var empCommand = new OracleCommand(empQuery, (OracleConnection)connection)
                 {
-                    BindByName = true
+                    BindByName = true,
+                    Transaction = (OracleTransaction)transaction
                 };
                 empCommand.Parameters.Add(":Id", OracleDbType.Double, employee.Id, ParameterDirection.Input);
                 empCommand.Parameters.Add(":FirstName", OracleDbType.Varchar2, employee.FirstName, ParameterDirection.Input);
@@ -289,11 +297,11 @@ public class EmployeeRepository(
                 await empCommand.ExecuteNonQueryAsync();
                 await detCommand.ExecuteNonQueryAsync();
 
-                transaction.Commit();
+                await transaction.CommitAsync();
             }
-            catch (Exception)
+            catch
             {
-                transaction.Rollback();
+                await transaction.RollbackAsync();
                 throw;
             }
         }
@@ -419,33 +427,38 @@ public class EmployeeRepository(
         try
         {
             using var connection = await _dbConnection.CreateOpenConnectionAsync();
-            using var transaction = connection.BeginTransaction();
+            // Spec transaction pattern: await using, async begin/commit/rollback,
+            // commands explicitly bound to the transaction.
+            await using var transaction = await connection.BeginTransactionAsync();
 
             try
             {
                 using (var detCommand = new OracleCommand(detQuery, (OracleConnection)connection))
                 {
+                    detCommand.Transaction = (OracleTransaction)transaction;
                     detCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
                     await detCommand.ExecuteNonQueryAsync();
                 }
 
                 using (var mgrCommand = new OracleCommand(mgrQuery, (OracleConnection)connection))
                 {
+                    mgrCommand.Transaction = (OracleTransaction)transaction;
                     mgrCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
                     await mgrCommand.ExecuteNonQueryAsync();
                 }
 
                 using (var empCommand = new OracleCommand(empQuery, (OracleConnection)connection))
                 {
+                    empCommand.Transaction = (OracleTransaction)transaction;
                     empCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
                     await empCommand.ExecuteNonQueryAsync();
                 }
 
-                transaction.Commit();
+                await transaction.CommitAsync();
             }
-            catch (Exception)
+            catch
             {
-                transaction.Rollback();
+                await transaction.RollbackAsync();
                 throw;
             }
         }
