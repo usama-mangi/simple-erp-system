@@ -292,11 +292,12 @@ public class EmployeeRepository(
 
     public async Task DeleteAsync(double id)
     {
+        // The schema has no is_deleted column; deletion is a hard delete and
+        // employment_details / department_managers FKs act as the guard:
+        // ORA-02292 surfaces as ChildFoundException through HandleDeleteExceptions.
         string query = @"
-            UPDATE
+            DELETE FROM
                 employees
-            SET
-                is_deleted = 1
             WHERE
                 id = :Id";
 
@@ -313,11 +314,9 @@ public class EmployeeRepository(
         {
             _oracleExceptionHandler
                 .HandlePermissionExceptions(ex)
-                .HandleUpdateExceptions(ex)
                 .HandleDeleteExceptions(ex);
             throw;
         }
-
     }
 
     private static Employee MapToEmployee(OracleDataReader reader)
