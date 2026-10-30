@@ -17,7 +17,12 @@ public class DateRangeInPast(string? _minDate) : ValidationAttribute
         };
 
         if (date is null)
-            return new ValidationResult("Invalid date format");
+        {
+            // Nullable usage (end dates, history backfill): blank means "not
+            // provided". Presence is [Required]'s job; spacing the range here
+            // would silently turn every optional date into a mandatory one.
+            return ValidationResult.Success;
+        }
 
         if (_minDate != null && date < DateTime.Parse(_minDate))
             return new ValidationResult(
