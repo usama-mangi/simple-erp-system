@@ -9,5 +9,7 @@ public interface IEmployeeRepository
     Task CreateAsync(Employee employee);
     Task CreateWithDetailsAsync(EmployeeWithDetails employee);
     Task UpdateAsync(EmployeeWithDetails employee);
+    Task<bool> HasDependenciesAsync(double id);
     Task DeleteAsync(double id);
+    Task DeleteWithDetailsAsync(double id);
 }

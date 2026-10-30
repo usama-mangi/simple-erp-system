@@ -22,7 +22,9 @@ public class EmployeeRepository(
             SELECT
                 id, first_name, last_name, email, phone, date_of_birth, gender_id, address, created_at, updated_at
             FROM
-                employees";
+                employees
+            WHERE
+                is_deleted = 0";
 
         try
         {
@@ -65,7 +67,8 @@ public class EmployeeRepository(
             LEFT JOIN
                 departments d ON ed.department_id = d.id
             WHERE
-                e.id = :Id";
+                e.id = :Id
+              AND e.is_deleted = 0";
 
         try
         {
@@ -258,6 +261,7 @@ public class EmployeeRepository(
                 {
                     BindByName = true
                 };
+                empCommand.Parameters.Add(":Id", OracleDbType.Double, employee.Id, ParameterDirection.Input);
                 empCommand.Parameters.Add(":FirstName", OracleDbType.Varchar2, employee.FirstName, ParameterDirection.Input);
                 empCommand.Parameters.Add(":LastName", OracleDbType.Varchar2, employee.LastName, ParameterDirection.Input);
                 empCommand.Parameters.Add(":Email", OracleDbType.Varchar2, employee.Email, ParameterDirection.Input);
@@ -270,13 +274,13 @@ public class EmployeeRepository(
                 {
                     BindByName = true
                 };
+                detCommand.Parameters.Add(":Id", OracleDbType.Double, employee.Id, ParameterDirection.Input);
                 detCommand.Parameters.Add(":JobTitle", OracleDbType.Varchar2, employee.JobTitle, ParameterDirection.Input);
                 detCommand.Parameters.Add(":Salary", OracleDbType.Double, employee.Salary, ParameterDirection.Input);
                 detCommand.Parameters.Add(":StartDate", OracleDbType.Date, employee.StartDate, ParameterDirection.Input);
                 detCommand.Parameters.Add(":DepartmentId", OracleDbType.Double, employee.DepartmentId, ParameterDirection.Input);
                 detCommand.Parameters.Add(":EmploymentTypeId", OracleDbType.Double, employee.EmploymentTypeId, ParameterDirection.Input);
                 detCommand.Parameters.Add(":EmploymentStatusId", OracleDbType.Double, employee.EmploymentStatusId, ParameterDirection.Input);
-                detCommand.Parameters.Add(":Id", OracleDbType.Double, employee.Id, ParameterDirection.Input);
 
                 // Updates only the open employment_details row (end_date IS NULL is the
                 // history boundary; uq_det_current_job guarantees a single candidate row).
@@ -307,14 +311,53 @@ public class EmployeeRepository(
         }
     }
 
+    public async Task<bool> HasDependenciesAsync(double id)
+    {
+        // One round-trip: both child-table counts in a single scalar.
+        // employment_details holds every job row (open and closed history),
+        // department_managers every management assignment.
+        string query = @"
+            SELECT
+                ( SELECT COUNT(*)
+                    FROM employment_details
+                   WHERE employee_id = :Id ) +
+                ( SELECT COUNT(*)
+                    FROM department_managers
+                   WHERE manager_id = :Id ) AS dep_count
+            FROM dual";
+
+        try
+        {
+            using var connection = await _dbConnection.CreateOpenConnectionAsync();
+            using var command = new OracleCommand(query, (OracleConnection)connection);
+
+            command.BindByName = true;
+            command.Parameters.Add(new OracleParameter(":Id", OracleDbType.Int64) { Value = (long)id });
+
+            var result = (OracleDecimal)await command.ExecuteScalarAsync()!;
+
+            return !(result.IsNull) && result.ToDouble() > 0;
+        }
+        catch (OracleException ex)
+        {
+            _oracleExceptionHandler
+                .HandlePermissionExceptions(ex)
+                .HandleReadExceptions(ex);
+
+            throw;
+        }
+    }
+
     public async Task DeleteAsync(double id)
     {
-        // The schema has no is_deleted column; deletion is a hard delete and
-        // employment_details / department_managers FKs act as the guard:
-        // ORA-02292 surfaces as ChildFoundException through HandleDeleteExceptions.
+        // Soft delete: is_deleted=1 keeps every child FK intact and consistent.
+        // GetAllAsync / GetByIdAsync hide rows through the is_deleted = 0 filter,
+        // so nothing downstream ever sees the flagged row.
         string query = @"
-            DELETE FROM
+            UPDATE
                 employees
+            SET
+                is_deleted = 1
             WHERE
                 id = :Id";
 
@@ -326,6 +369,73 @@ public class EmployeeRepository(
             command.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
 
             await command.ExecuteNonQueryAsync();
+        }
+        catch (OracleException ex)
+        {
+            _oracleExceptionHandler
+                .HandlePermissionExceptions(ex)
+                .HandleUpdateExceptions(ex);
+            throw;
+        }
+    }
+
+    public async Task DeleteWithDetailsAsync(double id)
+    {
+        // Destructive purge: the employee row plus every dependent record.
+        // Children go first in one transaction; if any statement fails the
+        // rollback restores all three, so the employee either survives fully
+        // or vanishes fully. ChildFoundException cannot fire on this path
+        // because no children remain when the employees delete runs.
+        string detQuery = @"
+            DELETE FROM
+                employment_details
+            WHERE
+                employee_id = :Id";
+
+        string mgrQuery = @"
+            DELETE FROM
+                department_managers
+            WHERE
+                manager_id = :Id";
+
+        string empQuery = @"
+            DELETE FROM
+                employees
+            WHERE
+                id = :Id";
+
+        try
+        {
+            using var connection = await _dbConnection.CreateOpenConnectionAsync();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                using (var detCommand = new OracleCommand(detQuery, (OracleConnection)connection))
+                {
+                    detCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
+                    await detCommand.ExecuteNonQueryAsync();
+                }
+
+                using (var mgrCommand = new OracleCommand(mgrQuery, (OracleConnection)connection))
+                {
+                    mgrCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
+                    await mgrCommand.ExecuteNonQueryAsync();
+                }
+
+                using (var empCommand = new OracleCommand(empQuery, (OracleConnection)connection))
+                {
+                    empCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
+                    await empCommand.ExecuteNonQueryAsync();
+                }
+
+                transaction.Commit();
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
         catch (OracleException ex)
         {
