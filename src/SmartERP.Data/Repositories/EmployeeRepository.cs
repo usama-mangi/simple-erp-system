@@ -334,9 +334,20 @@ public class EmployeeRepository(
             command.BindByName = true;
             command.Parameters.Add(new OracleParameter(":Id", OracleDbType.Int64) { Value = (long)id });
 
-            var result = (OracleDecimal)await command.ExecuteScalarAsync()!;
+            // ExecuteScalar shape differs per statement type: COUNT over dual
+            // surfaces as System.Decimal, RETURNING output surfaced as
+            // OracleDecimal. Normalize both instead of hard-casting one shape.
+            var result = await command.ExecuteScalarAsync();
 
-            return !(result.IsNull) && result.ToDouble() > 0;
+            var count = result switch
+            {
+                null => 0m, // no row returned: nothing can depend on this id
+                decimal d => d,
+                OracleDecimal od => od.IsNull ? 0m : od.Value,
+                _ => Convert.ToDecimal(result)
+            };
+
+            return count > 0;
         }
         catch (OracleException ex)
         {
