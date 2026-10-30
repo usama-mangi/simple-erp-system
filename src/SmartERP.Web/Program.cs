@@ -1,12 +1,18 @@
 using SmartERP.Data.Abstractions;
+using SmartERP.Data.ExceptionHandlers;
 using SmartERP.Data.Infrastructure;
+using SmartERP.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<IDbConnectionFactory, OracleDbConnection>();
+builder.Services.AddControllersWithViews();
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton<IDbConnectionFactory, OracleDbConnection>();
+builder.Services.AddSingleton<OracleExceptionHandler>();
+
+builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
 var app = builder.Build();
 
@@ -27,7 +33,7 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
+    pattern: "{controller=Department}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 
