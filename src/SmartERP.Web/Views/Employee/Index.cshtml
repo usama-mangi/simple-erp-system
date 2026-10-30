@@ -1,9 +1,31 @@
 @using SmartERP.Data.Models;
+@using SmartERP.Web
 
 @model IEnumerable<Employee>;
 
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Employees</h2>
+    <a asp-controller="Employee" asp-action="Create" class="btn btn-primary">Create New Employee</a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error!</strong> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="table-responsive">
-    <table class="table table-bordered table-hovered">
+    <table class="table table-bordered table-hover">
         <thead>
             <tr>
                 <th scope="col">First Name</th>
@@ -24,11 +46,13 @@
                     <td>@emp.LastName</td>
                     <td>@emp.Email</td>
                     <td>@emp.Phone</td>
-                    <td>@emp.DateOfBirth</td>
+                    <td>@emp.DateOfBirth.ToShortDateString()</td>
                     <td>@((Gender)emp.GenderId)</td>
                     <td>@emp.Address</td>
                     <td>
-                        <a asp-controller="Employee" asp-action="Details" asp-route-id=@emp.Id>Show Details</a>
+                        <a asp-controller="Employee" asp-action="Details" asp-route-id="@emp.Id">Show Details</a> |
+                        <a asp-controller="Employee" asp-action="Update" asp-route-id="@emp.Id">Update</a> |
+                        <a asp-controller="Employee" asp-action="Delete" asp-route-id="@emp.Id">Delete</a>
                     </td>
                 </tr>
             }
