@@ -51,7 +51,7 @@ public class EmployeeController(
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        await PopulateCreateSelectLists();
+        await PopulateSelectLists();
         return View(new EmployeeCreateViewModel());
     }
 
@@ -61,7 +61,7 @@ public class EmployeeController(
     {
         if (!ModelState.IsValid)
         {
-            await PopulateCreateSelectLists();
+            await PopulateSelectLists();
             return View(model);
         }
 
@@ -118,20 +118,163 @@ public class EmployeeController(
             ModelState.AddModelError(string.Empty, ex.Message);
         }
 
-        await PopulateCreateSelectLists();
+        await PopulateSelectLists();
         return View(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Update(double id)
+    {
+        try
+        {
+            var employee = await _repository.GetByIdAsync(id);
+
+            if (employee == null) return NotFound();
+
+            await PopulateSelectLists();
+            return View(MapToUpdateViewModel(employee));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Update(EmployeeUpdateViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            await PopulateSelectLists();
+            return View(model);
+        }
+
+        try
+        {
+            await _repository.UpdateAsync(new EmployeeWithDetails
+            {
+                Id = model.Id,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Email = model.Email,
+                Phone = model.Phone,
+                DateOfBirth = model.DateOfBirth.ToDateTime(TimeOnly.MinValue),
+                GenderId = model.GenderId,
+                Address = model.Address,
+                JobTitle = model.JobTitle,
+                Salary = model.Salary,
+                StartDate = model.StartDate.ToDateTime(TimeOnly.MinValue),
+                DepartmentId = model.DepartmentId,
+                EmploymentTypeId = model.EmploymentTypeId,
+                EmploymentStatusId = model.EmploymentStatusId
+            });
+
+            TempData["SuccessMessage"] = $"Employee {model.FirstName} {model.LastName} updated successfully";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (ConstraintException ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            ModelState.AddModelError(FieldErrorKey(ex.FieldName), ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            ModelState.AddModelError(string.Empty, ex.Message);
+        }
+
+        await PopulateSelectLists();
+        return View(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Delete(double id)
+    {
+        try
+        {
+            var employee = await _repository.GetByIdAsync(id);
+
+            if (employee == null) return NotFound();
+
+            return View(new EmployeeDeleteViewModel
+            {
+                Id = employee.Id,
+                DisplayName = $"{employee.FirstName} {employee.LastName}"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(EmployeeDeleteViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+
+        try
+        {
+            await _repository.DeleteAsync(model.Id);
+
+            TempData["SuccessMessage"] = $"Employee {model.DisplayName} deleted successfully";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    private EmployeeUpdateViewModel MapToUpdateViewModel(EmployeeWithDetails employee)
+    {
+        var model = new EmployeeUpdateViewModel
+        {
+            Id = employee.Id,
+            FirstName = employee.FirstName,
+            LastName = employee.LastName,
+            Email = employee.Email,
+            Phone = employee.Phone,
+            DateOfBirth = DateOnly.FromDateTime(employee.DateOfBirth),
+            GenderId = employee.GenderId,
+            Address = employee.Address,
+            HasEmploymentDetails = employee.HasEmploymentDetails
+        };
+
+        if (employee.HasEmploymentDetails)
+        {
+            model.JobTitle = employee.JobTitle;
+            model.Salary = employee.Salary;
+            model.StartDate = DateOnly.FromDateTime(employee.StartDate);
+            model.DepartmentId = employee.DepartmentId;
+            model.EmploymentTypeId = employee.EmploymentTypeId;
+            model.EmploymentStatusId = employee.EmploymentStatusId;
+        }
+
+        return model;
     }
 
     private static string FieldErrorKey(string fieldName) => fieldName switch
     {
-        "Email" => nameof(Models.EmployeeCreateViewModel.Email),
-        "Phone" => nameof(Models.EmployeeCreateViewModel.Phone),
-        "Salary" => nameof(Models.EmployeeCreateViewModel.Salary),
-        "EndDate" => nameof(Models.EmployeeCreateViewModel.StartDate),
+        "Email" => nameof(SmartERP.Web.Models.EmployeeCreateViewModel.Email),
+        "Phone" => nameof(SmartERP.Web.Models.EmployeeCreateViewModel.Phone),
+        "Salary" => nameof(SmartERP.Web.Models.EmployeeCreateViewModel.Salary),
+        "EndDate" => nameof(SmartERP.Web.Models.EmployeeCreateViewModel.StartDate),
         _ => string.Empty
     };
 
-    private async Task PopulateCreateSelectLists()
+    private async Task PopulateSelectLists()
     {
         var departments = await _departmentRepository.GetAllAsync();
 
