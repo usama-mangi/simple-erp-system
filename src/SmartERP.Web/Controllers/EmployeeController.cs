@@ -10,6 +10,7 @@ namespace SmartERP.Web.Controllers;
 public class EmployeeController(
     IEmployeeRepository _repository,
     IDepartmentRepository _departmentRepository,
+    ILookupRepository _lookupRepository,
     ILogger<EmployeeController> _logger
 ) : Controller
 {
@@ -19,6 +20,7 @@ public class EmployeeController(
         try
         {
             var employees = await _repository.GetAllAsync();
+            await PopulateLookupTitlesAsync();
             return View(employees);
         }
         catch (Exception ex)
@@ -37,6 +39,8 @@ public class EmployeeController(
             var detEmployee = await _repository.GetByIdAsync(id);
 
             if (detEmployee == null) return NotFound();
+
+            await PopulateLookupTitlesAsync(detEmployee.HasEmploymentDetails);
             return View(detEmployee);
         }
         catch (Exception ex)
@@ -291,15 +295,39 @@ public class EmployeeController(
     private async Task PopulateSelectLists()
     {
         var departments = await _departmentRepository.GetAllAsync();
+        var genders = await _lookupRepository.GetGendersAsync();
+        var employmentTypes = await _lookupRepository.GetEmploymentTypesAsync();
+        var employmentStatuses = await _lookupRepository.GetEmploymentStatusesAsync();
 
-        ViewData["Genders"] = Enum.GetValues<Gender>()
-            .Select(g => new SelectListItem(g.ToString(), ((int)g).ToString()));
+        // Ids come from the lookup tables themselves; enum positions in code
+        // cannot be trusted after lookups are reseeded or extended.
+        ViewData["Genders"] = genders
+            .Select(g => new SelectListItem(g.Title, g.Id.ToString()));
         ViewData["Departments"] = departments
             .OrderBy(d => d.Name)
             .Select(d => new SelectListItem(d.Name, d.Id.ToString()));
-        ViewData["EmploymentTypes"] = Enum.GetValues<EmploymentType>()
-            .Select(t => new SelectListItem(t.ToString(), ((int)t).ToString()));
-        ViewData["EmploymentStatuses"] = Enum.GetValues<EmploymentStatus>()
-            .Select(s => new SelectListItem(s.ToString(), ((int)s).ToString()));
+        ViewData["EmploymentTypes"] = employmentTypes
+            .Select(t => new SelectListItem(t.Title, t.Id.ToString()));
+        ViewData["EmploymentStatuses"] = employmentStatuses
+            .Select(s => new SelectListItem(s.Title, s.Id.ToString()));
     }
+
+    private async Task PopulateLookupTitlesAsync(bool includeEmploymentLookups = false)
+    {
+        var genders = await _lookupRepository.GetGendersAsync();
+        ViewData["GenderTitles"] = genders.ToDictionary(g => g.Id, g => g.Title);
+
+        if (!includeEmploymentLookups) return;
+
+        var types = await _lookupRepository.GetEmploymentTypesAsync();
+        var statuses = await _lookupRepository.GetEmploymentStatusesAsync();
+        var departments = await _departmentRepository.GetAllAsync();
+
+        ViewData["EmploymentTypeTitles"] = types.ToDictionary(t => t.Id, t => t.Title);
+        ViewData["EmploymentStatusTitles"] = statuses.ToDictionary(s => s.Id, s => s.Title);
+        ViewData["DepartmentTitles"] = departments.ToDictionary(d => d.Id, d => d.Name);
+    }
+
+    private static string Title(Dictionary<double, string>? titles, double id)
+        => titles is not null && titles.TryGetValue(id, out var title) ? title : "Unknown";
 }

@@ -2,6 +2,18 @@
 
 @model EmployeeWithDetails;
 
+@functions {
+    private static string Title(Dictionary<double, string>? titles, double id)
+        => titles is not null && titles.TryGetValue(id, out var title) ? title : "Unknown";
+}
+
+@{
+    var genderTitles = ViewData["GenderTitles"] as Dictionary<double, string>;
+    var departmentTitles = ViewData["DepartmentTitles"] as Dictionary<double, string>;
+    var employmentTypeTitles = ViewData["EmploymentTypeTitles"] as Dictionary<double, string>;
+    var employmentStatusTitles = ViewData["EmploymentStatusTitles"] as Dictionary<double, string>;
+}
+
 <div>
     <dl>
         <dt>Employee ID</dt>
@@ -23,7 +35,7 @@
         <dd>@Model.DateOfBirth.ToShortDateString()</dd>
 
         <dt>Gender</dt>
-        <dd>@((Gender)Model.GenderId)</dd>
+        <dd>@Title(genderTitles, Model.GenderId)</dd>
 
         <dt>Address</dt>
         <dd>@Model.Address</dd>
@@ -37,13 +49,13 @@
             <dd>@Model.Salary.ToString("N")</dd>
 
             <dt>Department</dt>
-            <dd>@Model.DepartmentName</dd>
+            <dd>@Title(departmentTitles, Model.DepartmentId)</dd>
 
             <dt>Employment Type</dt>
-            <dd>@((EmploymentType)Model.EmploymentTypeId)</dd>
+            <dd>@Title(employmentTypeTitles, Model.EmploymentTypeId)</dd>
 
             <dt>Employment Status</dt>
-            <dd>@((EmploymentStatus)Model.EmploymentStatusId)</dd>
+            <dd>@Title(employmentStatusTitles, Model.EmploymentStatusId)</dd>
 
             <dt>Start Date</dt>
             <dd>@Model.StartDate.ToShortDateString()</dd>

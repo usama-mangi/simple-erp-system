@@ -30,7 +30,7 @@ public class EmployeeCreateViewModel : IValidatableObject
     public DateOnly DateOfBirth { get; set; }
 
     [Required(ErrorMessage = "Please select a gender.")]
-    [Range(1, 3, ErrorMessage = "Please select a valid gender.")]
+    [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a valid gender.")]
     public double GenderId { get; set; }
 
     [Required(ErrorMessage = "Please provide an address.")]
@@ -58,11 +58,11 @@ public class EmployeeCreateViewModel : IValidatableObject
     public double DepartmentId { get; set; }
 
     [Display(Name = "Employment type")]
-    [Range(1, 5, ErrorMessage = "Please select a valid employment type.")]
+    [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a valid employment type.")]
     public double EmploymentTypeId { get; set; }
 
     [Display(Name = "Employment status")]
-    [Range(1, 8, ErrorMessage = "Please select a valid employment status.")]
+    [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a valid employment status.")]
     public double EmploymentStatusId { get; set; }
 
     // Detail-only constraints live here instead of per-property attributes:
