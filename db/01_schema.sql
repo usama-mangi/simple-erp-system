@@ -1,25 +1,25 @@
-create table genders (
+create table if not exists genders (
    id    number generated always as identity,
    title varchar2(10) not null,
    constraint pk_gender_id primary key ( id ),
    constraint uq_genders_title unique ( title )
 );
 
-create table employment_types (
+create table if not exists employment_types (
    id    number generated always as identity,
    title varchar2(20) not null,
    constraint pk_employment_type_id primary key ( id ),
    constraint uq_employment_types_title unique ( title )
 );
 
-create table employment_status (
+create table if not exists employment_status (
    id    number generated always as identity,
    title varchar2(20) not null, -- Removed the redundant inline 'unique'
    constraint pk_employment_status_id primary key ( id ),
    constraint uq_employment_status_title unique ( title )
 );
 
-create table departments (
+create table if not exists departments (
    id          number generated always as identity,
    name        varchar2(30) not null,
    code        varchar2(3) not null,
@@ -32,7 +32,7 @@ create table departments (
    constraint uq_departments_code unique ( code )
 );
 
-create table employees (
+create table if not exists employees (
    id            number generated always as identity,
    first_name    varchar2(50) not null,
    last_name     varchar2(50) not null,
@@ -45,12 +45,12 @@ create table employees (
    updated_at    timestamp,
    constraint pk_employee_id primary key ( id ),
    constraint fk_emp_gender foreign key ( gender_id )
-      references genders ( id ), -- Fixed table name 'genders' and fixed constraint name
+      references genders ( id ), -- Fixed table if not exists name 'genders' and fixed constraint name
    constraint uq_employees_email unique ( email ),
    constraint uq_employees_phone unique ( phone )
 );
 
-create table employment_details (
+create table if not exists employment_details (
    id                   number generated always as identity,
    employee_id          number not null,
    job_title            varchar2(50) not null,
@@ -76,7 +76,7 @@ create table employment_details (
        or end_date > start_date ) -- Unique check constraint name
 );
 
-create table department_managers (
+create table if not exists department_managers (
    id            number generated always as identity,
    department_id number not null,
    manager_id    number not null,
