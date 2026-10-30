@@ -3,7 +3,7 @@ using SmartERP.Web.Validations;
 
 namespace SmartERP.Web.Models;
 
-public class EmployeeCreateViewModel
+public class EmployeeCreateViewModel : IValidatableObject
 {
     [Required(ErrorMessage = "First name is required.")]
     [MinLength(3, ErrorMessage = "Minimum 3 characters required.")]
@@ -28,4 +28,66 @@ public class EmployeeCreateViewModel
     [Required(ErrorMessage = "Please provide date of birth.")]
     [DateRangeInPast("1965-01-01", ErrorMessage = "Date too old. Cannot assign year older than 1965.")]
     public DateOnly DateOfBirth { get; set; }
+
+    [Required(ErrorMessage = "Please select a gender.")]
+    [Range(1, 3, ErrorMessage = "Please select a valid gender.")]
+    public double GenderId { get; set; }
+
+    [Required(ErrorMessage = "Please provide an address.")]
+    [MaxLength(100, ErrorMessage = "Address must be 100 or less characters.")]
+    public string Address { get; set; } = string.Empty;
+
+    // Tracks whether the form carries an employment details section.
+    // Create POST routes to CreateWithDetailsAsync when true, CreateAsync otherwise.
+    [Display(Name = "Assign a job right away")]
+    public bool IncludeEmploymentDetails { get; set; }
+
+    [Display(Name = "Job title")]
+    [MaxLength(50, ErrorMessage = "Job title must be 50 or less characters.")]
+    public string JobTitle { get; set; } = string.Empty;
+
+    [Display(Name = "Salary")]
+    [Range(0, (double)decimal.MaxValue, ErrorMessage = "Salary cannot be negative.")]
+    public double Salary { get; set; }
+
+    [Display(Name = "Start date")]
+    [DateRangeInPast(null, ErrorMessage = "Start date must be today or a past date.")]
+    public DateOnly StartDate { get; set; }
+
+    [Display(Name = "Department")]
+    public double DepartmentId { get; set; }
+
+    [Display(Name = "Employment type")]
+    [Range(1, 5, ErrorMessage = "Please select a valid employment type.")]
+    public double EmploymentTypeId { get; set; }
+
+    [Display(Name = "Employment status")]
+    [Range(1, 8, ErrorMessage = "Please select a valid employment status.")]
+    public double EmploymentStatusId { get; set; }
+
+    // Detail-only constraints live here instead of per-property attributes:
+    // Required/Range on DepartmentId and salary would also fire when the user
+    // submits a plain employee with no details section.
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (!IncludeEmploymentDetails) yield break;
+
+        if (string.IsNullOrWhiteSpace(JobTitle))
+            yield return new ValidationResult("Job title is required to assign a job.", [nameof(JobTitle)]);
+
+        if (Salary <= 0)
+            yield return new ValidationResult("Salary is required to assign a job.", [nameof(Salary)]);
+
+        if (StartDate == default)
+            yield return new ValidationResult("Start date is required to assign a job.", [nameof(StartDate)]);
+
+        if (DepartmentId <= 0)
+            yield return new ValidationResult("Please select a department for the job.", [nameof(DepartmentId)]);
+
+        if (EmploymentTypeId <= 0)
+            yield return new ValidationResult("Please select an employment type for the job.", [nameof(EmploymentTypeId)]);
+
+        if (EmploymentStatusId <= 0)
+            yield return new ValidationResult("Please select an employment status for the job.", [nameof(EmploymentStatusId)]);
+    }
 }
