@@ -15,6 +15,11 @@
       "text": "Task deferred: double->decimal refactor for Oracle NUMBER ids across models/repos/controllers; pre-dated all current feature code by design.",
       "cat": "decision",
       "updated": "2026-10-30T08:30:13.767222+00:00"
+    },
+    "employee-soft-delete-contract": {
+      "text": "Delete contract: soft delete writes employees.is_deleted=1 (rows hidden by is_deleted=0 filter in GetAll/GetById); DeleteWithDetailsAsync purges employment_details then department_managers then employees in one transaction; HasDependenciesAsync sums both child counts in one scalar query. View shows destructive button only when dependencies exist, gated by checkbox + native confirm.",
+      "cat": "architecture",
+      "updated": "2026-10-30T10:48:32.803827+00:00"
     }
   }
 }

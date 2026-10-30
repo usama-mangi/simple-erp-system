@@ -53,11 +53,33 @@
       "status": "to-do",
       "dependencies": [],
       "notes": "DepartmentController POST Delete returns View(model) on invalid ModelState but Views/Department/Delete.cshtml does not exist and no GET Delete action is defined. Add confirmation view mirroring Employee Delete."
+    },
+    {
+      "id": "TASK-07",
+      "title": "Employee soft delete with double-gated destructive dependencies purge",
+      "status": "testing",
+      "dependencies": [
+        "[\"TASK-01\"]"
+      ],
+      "notes": "Implemented per docs/plans/TASK-07.md. Rebuild required: run db/00_drop then 01_schema, 02_seed, 03_triggers. Awaiting user live verification."
     }
   ],
   "log": {
-    "last_updated": "2026-10-30T08:30:13.550710+00:00",
+    "last_updated": "2026-10-30T10:48:32.683232+00:00",
     "recent_changes": [
+      {
+        "action": "update",
+        "task": "TASK-07",
+        "old_status": "to-do",
+        "new_status": "testing",
+        "at": "2026-10-30T10:48:32.683208+00:00"
+      },
+      {
+        "action": "add",
+        "task": "TASK-07",
+        "status": "to-do",
+        "at": "2026-10-30T10:42:58.345260+00:00"
+      },
       {
         "action": "add",
         "task": "TASK-06",
@@ -94,12 +116,6 @@
         "task": "TASK-02",
         "status": "to-do",
         "at": "2026-10-30T08:01:13.606865+00:00"
-      },
-      {
-        "action": "add",
-        "task": "TASK-01",
-        "status": "to-do",
-        "at": "2026-10-30T08:01:13.489639+00:00"
       }
     ]
   }
