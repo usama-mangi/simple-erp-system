@@ -442,7 +442,18 @@ values
 
 
 -- =========================================================
--- 8. VERIFY SEEDED DATA
+-- 8. COMMIT
+--    MERGE is DML: without a commit the rows exist only inside
+--    this session's transaction and vanish on disconnect.
+-- =========================================================
+
+commit;
+
+
+-- =========================================================
+-- 9. VERIFY SEEDED DATA
+--    Runs AFTER commit, so counts reflect what other
+--    sessions/connections actually see.
 -- =========================================================
 
 select 'Genders' table_name,
