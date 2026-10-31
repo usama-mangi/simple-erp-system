@@ -16,6 +16,7 @@ builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmploymentRepository, EmploymentRepository>();
 builder.Services.AddScoped<IDepartmentManagerRepository, DepartmentManagerRepository>();
 builder.Services.AddScoped<ILookupRepository, LookupRepository>();
+builder.Services.AddScoped<IStatisticsRepository, StatisticsRepository>();
 
 var app = builder.Build();
 

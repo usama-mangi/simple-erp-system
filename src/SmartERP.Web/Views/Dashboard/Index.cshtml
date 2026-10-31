@@ -1,0 +1,319 @@
+@using SmartERP.Data.Models;
+@using SmartERP.Web.Models;
+@using System.Globalization;
+@using System.Text.Json;
+
+@model DashboardIndexViewModel;
+
+@{
+    ViewData["Title"] = "Dashboard";
+
+    // Charts read this payload; JsonDefaults.Web gives camelCase keys and
+    // escapes < as \u003c, so employee-controlled text cannot close the
+    // script tag.
+    var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+    var chartPayload = JsonSerializer.Serialize(
+        new
+        {
+            trend = Model.Trend,
+            exitsByStatus = Model.Summary.ExitsByStatus,
+            typeShares = Model.Summary.TypeShares,
+            payrolls = Model.Payrolls
+        },
+        jsonOptions);
+
+    string FormatInt(object value) => FormatNumber(Convert.ToDouble(value, CultureInfo.InvariantCulture));
+
+    string FormatSigned(object value)
+    {
+        double number = Convert.ToDouble(value, CultureInfo.InvariantCulture);
+        return (number >= 0 ? "+" : "") + FormatNumber(number);
+    }
+
+    string FormatNumber(double number) => number.ToString("N0", CultureInfo.InvariantCulture);
+}
+
+<div class="d-flex justify-content-between align-items-center">
+    <h2>Dashboard</h2>
+    @if (Model.DataReady && Model.TrendMonths > 0)
+    {
+        <span class="text-muted">Trailing @Model.TrendMonths months</span>
+    }
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error!</strong> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (!Model.DataReady)
+{
+    <p class="text-muted">Dashboard statistics could not be loaded. Check the server logs for the cause.</p>
+    return;
+}
+
+<!-- KPI tiles -->
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-3">
+    <div class="col">
+        <div class="card h-100 border-primary-subtle">
+            <div class="card-body">
+                <div class="text-muted small">Current headcount</div>
+                <div class="fs-1 fw-semibold">@FormatInt(Model.CurrentHeadcount)</div>
+                <div class="small text-muted">
+                    @FormatSigned(Model.HeadcountDelta) vs twelve months ago
+                    @if (Model.HeadcountDeltaPercent is { } hcp)
+                    {
+                        <span class="fw-semibold">@($"{(hcp >= 0 ? "+" : "")}{hcp.ToString("0.0", CultureInfo.InvariantCulture)}%")</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100 border-primary-subtle">
+            <div class="card-body">
+                <div class="text-muted small">Monthly payroll (open jobs)</div>
+                <div class="fs-1 fw-semibold">@FormatInt(Model.CurrentMonthlyPayroll)</div>
+                <div class="small text-muted">
+                    @FormatSigned(Model.PayrollDelta) vs twelve months ago
+                    @if (Model.PayrollDeltaPercent is { } pcp)
+                    {
+                        <span class="fw-semibold">@($"{(pcp >= 0 ? "+" : "")}{pcp.ToString("0.0", CultureInfo.InvariantCulture)}%")</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100 border-success-subtle">
+            <div class="card-body">
+                <div class="text-muted small">Hires, last 12 months</div>
+                <div class="fs-1 fw-semibold">@FormatInt(Model.HiresLast12Months)</div>
+                <div class="small text-muted">
+                    @FormatSigned(Model.HireFlowDelta) vs prior 12 months (@FormatInt(Model.HiresPrior12Months))
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100 border-danger-subtle">
+            <div class="card-body">
+                <div class="text-muted small">Exits, last 12 months</div>
+                <div class="fs-1 fw-semibold">@FormatInt(Model.ExitsLast12Months)</div>
+                <div class="small text-muted">
+                    @FormatSigned(Model.ExitFlowDelta) vs prior 12 months (@FormatInt(Model.ExitsPrior12Months))
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Workforce trend + exits by status -->
+<div class="row g-3 mb-3">
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Workforce size</h5>
+                <div style="height: 300px;">
+                    <canvas id="headcount-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Exits by status</h5>
+                <div style="height: 300px;">
+                    <canvas id="exits-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hires vs exits + employment type mix -->
+<div class="row g-3 mb-3">
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Hires vs exits per month</h5>
+                <div style="height: 300px;">
+                    <canvas id="flow-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Employment type mix</h5>
+                <div style="height: 300px;">
+                    <canvas id="type-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payroll by department + salary spread -->
+<div class="row g-3 mb-3">
+    <div class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Payroll by department (open jobs)</h5>
+                <div style="height: 300px;">
+                    <canvas id="payroll-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Salary range by department</h5>
+                <div style="height: 300px;">
+                    <canvas id="spread-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Watchlists -->
+<div class="row g-3 mb-3">
+    <div class="col-lg-4">
+        <div class="card h-100 border-warning-subtle">
+            <div class="card-header bg-transparent">
+                <h6 class="mb-0">Departments without a manager</h6>
+            </div>
+            <div class="card-body py-2">
+                @if (Model.Lists.UnmanagedDepartments.Count == 0)
+                {
+                    <p class="text-muted small my-2">All departments have a current manager.</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Code</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Location</th>
+                                    <th scope="col">Since</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var dept in Model.Lists.UnmanagedDepartments)
+                                {
+                                    <tr>
+                                        <th scope="row">@dept.Code</th>
+                                        <td>@dept.Name</td>
+                                        <td>@dept.Location</td>
+                                        <td>@dept.Established.ToString("yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100 border-danger-subtle">
+            <div class="card-header bg-transparent">
+                <h6 class="mb-0">Probation beyond 90 days</h6>
+            </div>
+            <div class="card-body py-2">
+                @if (Model.Lists.Probation.Count == 0)
+                {
+                    <p class="text-muted small my-2">Nobody is stuck in probation.</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Employee</th>
+                                    <th scope="col">Department</th>
+                                    <th scope="col">Started</th>
+                                    <th scope="col" class="text-end">Days</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var entry in Model.Lists.Probation)
+                                {
+                                    <tr>
+                                        <th scope="row">@entry.EmployeeName</th>
+                                        <td>@entry.DepartmentName</td>
+                                        <td>@entry.StartDate.ToString("yyyy-MM-dd")</td>
+                                        <td class="text-end">@entry.DaysInStatus</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100 border-info-subtle">
+            <div class="card-header bg-transparent">
+                <h6 class="mb-0">On leave / notice period</h6>
+            </div>
+            <div class="card-body py-2">
+                @if (Model.Lists.PendingExits.Count == 0)
+                {
+                    <p class="text-muted small my-2">Nobody is on leave or serving a notice period.</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Employee</th>
+                                    <th scope="col">Job</th>
+                                    <th scope="col">Department</th>
+                                    <th scope="col" class="text-end">Days</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var entry in Model.Lists.PendingExits)
+                                {
+                                    <tr>
+                                        <th scope="row">@entry.EmployeeName</th>
+                                        <td>@entry.JobTitle</td>
+                                        <td>@entry.DepartmentName</td>
+                                        <td class="text-end">@entry.DaysInStatus</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script id="dashboard-data" type="application/json">@Html.Raw(chartPayload)</script>
+    <script src="~/lib/chart/chart.umd.min.js"></script>
+    <script src="~/js/dashboard.js" asp-append-version="true"></script>
+}
