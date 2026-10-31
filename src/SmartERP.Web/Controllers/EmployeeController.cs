@@ -105,7 +105,7 @@ public class EmployeeController(
                     DateOfBirth = dateOfBirth,
                     GenderId = model.GenderId,
                     Address = model.Address,
-                    JobTitle = model.JobTitle,
+                    PositionId = model.PositionId,
                     Salary = model.Salary,
                     StartDate = model.StartDate.ToDateTime(TimeOnly.MinValue),
                     DepartmentId = model.DepartmentId,
@@ -187,7 +187,7 @@ public class EmployeeController(
                 DateOfBirth = model.DateOfBirth.ToDateTime(TimeOnly.MinValue),
                 GenderId = model.GenderId,
                 Address = model.Address,
-                JobTitle = model.JobTitle,
+                PositionId = model.PositionId,
                 Salary = model.Salary,
                 StartDate = model.StartDate.ToDateTime(TimeOnly.MinValue),
                 DepartmentId = model.DepartmentId,
@@ -291,7 +291,7 @@ public class EmployeeController(
 
         if (employee.HasEmploymentDetails)
         {
-            model.JobTitle = employee.JobTitle;
+            model.PositionId = employee.PositionId;
             model.Salary = employee.Salary;
             model.StartDate = DateOnly.FromDateTime(employee.StartDate);
             model.DepartmentId = employee.DepartmentId;
@@ -322,6 +322,8 @@ public class EmployeeController(
         // cannot be trusted after lookups are reseeded or extended.
         ViewData["Genders"] = genders
             .Select(g => new SelectListItem(g.Title, g.Id.ToString()));
+        ViewData["Positions"] = (await _lookupRepository.GetPositionsAsync())
+            .Select(p => new SelectListItem(p.Title, p.Id.ToString()));
         ViewData["Departments"] = departments
             .OrderBy(d => d.Name)
             .Select(d => new SelectListItem(d.Name, d.Id.ToString()));

@@ -51,10 +51,19 @@ create table if not exists employees (
    constraint uq_employees_phone unique ( phone )
 );
 
+create table if not exists positions (
+   id         number generated always as identity,
+   title      varchar2(50) not null,
+   created_at timestamp default systimestamp not null,
+   updated_at timestamp,
+   constraint pk_position_id primary key ( id ),
+   constraint uq_positions_title unique ( title )
+);
+
 create table if not exists employment_details (
    id                   number generated always as identity,
    employee_id          number not null,
-   job_title            varchar2(50) not null,
+   position_id          number not null,
    salary               number(10,2) not null,
    start_date           date not null,
    end_date             date,
@@ -66,6 +75,8 @@ create table if not exists employment_details (
    constraint pk_employee_detail_id primary key ( id ),
    constraint fk_det_employee foreign key ( employee_id )
       references employees ( id ), -- Unique constraint name
+   constraint fk_det_position foreign key ( position_id )
+      references positions ( id ),
    constraint fk_det_department foreign key ( department_id )
       references departments ( id ), -- Unique constraint name
    constraint fk_det_employment_type foreign key ( employment_type_id )

@@ -42,9 +42,8 @@ public class EmployeeCreateViewModel : IValidatableObject
     [Display(Name = "Assign a job right away")]
     public bool IncludeEmploymentDetails { get; set; }
 
-    [Display(Name = "Job title")]
-    [MaxLength(50, ErrorMessage = "Job title must be 50 or less characters.")]
-    public string JobTitle { get; set; } = string.Empty;
+    [Display(Name = "Position")]
+    public double PositionId { get; set; }
 
     [Display(Name = "Salary")]
     [Range(0, (double)decimal.MaxValue, ErrorMessage = "Salary cannot be negative.")]
@@ -72,8 +71,8 @@ public class EmployeeCreateViewModel : IValidatableObject
     {
         if (!IncludeEmploymentDetails) yield break;
 
-        if (string.IsNullOrWhiteSpace(JobTitle))
-            yield return new ValidationResult("Job title is required to assign a job.", [nameof(JobTitle)]);
+        if (PositionId <= 0)
+            yield return new ValidationResult("Please select a position for the job.", [nameof(PositionId)]);
 
         if (Salary <= 0)
             yield return new ValidationResult("Salary is required to assign a job.", [nameof(Salary)]);

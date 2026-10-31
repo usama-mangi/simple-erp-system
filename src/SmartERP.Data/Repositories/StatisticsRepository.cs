@@ -129,7 +129,7 @@ public class StatisticsRepository(
     private const string WatchlistQuery = @"
         SELECT
             e.first_name || ' ' || e.last_name AS employee_name,
-            ed.job_title                       AS job_title,
+            p.title                            AS position_name,
             d.name                             AS department_name,
             ed.salary                          AS salary,
             ed.start_date                      AS start_date,
@@ -138,6 +138,8 @@ public class StatisticsRepository(
             employment_details ed
         JOIN
             employees e ON e.id = ed.employee_id AND e.is_deleted = 0
+        JOIN
+            positions p ON p.id = ed.position_id
         JOIN
             departments d ON d.id = ed.department_id
         JOIN
@@ -154,7 +156,7 @@ public class StatisticsRepository(
     private const string PendingExitsQuery = @"
         SELECT
             e.first_name || ' ' || e.last_name AS employee_name,
-            ed.job_title                       AS job_title,
+            p.title                            AS position_name,
             d.name                             AS department_name,
             ed.salary                          AS salary,
             ed.start_date                      AS start_date,
@@ -163,6 +165,8 @@ public class StatisticsRepository(
             employment_details ed
         JOIN
             employees e ON e.id = ed.employee_id AND e.is_deleted = 0
+        JOIN
+            positions p ON p.id = ed.position_id
         JOIN
             departments d ON d.id = ed.department_id
         JOIN
@@ -407,7 +411,7 @@ public class StatisticsRepository(
 
         return new WatchlistEntry(
             reader.GetString(reader.GetOrdinal("employee_name")),
-            reader.GetString(reader.GetOrdinal("job_title")),
+            reader.GetString(reader.GetOrdinal("position_name")),
             reader.GetString(reader.GetOrdinal("department_name")),
             reader.GetDouble(reader.GetOrdinal("salary")),
             reader.GetDateTime(startDateOrdinal),

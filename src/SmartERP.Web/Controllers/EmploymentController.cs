@@ -82,7 +82,7 @@ public class EmploymentController(
             var detail = new EmploymentDetail
             {
                 EmployeeId = model.EmployeeId,
-                JobTitle = model.JobTitle,
+                PositionId = model.PositionId,
                 Salary = model.Salary,
                 StartDate = model.StartDate.ToDateTime(TimeOnly.MinValue),
                 EndDate = model.EndDate is { } endDate
@@ -130,7 +130,10 @@ public class EmploymentController(
                 await _employmentRepository.CreateAsync(detail);
             }
 
-            TempData["SuccessMessage"] = $"Assignment {model.JobTitle} created successfully";
+            var positions = await _lookupRepository.GetPositionsAsync();
+            var positionTitle = positions.FirstOrDefault(p => p.Id == model.PositionId)?.Title ?? "position";
+
+            TempData["SuccessMessage"] = $"Assignment {positionTitle} created successfully";
             return RedirectToAction(nameof(Index), new { employeeId = model.EmployeeId });
         }
         catch (DuplicateCurrentJobException ex)
@@ -212,7 +215,7 @@ public class EmploymentController(
 
     private static string FieldErrorKey(string fieldName) => fieldName switch
     {
-        "JobTitle" => nameof(EmploymentDetailCreateViewModel.JobTitle),
+        "PositionId" => nameof(EmploymentDetailCreateViewModel.PositionId),
         "Salary" => nameof(EmploymentDetailCreateViewModel.Salary),
         "StartDate" => nameof(EmploymentDetailCreateViewModel.StartDate),
         "EndDate" => nameof(EmploymentDetailCreateViewModel.EndDate),
@@ -238,6 +241,7 @@ public class EmploymentController(
         var departments = await _departmentRepository.GetAllAsync();
         var types = await _lookupRepository.GetEmploymentTypesAsync();
         var statuses = await _lookupRepository.GetEmploymentStatusesAsync();
+        var positions = await _lookupRepository.GetPositionsAsync();
 
         // Ids come from the lookup tables themselves; enum positions in code
         // cannot be trusted after lookups are reseeded or extended.
@@ -248,5 +252,7 @@ public class EmploymentController(
             .Select(t => new SelectListItem(t.Title, t.Id.ToString()));
         ViewData["EmploymentStatuses"] = statuses
             .Select(s => new SelectListItem(s.Title, s.Id.ToString()));
+        ViewData["Positions"] = positions
+            .Select(p => new SelectListItem(p.Title, p.Id.ToString()));
     }
 }

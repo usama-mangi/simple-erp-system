@@ -8,11 +8,8 @@ public class EmploymentDetailCreateViewModel : IValidatableObject
     [Required(ErrorMessage = "Invalid employee provided.")]
     public double EmployeeId { get; set; }
 
-    [Display(Name = "Job title")]
-    [Required(ErrorMessage = "Job title is required.")]
-    [MaxLength(50, ErrorMessage = "Job title must be 50 or less characters.")]
-    [MinLength(2, ErrorMessage = "Minimum 2 characters required.")]
-    public string JobTitle { get; set; } = string.Empty;
+    [Display(Name = "Position")]
+    public double PositionId { get; set; }
 
     [Display(Name = "Salary")]
     [Range(0, (double)decimal.MaxValue, ErrorMessage = "Salary cannot be negative.")]

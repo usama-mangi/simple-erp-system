@@ -10,7 +10,8 @@ public class EmployeeWithDetails
     public DateTime DateOfBirth { get; set; }
     public double GenderId { get; set; }
     public string Address { get; set; } = string.Empty;
-    public string JobTitle { get; set; } = string.Empty;
+    public double PositionId { get; set; }
+    public string PositionName { get; set; } = string.Empty;
     public double Salary { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime? EndDate { get; set; }

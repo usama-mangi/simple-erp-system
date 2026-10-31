@@ -45,9 +45,8 @@ public class EmployeeUpdateViewModel
     [Display(Name = "Assign a job right away")]
     public bool HasEmploymentDetails { get; set; }
 
-    [Display(Name = "Job title")]
-    [MaxLength(50, ErrorMessage = "Job title must be 50 or less characters.")]
-    public string JobTitle { get; set; } = string.Empty;
+    [Display(Name = "Position")]
+    public double PositionId { get; set; }
 
     [Display(Name = "Salary")]
     [Range(0, (double)decimal.MaxValue, ErrorMessage = "Salary cannot be negative.")]
@@ -74,8 +73,8 @@ public class EmployeeUpdateViewModel
     {
         if (!HasEmploymentDetails) yield break;
 
-        if (string.IsNullOrWhiteSpace(JobTitle))
-            yield return new ValidationResult("Job title is required.", [nameof(JobTitle)]);
+        if (PositionId <= 0)
+            yield return new ValidationResult("Please select a position.", [nameof(PositionId)]);
 
         if (Salary <= 0)
             yield return new ValidationResult("Salary is required.", [nameof(Salary)]);

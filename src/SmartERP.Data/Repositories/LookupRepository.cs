@@ -30,6 +30,11 @@ public class LookupRepository(
           FROM employment_status
       ORDER BY id";
 
+    private const string PositionsQuery = @"
+        SELECT id, title
+          FROM positions
+      ORDER BY title";
+
     public async Task<IEnumerable<LookupItem>> GetGendersAsync()
         => await ReadAsync(GenderQuery);
 
@@ -38,6 +43,9 @@ public class LookupRepository(
 
     public async Task<IEnumerable<LookupItem>> GetEmploymentStatusesAsync()
         => await ReadAsync(EmploymentStatusQuery);
+
+    public async Task<IEnumerable<LookupItem>> GetPositionsAsync()
+        => await ReadAsync(PositionsQuery);
 
     private async Task<IEnumerable<LookupItem>> ReadAsync(string query)
     {

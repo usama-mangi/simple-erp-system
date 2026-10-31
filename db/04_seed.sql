@@ -233,7 +233,51 @@ values
 
 
 -- =========================================================
--- 6. SEED EMPLOYMENT DETAILS
+-- 6. SEED POSITIONS
+--    One master row per job title; employment_details points
+--    at positions, the free-text job_title column is gone.
+-- =========================================================
+
+merge into positions p
+using (
+   select 'Software Engineer' title
+     from dual
+   union all
+   select 'HR Manager'
+     from dual
+   union all
+   select 'Financial Analyst'
+     from dual
+   union all
+   select 'Marketing Specialist'
+     from dual
+   union all
+   select 'IT Support Engineer'
+     from dual
+   union all
+   select 'Marketing Intern'
+     from dual
+   union all
+   select 'Operations Manager'
+     from dual
+   union all
+   select 'HR Assistant'
+     from dual
+   union all
+   select 'Junior Developer'
+     from dual
+   union all
+   select 'Marketing Assistant'
+     from dual
+) s on ( p.title = s.title )
+when not matched then
+insert ( title )
+values
+   ( s.title );
+
+
+-- =========================================================
+-- 7. SEED EMPLOYMENT DETAILS
 --    Includes current and historical employment records.
 -- =========================================================
 
@@ -346,11 +390,15 @@ using (
        where e.email = s.email
    )
    and ed.start_date = s.start_date
-   and ed.job_title = s.job_title )
+   and ed.position_id = (
+      select p.id
+        from positions p
+       where p.title = s.job_title
+    ) )
 when not matched then
 insert (
    employee_id,
-   job_title,
+   position_id,
    salary,
    start_date,
    end_date,
@@ -362,8 +410,11 @@ values
       select e.id
         from employees e
        where e.email = s.email
+   ),(
+      select p.id
+        from positions p
+       where p.title = s.job_title
    ),
-     s.job_title,
      s.salary,
      s.start_date,
      s.end_date,
@@ -385,7 +436,7 @@ values
 
 
 -- =========================================================
--- 7. SEED DEPARTMENT MANAGERS
+-- 8. SEED DEPARTMENT MANAGERS
 -- =========================================================
 
 merge into department_managers dm
@@ -442,7 +493,7 @@ values
 
 
 -- =========================================================
--- 8. COMMIT
+-- 9. COMMIT
 --    MERGE is DML: without a commit the rows exist only inside
 --    this session's transaction and vanish on disconnect.
 -- =========================================================
@@ -451,7 +502,7 @@ commit;
 
 
 -- =========================================================
--- 9. VERIFY SEEDED DATA
+-- 10. VERIFY SEEDED DATA
 --    Runs AFTER commit, so counts reflect what other
 --    sessions/connections actually see.
 -- =========================================================

@@ -81,64 +81,114 @@
         "\"TASK-03\"]"
       ],
       "notes": "Per session spec Step 8 audit."
+    },
+    {
+      "id": "TASK-10",
+      "title": "HR statistics dashboard: KPI tiles, Chart.js trend/mix/payroll charts, watchlists",
+      "status": "closed",
+      "dependencies": [],
+      "notes": "Done. StatisticsRepository (24-month workforce trend, period summary, payroll by department, watchlists), DashboardController, Dashboard view, local Chart.js bundle, nav link, README updated. Verified live against Oracle: 24 trend points, headcount 8, payroll 1,005,000, Sara on probation watchlist, MKT unmanaged. Build green; only pre-existing NU190x warnings."
+    },
+    {
+      "id": "TASK-11",
+      "title": "Option A.1: positions table, drop job_title from employment_details",
+      "status": "closed",
+      "dependencies": [],
+      "notes": "Done. positions table added (unique title, timestamps); db/06_positions.sql migrates populated installs: guarded create, title backfill, employment_details repoint (add position_id, backfill, NOT NULL, FK_DET_POSITION), job_title drop, verification queries dropping no rows - re-runnable, live-verified twice (run + clean no-op). Fresh rebuild path updated in 01_schema/00_drop/04_seed (positions seeded before details merge). Web: PositionId/PositionName replace JobTitle across EmploymentDetail, EmployeeWithDetails, WatchlistEntry; ILookupRepository.GetPositionsAsync; create/update forms use position dropdowns; dashboard watchlists show position names. Live smoke tests: pages render, create replacing-current POST succeeded then reverted - DB state restored to exactly prior (10 rows, Bilal open Operations Manager)."
+    },
+    {
+      "id": "TASK-12",
+      "title": "Option A.2: leave_types, leave_requests, leave_balances",
+      "status": "to-do",
+      "dependencies": [],
+      "notes": "Leave domain: leave_types lookup, leave_requests (employee, type, start, end, status), one open request per employee via function-based unique index like uq_det_current_job, balances per employee/year. Dashboard: dated On Leave entries and absence stats."
+    },
+    {
+      "id": "TASK-13",
+      "title": "Option A.3: departments.parent_department_id org hierarchy",
+      "status": "to-do",
+      "dependencies": [],
+      "notes": "departments.parent_department_id self FK nullable. Org-tree reads (headcount rollups, org chart)."
+    },
+    {
+      "id": "TASK-14",
+      "title": "Option A.4: status_events table for status churn history",
+      "status": "to-do",
+      "dependencies": [],
+      "notes": "status_events (employee, from_status, to_status, at, note). Honest time series for exits and State churn; keep current final-status column reading backwards compatible."
+    },
+    {
+      "id": "TASK-15",
+      "title": "Option A.5: app_users 1:1 with employees + audit_log via triggers",
+      "status": "to-do",
+      "dependencies": [],
+      "notes": "app_users 1:1 employees (unique FK), audit_log table_name/PK/action/who/when via triggers along 03_triggers pattern."
+    },
+    {
+      "id": "TASK-16",
+      "title": "Option B: new HR domains (requisitions, reviews, documents)",
+      "status": "to-do",
+      "dependencies": [],
+      "notes": "Umbrella to-do, scope decided when Option A lands: requisitions and candidates, review_cycles and reviews (employee-to-employee FK), documents with expiry watchlist. Deferred until after Option A."
     }
   ],
   "log": {
-    "last_updated": "2026-10-30T12:43:08.819185+00:00",
+    "last_updated": "2026-10-31T07:11:17.474002+00:00",
     "recent_changes": [
       {
         "action": "update",
-        "task": "TASK-09",
+        "task": "TASK-11",
         "old_status": "active",
-        "new_status": "testing",
-        "at": "2026-10-30T12:43:08.819165+00:00"
+        "new_status": "closed",
+        "at": "2026-10-31T07:11:17.473925+00:00"
       },
       {
         "action": "update",
-        "task": "TASK-09",
+        "task": "TASK-11",
         "old_status": "to-do",
         "new_status": "active",
-        "at": "2026-10-30T12:29:59.471341+00:00"
+        "at": "2026-10-31T06:48:37.803576+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-16",
+        "old_status": "to-do",
+        "new_status": "to-do",
+        "at": "2026-10-31T06:48:32.346401+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-15",
+        "old_status": "to-do",
+        "new_status": "to-do",
+        "at": "2026-10-31T06:48:32.192032+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-14",
+        "old_status": "to-do",
+        "new_status": "to-do",
+        "at": "2026-10-31T06:48:32.060462+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-13",
+        "old_status": "to-do",
+        "new_status": "to-do",
+        "at": "2026-10-31T06:48:31.922022+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-12",
+        "old_status": "to-do",
+        "new_status": "to-do",
+        "at": "2026-10-31T06:48:31.776689+00:00"
       },
       {
         "action": "add",
-        "task": "TASK-09",
+        "task": "TASK-16",
         "status": "to-do",
-        "at": "2026-10-30T12:29:59.352410+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-08",
-        "old_status": "active",
-        "new_status": "testing",
-        "at": "2026-10-30T12:08:04.142144+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-08",
-        "old_status": "to-do",
-        "new_status": "active",
-        "at": "2026-10-30T12:04:12.058065+00:00"
-      },
-      {
-        "action": "add",
-        "task": "TASK-08",
-        "status": "to-do",
-        "at": "2026-10-30T12:04:11.930903+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-04",
-        "old_status": "active",
-        "new_status": "testing",
-        "at": "2026-10-30T11:47:29.342212+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-04",
-        "old_status": "to-do",
-        "new_status": "active",
-        "at": "2026-10-30T11:45:34.037093+00:00"
+        "at": "2026-10-31T06:48:20.758626+00:00"
       }
     ]
   }

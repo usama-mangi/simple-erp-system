@@ -23,7 +23,7 @@
     <table class="table table-bordered table-hover">
         <thead>
             <tr>
-                <th scope="col">Job Title</th>
+                <th scope="col">Position</th>
                 <th scope="col">Salary</th>
                 <th scope="col">Department</th>
                 <th scope="col">Type</th>
@@ -41,7 +41,7 @@
             @foreach (var detail in Model.Details)
             {
                 <tr>
-                    <td>@detail.JobTitle</td>
+                    <td>@detail.PositionName</td>
                     <td>@detail.Salary.ToString("N")</td>
                     <td>@Title(departmentTitles, detail.DepartmentId)</td>
                     <td>@Title(employmentTypeTitles, detail.EmploymentTypeId)</td>

@@ -4,7 +4,7 @@ namespace SmartERP.Data.Models;
 // been sitting in their current open employment status.
 public record WatchlistEntry(
     string EmployeeName,
-    string JobTitle,
+    string PositionName,
     string DepartmentName,
     double Salary,
     DateTime StartDate,

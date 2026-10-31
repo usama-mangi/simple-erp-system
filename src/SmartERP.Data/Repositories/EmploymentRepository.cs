@@ -17,7 +17,7 @@ public class EmploymentRepository(
 ) : IEmploymentRepository
 {
     private const string SelectColumns = @"
-                ed.id, ed.employee_id, ed.job_title, ed.salary, ed.start_date, ed.end_date,
+                ed.id, ed.employee_id, ed.position_id, p.title as position_name, ed.salary, ed.start_date, ed.end_date,
                 ed.department_id, d.name as department_name,
                 ed.employment_type_id, ed.employment_status_id,
                 ed.created_at, ed.updated_at";
@@ -25,6 +25,8 @@ public class EmploymentRepository(
     private const string FromClause = @"
             FROM
                 employment_details ed
+            LEFT JOIN
+                positions p ON p.id = ed.position_id
             LEFT JOIN
                 departments d ON ed.department_id = d.id";
 
@@ -142,9 +144,9 @@ public class EmploymentRepository(
     {
         string query = @"
             INSERT INTO
-                employment_details (employee_id, job_title, salary, start_date, end_date, department_id, employment_type_id, employment_status_id)
+                employment_details (employee_id, position_id, salary, start_date, end_date, department_id, employment_type_id, employment_status_id)
             VALUES
-                (:EmployeeId, :JobTitle, :Salary, :StartDate, :EndDate, :DepartmentId, :EmploymentTypeId, :EmploymentStatusId)";
+                (:EmployeeId, :PositionId, :Salary, :StartDate, :EndDate, :DepartmentId, :EmploymentTypeId, :EmploymentStatusId)";
 
         try
         {
@@ -324,14 +326,14 @@ public class EmploymentRepository(
     private static string BuildInsertQuery()
         => @"
             INSERT INTO
-                employment_details (employee_id, job_title, salary, start_date, end_date, department_id, employment_type_id, employment_status_id)
+                employment_details (employee_id, position_id, salary, start_date, end_date, department_id, employment_type_id, employment_status_id)
             VALUES
-                (:EmployeeId, :JobTitle, :Salary, :StartDate, :EndDate, :DepartmentId, :EmploymentTypeId, :EmploymentStatusId)";
+                (:EmployeeId, :PositionId, :Salary, :StartDate, :EndDate, :DepartmentId, :EmploymentTypeId, :EmploymentStatusId)";
 
     private static void AddInsertParameters(OracleCommand command, EmploymentDetail detail)
     {
         command.Parameters.Add(":EmployeeId", OracleDbType.Double, detail.EmployeeId, ParameterDirection.Input);
-        command.Parameters.Add(":JobTitle", OracleDbType.Varchar2, detail.JobTitle, ParameterDirection.Input);
+        command.Parameters.Add(":PositionId", OracleDbType.Double, detail.PositionId, ParameterDirection.Input);
         command.Parameters.Add(":Salary", OracleDbType.Double, detail.Salary, ParameterDirection.Input);
         command.Parameters.Add(":StartDate", OracleDbType.Date, detail.StartDate, ParameterDirection.Input);
         command.Parameters.Add(
@@ -354,7 +356,8 @@ public class EmploymentRepository(
         {
             Id = reader.GetDouble(reader.GetOrdinal("id")),
             EmployeeId = reader.GetDouble(reader.GetOrdinal("employee_id")),
-            JobTitle = reader.GetString(reader.GetOrdinal("job_title")),
+            PositionId = reader.GetDouble(reader.GetOrdinal("position_id")),
+            PositionName = reader.GetString(reader.GetOrdinal("position_name")),
             Salary = reader.GetDouble(reader.GetOrdinal("salary")),
             StartDate = reader.GetDateTime(reader.GetOrdinal("start_date")),
             EndDate = reader.IsDBNull(endDateOrdinal) ? null : reader.GetDateTime(endDateOrdinal),

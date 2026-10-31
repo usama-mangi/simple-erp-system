@@ -59,12 +59,14 @@ public class EmployeeRepository(
         string query = @"
             SELECT
                 e.id as employee_id, e.first_name, e.last_name, e.email, e.phone, e.date_of_birth, e.gender_id, e.address, e.created_at, e.updated_at as emp_updated_at,
-                ed.job_title, ed.salary, ed.start_date, ed.end_date, ed.employment_type_id, ed.employment_status_id, ed.updated_at as det_updated_at,
+                ed.position_id, p.title as position_name, ed.salary, ed.start_date, ed.end_date, ed.employment_type_id, ed.employment_status_id, ed.updated_at as det_updated_at,
                 d.id as department_id, d.name as department_name
             FROM
                 employees e
             LEFT JOIN
                 employment_details ed ON ed.employee_id = e.id AND ed.end_date IS NULL
+            LEFT JOIN
+                positions p ON p.id = ed.position_id
             LEFT JOIN
                 departments d ON ed.department_id = d.id
             WHERE
@@ -146,9 +148,9 @@ public class EmployeeRepository(
             RETURNING id INTO :NewId";
         string detQuery = @"
             INSERT INTO
-                employment_details (employee_id, job_title, salary, start_date, end_date, department_id, employment_type_id, employment_status_id)
+                employment_details (employee_id, position_id, salary, start_date, end_date, department_id, employment_type_id, employment_status_id)
             VALUES
-                (:EmployeeId, :JobTitle, :Salary, :StartDate, :EndDate, :DepartmentId, :EmploymentTypeId, :EmploymentStatusId)";
+                (:EmployeeId, :PositionId, :Salary, :StartDate, :EndDate, :DepartmentId, :EmploymentTypeId, :EmploymentStatusId)";
 
         try
         {
@@ -180,7 +182,7 @@ public class EmployeeRepository(
                     BindByName = true,
                     Transaction = (OracleTransaction)transaction
                 };
-                detCommand.Parameters.Add(":JobTitle", OracleDbType.Varchar2, employee.JobTitle, ParameterDirection.Input);
+                detCommand.Parameters.Add(":PositionId", OracleDbType.Double, employee.PositionId, ParameterDirection.Input);
                 detCommand.Parameters.Add(":Salary", OracleDbType.Double, employee.Salary, ParameterDirection.Input);
                 detCommand.Parameters.Add(":StartDate", OracleDbType.Date, employee.StartDate, ParameterDirection.Input);
                 detCommand.Parameters.Add(":EndDate", OracleDbType.Date, (object?)employee.EndDate ?? DBNull.Value, ParameterDirection.Input);
@@ -246,7 +248,7 @@ public class EmployeeRepository(
             UPDATE
                 employment_details
             SET
-                job_title = :JobTitle,
+                position_id = :PositionId,
                 salary = :Salary,
                 start_date = :StartDate,
                 department_id = :DepartmentId,
@@ -284,7 +286,7 @@ public class EmployeeRepository(
                     BindByName = true
                 };
                 detCommand.Parameters.Add(":Id", OracleDbType.Double, employee.Id, ParameterDirection.Input);
-                detCommand.Parameters.Add(":JobTitle", OracleDbType.Varchar2, employee.JobTitle, ParameterDirection.Input);
+                detCommand.Parameters.Add(":PositionId", OracleDbType.Double, employee.PositionId, ParameterDirection.Input);
                 detCommand.Parameters.Add(":Salary", OracleDbType.Double, employee.Salary, ParameterDirection.Input);
                 detCommand.Parameters.Add(":StartDate", OracleDbType.Date, employee.StartDate, ParameterDirection.Input);
                 detCommand.Parameters.Add(":DepartmentId", OracleDbType.Double, employee.DepartmentId, ParameterDirection.Input);
@@ -494,7 +496,7 @@ public class EmployeeRepository(
     {
         var detUpdatedAtOrdinal = reader.GetOrdinal("det_updated_at");
 
-        bool hasDetails = !reader.IsDBNull(reader.GetOrdinal("job_title"));
+        bool hasDetails = !reader.IsDBNull(reader.GetOrdinal("position_id"));
 
         DateTime updatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"));
 
@@ -526,7 +528,8 @@ public class EmployeeRepository(
             GenderId = reader.GetDouble(reader.GetOrdinal("gender_id")),
             Address = reader.GetString(reader.GetOrdinal("address")),
             HasEmploymentDetails = hasDetails,
-            JobTitle = hasDetails ? reader.GetString(reader.GetOrdinal("job_title")) : string.Empty,
+            PositionId = hasDetails ? reader.GetDouble(reader.GetOrdinal("position_id")) : 0,
+            PositionName = hasDetails ? reader.GetString(reader.GetOrdinal("position_name")) : string.Empty,
             Salary = hasDetails ? reader.GetDouble(reader.GetOrdinal("salary")) : 0,
             StartDate = hasDetails ? reader.GetDateTime(reader.GetOrdinal("start_date")) : default,
             EndDate = !hasDetails || reader.IsDBNull(endDateOrdinal) ? null : reader.GetDateTime(endDateOrdinal),

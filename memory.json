@@ -40,6 +40,21 @@
       "text": "sp_assign_manager (db/05_procedures.sql) holds no COMMIT; the .NET caller owns commit/rollback - AssignWithStoredProcedureAsync wraps the proc call in an explicit transaction, AssignWithNetTransactionAsync covers dated backfills. Contracts renamed per spec: IEmploymentRepository / IDepartmentManagerRepository. Multi-statement flows use: await using var tx = await connection.BeginTransactionAsync(); commands bound via Transaction = (OracleTransaction)tx; helper DbConnectionExtensions bridges IDbConnection (factory return) to the async API. Employment create gates replacements on GetCurrentAsync (new start must be after current start) before CreateReplacingCurrentAsync; close view models are employee/department-scoped (EndCurrentAsync), no row-id closes.",
       "cat": "codebase",
       "updated": "2026-10-30T12:43:25.807360+00:00"
+    },
+    "statistics-dashboard-design": {
+      "text": "Dashboard stats derive from closed rows, not snapshots: month-end headcount/payroll = employment_details rows with start_date <= month AND NVL(end_date, month) >= month; flows bucket by TRUNC(start_date/end_date,'MM'). Trend window 24 months; soft-deleted employees drop out retroactively (user approved). Watchlists: Probation older than 90 days, On Leave/Notice Period open rows, departments with no open department_managers row. SQL is sysdate-relative; no new db scripts needed.",
+      "cat": "architecture",
+      "updated": "2026-10-31T06:22:42.459116+00:00"
+    },
+    "dashboard-chart-pipeline": {
+      "text": "Dashboard chart data flows C# -> @Html.Raw(System.Text.Json JSON island #dashboard-data, Web defaults camelCase, angle brackets escaped) -> wwwroot/js/dashboard.js builds Chart.js canvases from wwwroot/lib/chart/chart.umd.min.js (local v4.4.9 copy, no CDN). Charts animation:false under prefers-reduced-motion. Dashboard failure path: per-section try in controller; trend failure = DataReady=false renders banner, no redirect loop.",
+      "cat": "architecture",
+      "updated": "2026-10-31T06:22:48.147976+00:00"
+    },
+    "positions-schema-addition": {
+      "text": "positions is master data (unique title) referenced by employment_details.position_id; free-text job_title dropped entirely (user decision). Rebuild scripts 01_schema/04_seed carry the canonical shape; 06_positions.sql is the guarded migration for populated installs, written with every statement /-terminated and dynamic SQL inside guards because PL/SQL compilers resolve referenced columns at compile time. employment ids in live DB range in the 20s-30s: never guess identity ids in HTTP tests, read dropdown option values from the page.",
+      "cat": "schema-design",
+      "updated": "2026-10-31T07:11:17.813014+00:00"
     }
   }
 }

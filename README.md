@@ -14,13 +14,15 @@ SmartERP.slnx
 └── db/                   # Oracle SQL scripts, run in numeric order on every rebuild
     ├── 00_drop.sql       # Drop all objects for a clean rebuild
     ├── 01_schema.sql     # Tables, constraints, unique indexes
-    ├── 02_seed.sql       # Reference and sample data
+    ├── 02_procedures.sql # Stored procedures: sp_assign_manager (atomic end-then-insert manager assignment)
     ├── 03_triggers.sql   # Triggers that stamp updated_at on row updates
-    ├── 04_test.sql       # Empty placeholder for ad-hoc test queries
-    └── 05_procedures.sql # KV stored procedures: sp_assign_manager (atomic end-then-insert manager assignment)
+    ├── 04_seed.sql       # Reference and sample data
+    ├── 05_migrate.sql    # Chain runner: executes 00..04 in order, 05_test ad-hoc checks
+    ├── 05_test.sql       # Empty placeholder for ad-hoc test queries
+    └── 06_positions.sql  # One-shot migration: existing installs move from employment_details.job_title onto positions
 ```
 
-Rebuild the database after every schema change: run all six scripts in filename order against an Oracle instance. Dropping a table drops its identity sequence too, so ids restart at 1 per rebuild; anyone hard-coding lookup or row ids in code instead of reading them from queries will drift.
+Rebuild the database after every schema change: run the chained scripts in filename order on every rebuild. Dropping a table drops its identity sequence too, so ids restart at 1 per rebuild; anyone hard-coding lookup or row ids in code instead of reading them from queries will drift. Schema-level migrations for already-populated databases live in numbered follow-up scripts (`06_positions.sql` is one: it backfills positions from the former free-text job_title column, repoints employment_details, drops job_title, and is re-runnable).
 
 ## Data model
 
@@ -39,8 +41,9 @@ Main tables:
 | Table | What it stores |
 |---|---|
 | `employees` | Personal info: names, unique email and phone, date of birth, gender, address, and `is_deleted` for the soft-delete flag |
+| `positions` | Position titles referenced by jobs; `employment_details` points at a position instead of carrying a free-text `job_title` |
 | `departments` | Name, unique 3-letter code, location, established date |
-| `employment_details` | One job assignment: job title, salary, start and end dates, plus FKs to employee, department, type, and status |
+| `employment_details` | One job assignment: position, salary, start and end dates, plus FKs to employee, department, type, and status |
 | `department_managers` | Management assignment: department, manager, start and end dates |
 
 Design rules worth noting:
@@ -58,6 +61,7 @@ Design rules worth noting:
 
 ```
 employees 1───* employment_details *───1 departments
+employment_details *───1 positions
 employees 1───* department_managers *───1 departments
 employment_details *───1 employment_types
 employment_details *───1 employment_status

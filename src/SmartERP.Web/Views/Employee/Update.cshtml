@@ -8,6 +8,7 @@
     var departments = (IEnumerable<SelectListItem>)ViewData["Departments"]!;
     var employmentTypes = (IEnumerable<SelectListItem>)ViewData["EmploymentTypes"]!;
     var employmentStatuses = (IEnumerable<SelectListItem>)ViewData["EmploymentStatuses"]!;
+    var positions = (IEnumerable<SelectListItem>)ViewData["Positions"]!;
 }
 
 <h2>Update Employee</h2>
@@ -67,9 +68,9 @@
                 <h5 class="mt-2">Employment Details</h5>
 
                 <div class="form-group mb-3">
-                    <label asp-for="JobTitle" class="control-label"></label>
-                    <input asp-for="JobTitle" type="text" class="form-control" />
-                    <span asp-validation-for="JobTitle" class="text-danger"></span>
+                    <label asp-for="PositionId" class="control-label"></label>
+                    <select asp-for="PositionId" asp-items="positions" class="form-select"></select>
+                    <span asp-validation-for="PositionId" class="text-danger"></span>
                 </div>
 
                 <div class="form-group mb-3">
