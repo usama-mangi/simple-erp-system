@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartERP.Data.Repositories;
 using SmartERP.Web.Models;
 
 namespace SmartERP.Web.Controllers;
 
+[Authorize]
 public class DashboardController(
     IStatisticsRepository _statisticsRepository,
     ILogger<DashboardController> _logger

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SmartERP.Data.Exceptions.Constraint;
@@ -7,6 +8,7 @@ using SmartERP.Web.Models;
 
 namespace SmartERP.Web.Controllers;
 
+[Authorize]
 public class EmployeeController(
     IEmployeeRepository _repository,
     IEmploymentRepository _employmentRepository,
@@ -240,6 +242,7 @@ public class EmployeeController(
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(EmployeeDeleteViewModel model)
     {

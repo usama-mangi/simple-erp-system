@@ -85,6 +85,11 @@
       "text": "status_events is an append-only table (employee, from_status, to_status, changed_at, note) recording employment-status transitions. Final status stays on employment_details.employment_status_id for backwards-compatible reads. Writes happen in the same transaction via StatusEventWriter: CreateAsync (null -> status, at start_date, note 'New assignment started'), CreateReplacingCurrentAsync (RETURNING old status -> new, at new start_date, note 'Replaced the previous assignment'), CreateWithDetailsAsync (null -> status, at start_date, note 'First assignment recorded'), UpdateAsync only when the open row's status actually changes (SELECT ... FOR UPDATE lock, AND end_date IS NULL guard added; note 'Status changed on the employee record'). Purge deletes status_events before employment_details. Watchlist days_in_status uses MAX(changed_at) per employee with fallback to start_date. Backfill in 04_seed and 09_status_events.sql seeds one event per existing assignment using LAG over start_date.",
       "cat": "architecture",
       "updated": "2026-11-02T06:21:47.085101+00:00"
+    },
+    "auth-audit-contract": {
+      "text": "Auth: cookie-based (AddAuthentication/AddCookie), LoginPath /Auth/Login. ICurrentUser (scoped) reads ClaimsPrincipal; HttpContextCurrentUser provides uid/eid/role/name. IConnectionContext (singleton) holds AsyncLocal client identifier; OracleDbConnection sets DBMS_SESSION.SET_IDENTIFIER on open so audit triggers record the signed-in username. PasswordService uses static Rfc2898DeriveBytes.Pbkdf2 (100k, SHA-256, 16-byte salt, 32-byte hash), stored base64(salt):base64(hash), verified with FixedTimeEquals. app_users is 1:1 with employees (unique FK), role check in Admin/HR/Viewer. audit_log written by AFTER triggers on employees, departments, employment_details, department_managers, leave_requests, leave_balances, app_users: table_name, pk_value, action, changed_by (NVL client identifier, 'anonymous' fallback), changed_at. Default seeded admin: username ali.khan, password ChangeMe123! (hash seeded in 04_seed.sql). Destructive actions require Admin role.",
+      "cat": "architecture",
+      "updated": "2026-11-02T06:55:33.725936+00:00"
     }
   }
 }

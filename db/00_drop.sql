@@ -12,6 +12,8 @@ drop table if exists leave_requests;
 drop table if exists leave_types;
 drop table if exists leave_statuses;
 
+drop table if exists audit_log;
+drop table if exists app_users;
 drop table if exists employees;
 drop table if exists departments;
 drop table if exists employment_status;

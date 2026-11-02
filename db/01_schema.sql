@@ -233,3 +233,37 @@ create unique index uq_lr_open_request on
 -- Ora@x.com vs ora@x.com is one subscriber, not two.
 create unique index uq_employees_email_lower on
    employees ( lower(email) );
+create table if not exists app_users (
+   id            number generated always as identity,
+   employee_id   number not null,
+   username      varchar2(50) not null,
+   password_hash varchar2(256) not null,
+   role          varchar2(20) not null,
+   is_active     number(1) default 1 not null,
+   created_at    timestamp default systimestamp not null,
+   updated_at    timestamp,
+   constraint pk_app_user_id primary key ( id ),
+   constraint uq_app_users_username unique ( username ),
+   constraint uq_app_users_employee unique ( employee_id ),
+   constraint fk_au_employee foreign key ( employee_id )
+      references employees ( id ),
+   constraint chk_au_role check ( role in ( 'Admin', 'HR', 'Viewer' ) ),
+   constraint chk_au_active check ( is_active in ( 0, 1 ) )
+);
+
+create table if not exists audit_log (
+   id          number generated always as identity,
+   table_name  varchar2(30) not null,
+   pk_value    varchar2(64) not null,
+   action      varchar2(10) not null,
+   changed_by  varchar2(64) not null,
+   changed_at  timestamp default systimestamp not null,
+   constraint pk_audit_log_id primary key ( id ),
+   constraint chk_al_action check ( action in ( 'INSERT', 'UPDATE', 'DELETE' ) )
+);
+
+create index if not exists ix_audit_log_table_pk
+   on audit_log ( table_name, pk_value );
+
+create index if not exists ix_audit_log_changed_at
+   on audit_log ( changed_at );

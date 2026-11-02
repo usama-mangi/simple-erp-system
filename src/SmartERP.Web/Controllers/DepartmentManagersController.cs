@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SmartERP.Data.Exceptions.Constraint;
@@ -8,6 +9,7 @@ using SmartERP.Web.Models;
 
 namespace SmartERP.Web.Controllers;
 
+[Authorize]
 public class DepartmentManagersController(
     IDepartmentManagerRepository _managersRepository,
     IDepartmentRepository _departmentRepository,

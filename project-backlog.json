@@ -120,7 +120,7 @@
     {
       "id": "TASK-15",
       "title": "Option A.5: app_users 1:1 with employees + audit_log via triggers",
-      "status": "to-do",
+      "status": "closed",
       "dependencies": [],
       "notes": "app_users 1:1 employees (unique FK), audit_log table_name/PK/action/who/when via triggers along 03_triggers pattern."
     },
@@ -133,8 +133,22 @@
     }
   ],
   "log": {
-    "last_updated": "2026-11-02T06:21:42.980594+00:00",
+    "last_updated": "2026-11-02T06:55:29.315576+00:00",
     "recent_changes": [
+      {
+        "action": "update",
+        "task": "TASK-15",
+        "old_status": "active",
+        "new_status": "closed",
+        "at": "2026-11-02T06:55:29.315541+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-15",
+        "old_status": "to-do",
+        "new_status": "active",
+        "at": "2026-11-02T06:42:12.567308+00:00"
+      },
       {
         "action": "update",
         "task": "TASK-14",
@@ -176,20 +190,6 @@
         "old_status": "testing",
         "new_status": "closed",
         "at": "2026-10-31T10:48:00.359498+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-08",
-        "old_status": "testing",
-        "new_status": "closed",
-        "at": "2026-10-31T10:47:46.997756+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-07",
-        "old_status": "testing",
-        "new_status": "closed",
-        "at": "2026-10-31T10:47:27.501455+00:00"
       }
     ]
   }

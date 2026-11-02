@@ -803,10 +803,34 @@ union all
 select 'Leave Requests',
        count(*)
   from leave_requests
+-- =========================================================
+-- 9. SEED APP USERS
+-- =========================================================
+
+merge into app_users au
+using (
+   select 'ali.khan@example.com' email,
+          'ali.khan' username,
+          '/gQlnJhWSDE5dgpujA96Mg==:2Q3q3jM/yGT0E06oRoHKL7UpHYJXppqRBiJoHF3ksfc=' password_hash
+     from dual
+) s on ( au.username = s.username )
+when not matched then
+insert (employee_id, username, password_hash, role, is_active)
+values (
+   ( select e.id from employees e where e.email = s.email ),
+   s.username,
+   s.password_hash,
+   'Admin',
+   1 );
+
 union all
 select 'Leave Balances',
        count(*)
   from leave_balances;
+union all
+select 'App Users',
+       count(*)
+  from app_users;
 union all
 select 'Status Events',
        count(*)
