@@ -11,4 +11,5 @@ public interface IEmploymentRepository
     Task CreateReplacingCurrentAsync(EmploymentDetail detail);
     Task EndCurrentAsync(double employeeId, DateOnly endDate);
     Task TransferCurrentDepartmentAsync(double employeeId, double departmentId);
+    Task<IEnumerable<StatusEvent>> GetStatusEventsAsync(double employeeId);
 }

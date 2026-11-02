@@ -206,6 +206,15 @@ public class EmployeeRepository(
 
                 await detCommand.ExecuteNonQueryAsync();
 
+                await StatusEventWriter.InsertAsync(
+                    (OracleConnection)connection,
+                    (OracleTransaction)transaction,
+                    employee.Id,
+                    null,
+                    employee.EmploymentStatusId,
+                    employee.StartDate,
+                    "First assignment recorded");
+
                 await transaction.CommitAsync();
             }
             catch
@@ -255,7 +264,8 @@ public class EmployeeRepository(
                 employment_type_id = :EmploymentTypeId,
                 employment_status_id = :EmploymentStatusId
             WHERE
-                employee_id = :Id";
+                employee_id = :Id
+              AND end_date IS NULL";
 
         try
         {
@@ -283,7 +293,8 @@ public class EmployeeRepository(
 
                 using var detCommand = new OracleCommand(detQuery, (OracleConnection)connection)
                 {
-                    BindByName = true
+                    BindByName = true,
+                    Transaction = (OracleTransaction)transaction
                 };
                 detCommand.Parameters.Add(":Id", OracleDbType.Double, employee.Id, ParameterDirection.Input);
                 detCommand.Parameters.Add(":PositionId", OracleDbType.Double, employee.PositionId, ParameterDirection.Input);
@@ -293,11 +304,47 @@ public class EmployeeRepository(
                 detCommand.Parameters.Add(":EmploymentTypeId", OracleDbType.Double, employee.EmploymentTypeId, ParameterDirection.Input);
                 detCommand.Parameters.Add(":EmploymentStatusId", OracleDbType.Double, employee.EmploymentStatusId, ParameterDirection.Input);
 
+                // Read the open row's current status under a row lock so a concurrent
+                // edit cannot race the transition we are about to record.
+                double? oldStatus = null;
+                using (var statusCommand = new OracleCommand(
+                    "SELECT employment_status_id FROM employment_details WHERE employee_id = :Id AND end_date IS NULL FOR UPDATE",
+                    (OracleConnection)connection)
+                {
+                    BindByName = true,
+                    Transaction = (OracleTransaction)transaction
+                })
+                {
+                    statusCommand.Parameters.Add(":Id", OracleDbType.Double, employee.Id, ParameterDirection.Input);
+                    var result = await statusCommand.ExecuteScalarAsync();
+                    if (result is not null and not DBNull)
+                    {
+                        oldStatus = result switch
+                        {
+                            decimal d => (double)d,
+                            OracleDecimal od => od.IsNull ? null : (double?)od.Value,
+                            _ => Convert.ToDouble(result)
+                        };
+                    }
+                }
+
                 // Updates only the open employment_details row (end_date IS NULL is the
                 // history boundary; uq_det_current_job guarantees a single candidate row).
                 // An employee without an open row matches zero rows and stays unchanged.
                 await empCommand.ExecuteNonQueryAsync();
                 await detCommand.ExecuteNonQueryAsync();
+
+                if (oldStatus is { } previous && previous != employee.EmploymentStatusId)
+                {
+                    await StatusEventWriter.InsertAsync(
+                        (OracleConnection)connection,
+                        (OracleTransaction)transaction,
+                        employee.Id,
+                        previous,
+                        employee.EmploymentStatusId,
+                        DateTime.Now,
+                        "Status changed on the employee record");
+                }
 
                 await transaction.CommitAsync();
             }
@@ -403,6 +450,12 @@ public class EmployeeRepository(
 
     public async Task DeleteWithDetailsAsync(double id)
     {
+        string statusEventQuery = @"
+            DELETE FROM
+                status_events
+            WHERE
+                employee_id = :Id";
+
         // Destructive purge: the employee row plus every dependent record.
         // Children go first in one transaction; if any statement fails the
         // rollback restores all of them, so the employee either survives
@@ -449,6 +502,13 @@ public class EmployeeRepository(
 
             try
             {
+                using (var statusEventCommand = new OracleCommand(statusEventQuery, (OracleConnection)connection))
+                {
+                    statusEventCommand.Transaction = (OracleTransaction)transaction;
+                    statusEventCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
+                    await statusEventCommand.ExecuteNonQueryAsync();
+                }
+
                 using (var detCommand = new OracleCommand(detQuery, (OracleConnection)connection))
                 {
                     detCommand.Transaction = (OracleTransaction)transaction;

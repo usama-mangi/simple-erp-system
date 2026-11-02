@@ -45,6 +45,7 @@ public class EmployeeController(
 
             var details = await _employmentRepository.GetByEmployeeAsync(id);
             var departments = await _departmentRepository.GetAllAsync();
+            var statusEvents = await _employmentRepository.GetStatusEventsAsync(id);
 
             return View(new EmployeeDetailsViewModel
             {
@@ -59,7 +60,8 @@ public class EmployeeController(
                     DepartmentOptions = departments
                         .OrderBy(d => d.Name)
                         .Select(d => new SelectListItem(d.Name, d.Id.ToString()))
-                }
+                },
+                StatusEvents = statusEvents.ToList()
             });
         }
         catch (Exception ex)

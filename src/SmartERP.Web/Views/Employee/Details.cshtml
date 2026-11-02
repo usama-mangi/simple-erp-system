@@ -88,3 +88,35 @@
     ViewData["ShowActions"] = true;
 }
 <partial name="_EmploymentHistory" model="Model.History" />
+
+<h3 class="mt-4">Status history</h3>
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th scope="col">When</th>
+                <th scope="col">From</th>
+                <th scope="col">To</th>
+                <th scope="col">Note</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.StatusEvents.Any())
+            {
+                <tr><td colspan="4" class="text-center">No status changes recorded yet.</td></tr>
+            }
+            else
+            {
+                @foreach (var ev in Model.StatusEvents)
+                {
+                    <tr>
+                        <td>@ev.ChangedAt.ToString("yyyy-MM-dd")</td>
+                        <td>@(ev.FromStatusTitle ?? "First status")</td>
+                        <td>@ev.ToStatusTitle</td>
+                        <td>@(string.IsNullOrWhiteSpace(ev.Note) ? "—" : ev.Note)</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

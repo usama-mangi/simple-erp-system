@@ -1,5 +1,6 @@
 using System.Data;
 using Oracle.ManagedDataAccess.Client;
+using Oracle.ManagedDataAccess.Types;
 using SmartERP.Data.Abstractions;
 using SmartERP.Data.ExceptionHandlers;
 using SmartERP.Data.Exceptions;
@@ -151,13 +152,36 @@ public class EmploymentRepository(
         try
         {
             using var connection = await _dbConnection.CreateOpenConnectionAsync();
-            using var command = new OracleCommand(query, (OracleConnection)connection)
-            {
-                BindByName = true
-            };
+            await using var transaction = await connection.BeginTransactionAsync();
 
-            AddInsertParameters(command, detail);
-            await command.ExecuteNonQueryAsync();
+            try
+            {
+                using (var command = new OracleCommand(query, (OracleConnection)connection)
+                {
+                    BindByName = true,
+                    Transaction = (OracleTransaction)transaction
+                })
+                {
+                    AddInsertParameters(command, detail);
+                    await command.ExecuteNonQueryAsync();
+                }
+
+                await StatusEventWriter.InsertAsync(
+                    (OracleConnection)connection,
+                    (OracleTransaction)transaction,
+                    detail.EmployeeId,
+                    null,
+                    detail.EmploymentStatusId,
+                    detail.StartDate,
+                    "New assignment started");
+
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
         catch (OracleException ex)
         {
@@ -189,7 +213,9 @@ public class EmploymentRepository(
                 end_date = :CloseOn
             WHERE
                 employee_id = :EmployeeId
-              AND end_date IS NULL";
+              AND end_date IS NULL
+            RETURNING
+                employment_status_id INTO :FromStatus";
 
         try
         {
@@ -201,12 +227,19 @@ public class EmploymentRepository(
 
             try
             {
+                double? fromStatus = null;
                 using (var closeCommand = new OracleCommand(closeQuery, (OracleConnection)connection))
                 {
                     closeCommand.Transaction = (OracleTransaction)transaction;
                     closeCommand.Parameters.Add(":CloseOn", OracleDbType.Date, detail.StartDate, ParameterDirection.Input);
                     closeCommand.Parameters.Add(":EmployeeId", OracleDbType.Double, detail.EmployeeId, ParameterDirection.Input);
+                    var fromParam = closeCommand.Parameters.Add(
+                        new OracleParameter(":FromStatus", OracleDbType.Double) { Direction = ParameterDirection.Output });
                     await closeCommand.ExecuteNonQueryAsync();
+                    if (fromParam.Value is OracleDecimal od && !od.IsNull)
+                    {
+                        fromStatus = (double)od;
+                    }
                 }
 
                 using (var insertCommand = new OracleCommand(BuildInsertQuery(), (OracleConnection)connection))
@@ -215,6 +248,15 @@ public class EmploymentRepository(
                     AddInsertParameters(insertCommand, detail);
                     await insertCommand.ExecuteNonQueryAsync();
                 }
+
+                await StatusEventWriter.InsertAsync(
+                    (OracleConnection)connection,
+                    (OracleTransaction)transaction,
+                    detail.EmployeeId,
+                    fromStatus,
+                    detail.EmploymentStatusId,
+                    detail.StartDate,
+                    "Replaced the previous assignment");
 
                 await transaction.CommitAsync();
             }
@@ -345,6 +387,65 @@ public class EmploymentRepository(
         command.Parameters.Add(":DepartmentId", OracleDbType.Double, detail.DepartmentId, ParameterDirection.Input);
         command.Parameters.Add(":EmploymentTypeId", OracleDbType.Double, detail.EmploymentTypeId, ParameterDirection.Input);
         command.Parameters.Add(":EmploymentStatusId", OracleDbType.Double, detail.EmploymentStatusId, ParameterDirection.Input);
+    }
+
+    public async Task<IEnumerable<StatusEvent>> GetStatusEventsAsync(double employeeId)
+    {
+        string query = @"
+            SELECT
+                se.id, se.employee_id, se.from_status_id, fs.title AS from_status_title,
+                se.to_status_id, ts.title AS to_status_title, se.changed_at, se.note
+            FROM
+                status_events se
+            LEFT JOIN
+                employment_status fs ON fs.id = se.from_status_id
+            JOIN
+                employment_status ts ON ts.id = se.to_status_id
+            WHERE
+                se.employee_id = :Id
+            ORDER BY
+                se.changed_at DESC, se.id DESC";
+
+        try
+        {
+            var events = new List<StatusEvent>();
+            using var connection = await _dbConnection.CreateOpenConnectionAsync();
+            using var command = new OracleCommand(query, (OracleConnection)connection);
+            command.BindByName = true;
+            command.Parameters.Add(new OracleParameter(":Id", OracleDbType.Int64) { Value = (long)employeeId });
+
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                events.Add(MapToStatusEvent(reader));
+            }
+            return events;
+        }
+        catch (OracleException ex)
+        {
+            _oracleExceptionHandler
+                .HandlePermissionExceptions(ex)
+                .HandleReadExceptions(ex);
+            throw new DatabaseAccessException(ex);
+        }
+    }
+
+    private static StatusEvent MapToStatusEvent(OracleDataReader reader)
+    {
+        int fromStatusOrdinal = reader.GetOrdinal("from_status_id");
+        int fromTitleOrdinal = reader.GetOrdinal("from_status_title");
+        int noteOrdinal = reader.GetOrdinal("note");
+        return new StatusEvent
+        {
+            Id = reader.GetDouble(reader.GetOrdinal("id")),
+            EmployeeId = reader.GetDouble(reader.GetOrdinal("employee_id")),
+            FromStatusId = reader.IsDBNull(fromStatusOrdinal) ? null : reader.GetDouble(fromStatusOrdinal),
+            FromStatusTitle = reader.IsDBNull(fromTitleOrdinal) ? null : reader.GetString(fromTitleOrdinal),
+            ToStatusId = reader.GetDouble(reader.GetOrdinal("to_status_id")),
+            ToStatusTitle = reader.GetString(reader.GetOrdinal("to_status_title")),
+            ChangedAt = reader.GetDateTime(reader.GetOrdinal("changed_at")),
+            Note = reader.IsDBNull(noteOrdinal) ? null : reader.GetString(noteOrdinal)
+        };
     }
 
     private static EmploymentDetail MapToDetail(OracleDataReader reader)

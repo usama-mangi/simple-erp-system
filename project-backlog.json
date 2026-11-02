@@ -113,7 +113,7 @@
     {
       "id": "TASK-14",
       "title": "Option A.4: status_events table for status churn history",
-      "status": "to-do",
+      "status": "closed",
       "dependencies": [],
       "notes": "status_events (employee, from_status, to_status, at, note). Honest time series for exits and State churn; keep current final-status column reading backwards compatible."
     },
@@ -133,8 +133,22 @@
     }
   ],
   "log": {
-    "last_updated": "2026-11-02T05:41:27.913067+00:00",
+    "last_updated": "2026-11-02T06:21:42.980594+00:00",
     "recent_changes": [
+      {
+        "action": "update",
+        "task": "TASK-14",
+        "old_status": "active",
+        "new_status": "closed",
+        "at": "2026-11-02T06:21:42.980542+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-14",
+        "old_status": "to-do",
+        "new_status": "active",
+        "at": "2026-11-02T05:54:55.209727+00:00"
+      },
       {
         "action": "update",
         "task": "TASK-13",
@@ -176,20 +190,6 @@
         "old_status": "testing",
         "new_status": "closed",
         "at": "2026-10-31T10:47:27.501455+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-04",
-        "old_status": "testing",
-        "new_status": "closed",
-        "at": "2026-10-31T10:45:09.356195+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-03",
-        "old_status": "testing",
-        "new_status": "closed",
-        "at": "2026-10-31T10:45:05.935343+00:00"
       }
     ]
   }

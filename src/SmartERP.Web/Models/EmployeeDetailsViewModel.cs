@@ -9,4 +9,5 @@ public class EmployeeDetailsViewModel
 {
     public EmployeeWithDetails Employee { get; set; } = new();
     public EmploymentIndexViewModel History { get; set; } = new();
+    public IReadOnlyList<StatusEvent> StatusEvents { get; set; } = Array.Empty<StatusEvent>();
 }

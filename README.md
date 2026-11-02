@@ -22,6 +22,7 @@ SmartERP.slnx
 ├── 06_positions.sql  # One-shot migration: existing installs move from employment_details.job_title onto positions
 ├── 07_leave.sql      # One-shot migration: existing installs gain leave_types, leave_statuses, leave_requests, leave_balances
 └── 08_department_hierarchy.sql # One-shot migration: existing installs gain departments.parent_department_id, its self-FK and no-self-parent check
+├── 09_status_events.sql        # One-shot migration: existing installs gain status_events, its FKs and the transition check
 ```
 
 Rebuild the database after every schema change: run the chained scripts in filename order on every rebuild. Dropping a table drops its identity sequence too, so ids restart at 1 per rebuild; anyone hard-coding lookup or row ids in code instead of reading them from queries will drift. Schema-level migrations for already-populated databases live in numbered follow-up scripts (`06_positions.sql` is one: it backfills positions from the former free-text job_title column, repoints employment_details, drops job_title, and is re-runnable).
@@ -66,7 +67,9 @@ Design rules worth noting:
   - `uq_lr_open_request`: an employee can have only one Pending `leave_requests` row, so only one request waiting for a decision. The index compares `status_id` against `leave_statuses.id = 1`, which is why the seed inserts Pending first and fails loudly if anything else claims id 1.
 - `leave_balances.used_days` is written by two paths only: approving a request adds its inclusive days, cancelling an approved request gives them back. `chk_bal_used` keeps it between 0 and `entitlement_days`.
 - Soft delete: `UPDATE employees SET is_deleted = 1` hides the row from app reads (every read filters `is_deleted = 0`); children stay intact. Deleting an employee together with their dependent rows is an explicit separate transaction in the data layer.
-- Closed rows (with an `end_date`) are the history; there is no separate history table.
+- Closed rows (with an `end_date`) are the history of assignments. Status transitions inside an
+  open assignment are recorded in `status_events` (from, to, when, note); the final status
+  stays on the assignment row, so existing reads remain unchanged.
 
 ## Relationships
 

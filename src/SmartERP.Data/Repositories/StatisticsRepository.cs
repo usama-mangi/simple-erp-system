@@ -133,7 +133,7 @@ public class StatisticsRepository(
             d.name                             AS department_name,
             ed.salary                          AS salary,
             ed.start_date                      AS start_date,
-            TRUNC(SYSDATE) - ed.start_date     AS days_in_status
+            TRUNC(SYSDATE) - NVL(CAST(se.status_since AS DATE), ed.start_date) AS days_in_status
         FROM
             employment_details ed
         JOIN
@@ -144,6 +144,10 @@ public class StatisticsRepository(
             departments d ON d.id = ed.department_id
         JOIN
             employment_status es ON es.id = ed.employment_status_id
+        LEFT JOIN
+            (SELECT employee_id, MAX(changed_at) AS status_since
+               FROM status_events
+              GROUP BY employee_id) se ON se.employee_id = ed.employee_id
         WHERE
             ed.end_date IS NULL
             AND es.title = :StatusTitle
@@ -160,7 +164,7 @@ public class StatisticsRepository(
             d.name                             AS department_name,
             ed.salary                          AS salary,
             ed.start_date                      AS start_date,
-            TRUNC(SYSDATE) - ed.start_date     AS days_in_status
+            TRUNC(SYSDATE) - NVL(CAST(se.status_since AS DATE), ed.start_date) AS days_in_status
         FROM
             employment_details ed
         JOIN
@@ -171,6 +175,10 @@ public class StatisticsRepository(
             departments d ON d.id = ed.department_id
         JOIN
             employment_status es ON es.id = ed.employment_status_id
+        LEFT JOIN
+            (SELECT employee_id, MAX(changed_at) AS status_since
+               FROM status_events
+              GROUP BY employee_id) se ON se.employee_id = ed.employee_id
         WHERE
             ed.end_date IS NULL
             AND es.title IN (:StatusOne, :StatusTwo)

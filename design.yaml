@@ -203,6 +203,7 @@ log:
   last_updated: "2026-11-02"
   recent_changes:
     - "TASK-13 added the reporting-structure screen, reusing RegisterPanel and the existing tokens; indentation is decorative and the Reports to column carries the relationship."
+    - "TASK-14 added a Status history subsection to Employee Details (When / From / To / Note) backed by the append-only status_events table; no new component or token."
     - "TASK-12 initialized the design system: first design.yaml in the project, built from a sealed rollout rather than defaults."
     - "Direction chosen (leave register book) over Swiss form, green-bar listing and departure board; scores recorded in intent.style.rubric."
     - "Motion personality productive with a cross-document shared-element signature; see intent.motion."

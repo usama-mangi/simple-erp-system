@@ -93,6 +93,27 @@ create table if not exists employment_details (
        or end_date > start_date ) -- Unique check constraint name
 );
 
+create table if not exists status_events (
+   id              number generated always as identity,
+   employee_id     number not null,
+   from_status_id  number,
+   to_status_id    number not null,
+   changed_at      timestamp default systimestamp not null,
+   note            varchar2(200),
+   constraint pk_status_event_id primary key ( id ),
+   constraint fk_se_employee foreign key ( employee_id )
+      references employees ( id ),
+   constraint fk_se_from_status foreign key ( from_status_id )
+      references employment_status ( id ),
+   constraint fk_se_to_status foreign key ( to_status_id )
+      references employment_status ( id ),
+   constraint chk_se_transition check ( from_status_id is null
+       or from_status_id != to_status_id )
+);
+
+create index if not exists ix_se_employee_at
+   on status_events ( employee_id, changed_at );
+
 create table if not exists department_managers (
    id            number generated always as identity,
    department_id number not null,

@@ -436,6 +436,24 @@ values
 
 
 -- =========================================================
+-- 7a. SEED STATUS EVENTS (backfill from assignment history)
+-- =========================================================
+
+insert into status_events (employee_id, from_status_id, to_status_id, changed_at, note)
+select ed.employee_id,
+       lag(ed.employment_status_id) over (
+          partition by ed.employee_id
+          order by ed.start_date, ed.id ),
+       ed.employment_status_id,
+       cast(ed.start_date as timestamp),
+       'Backfilled from assignment history'
+  from employment_details ed
+ where not exists (
+          select 1
+            from status_events se
+           where se.employee_id = ed.employee_id );
+
+-- =========================================================
 -- 8. SEED DEPARTMENT MANAGERS
 -- =========================================================
 
@@ -789,3 +807,7 @@ union all
 select 'Leave Balances',
        count(*)
   from leave_balances;
+union all
+select 'Status Events',
+       count(*)
+  from status_events;
