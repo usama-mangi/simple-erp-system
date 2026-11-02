@@ -76,6 +76,7 @@
 
 <div>
     <a asp-controller="Employee" asp-action="Update" asp-route-id="@Model.Employee.Id" class="btn btn-warning">Update</a>
+    <a asp-controller="Leave" asp-action="Index" asp-route-employeeId="@Model.Employee.Id" class="btn btn-outline-primary">Leave requests</a>
     <a asp-controller="Employee" asp-action="Delete" asp-route-id="@Model.Employee.Id" class="btn btn-danger">Delete</a>
     <a asp-controller="Employee" asp-action="Index" class="btn btn-secondary">Back to List</a>
 </div>

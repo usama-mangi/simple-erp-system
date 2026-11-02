@@ -41,3 +41,25 @@ begin
    :new.updated_at := systimestamp;
 end;
 /
+
+create or replace trigger trg_set_lr_updated_at before
+   update on leave_requests
+   for each row
+   when ( new.updated_at is null
+       or old.updated_at is null
+       or new.updated_at = old.updated_at )
+begin
+   :new.updated_at := systimestamp;
+end;
+/
+
+create or replace trigger trg_set_bal_updated_at before
+   update on leave_balances
+   for each row
+   when ( new.updated_at is null
+       or old.updated_at is null
+       or new.updated_at = old.updated_at )
+begin
+   :new.updated_at := systimestamp;
+end;
+/

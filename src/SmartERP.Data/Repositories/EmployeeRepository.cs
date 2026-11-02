@@ -405,9 +405,11 @@ public class EmployeeRepository(
     {
         // Destructive purge: the employee row plus every dependent record.
         // Children go first in one transaction; if any statement fails the
-        // rollback restores all three, so the employee either survives fully
-        // or vanishes fully. ChildFoundException cannot fire on this path
-        // because no children remain when the employees delete runs.
+        // rollback restores all of them, so the employee either survives
+        // fully or vanishes fully. ChildFoundException cannot fire on this
+        // path because no children remain when the employees delete runs.
+        // Leave rows are children too: FK_LR_EMPLOYEE / FK_BAL_EMPLOYEE would
+        // otherwise block the final delete for anyone with leave history.
         string detQuery = @"
             DELETE FROM
                 employment_details
@@ -419,6 +421,18 @@ public class EmployeeRepository(
                 department_managers
             WHERE
                 manager_id = :Id";
+
+        string leaveRequestQuery = @"
+            DELETE FROM
+                leave_requests
+            WHERE
+                employee_id = :Id";
+
+        string leaveBalanceQuery = @"
+            DELETE FROM
+                leave_balances
+            WHERE
+                employee_id = :Id";
 
         string empQuery = @"
             DELETE FROM
@@ -447,6 +461,20 @@ public class EmployeeRepository(
                     mgrCommand.Transaction = (OracleTransaction)transaction;
                     mgrCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
                     await mgrCommand.ExecuteNonQueryAsync();
+                }
+
+                using (var leaveRequestCommand = new OracleCommand(leaveRequestQuery, (OracleConnection)connection))
+                {
+                    leaveRequestCommand.Transaction = (OracleTransaction)transaction;
+                    leaveRequestCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
+                    await leaveRequestCommand.ExecuteNonQueryAsync();
+                }
+
+                using (var leaveBalanceCommand = new OracleCommand(leaveBalanceQuery, (OracleConnection)connection))
+                {
+                    leaveBalanceCommand.Transaction = (OracleTransaction)transaction;
+                    leaveBalanceCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
+                    await leaveBalanceCommand.ExecuteNonQueryAsync();
                 }
 
                 using (var empCommand = new OracleCommand(empQuery, (OracleConnection)connection))

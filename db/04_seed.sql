@@ -493,7 +493,246 @@ values
 
 
 -- =========================================================
--- 9. COMMIT
+-- 9. SEED LEAVE STATUSES
+--    Pending gets its own statement first: uq_lr_open_request
+--    binds leave_statuses id 1 to Pending, so Pending must be
+--    the first row ever inserted into the table.
+-- =========================================================
+
+insert into leave_statuses ( title )
+select 'Pending'
+  from dual
+ where not exists (
+       select 1
+         from leave_statuses
+        where title = 'Pending'
+   );
+
+merge into leave_statuses ls
+using (
+   select 'Approved' title
+     from dual
+   union all
+   select 'Rejected'
+     from dual
+   union all
+   select 'Cancelled'
+     from dual
+) s on ( ls.title = s.title )
+when not matched then
+insert ( title )
+values
+   ( s.title );
+
+-- Guard, not a comment: if Pending is not id 1 the open-request index
+-- would silently bind the wrong status, so the rebuild fails loudly.
+declare
+   pending_id number;
+begin
+   select id
+     into pending_id
+     from leave_statuses
+    where title = 'Pending';
+
+   if pending_id != 1 then
+      raise_application_error(
+         -20001,
+         'uq_lr_open_request binds leave_statuses id 1 to Pending, but Pending has id '
+            || pending_id
+      );
+   end if;
+end;
+/
+
+
+-- =========================================================
+-- 10. SEED LEAVE TYPES
+-- =========================================================
+
+merge into leave_types lt
+using (
+   select 'Annual' title
+     from dual
+   union all
+   select 'Sick'
+     from dual
+   union all
+   select 'Personal'
+     from dual
+   union all
+   select 'Unpaid'
+     from dual
+) s on ( lt.title = s.title )
+when not matched then
+insert ( title )
+values
+   ( s.title );
+
+
+-- =========================================================
+-- 11. SEED LEAVE BALANCES
+--    used_days starts at 0 and is synced from the approved
+--    sample requests in section 13, so the balance rows and the
+--    request rows can never disagree.
+-- =========================================================
+
+merge into leave_balances lb
+using (
+   select 'ali.khan@example.com' email,
+          'Annual' type_title,
+          20 entitlement
+     from dual
+   union all
+   select 'ayesha.ahmed@example.com',
+          'Sick',
+          10
+     from dual
+   union all
+   select 'usman.malik@example.com',
+          'Annual',
+          20
+     from dual
+) s on ( lb.employee_id = (
+      select e.id
+        from employees e
+       where e.email = s.email
+   )
+   and lb.leave_type_id = (
+      select lt.id
+        from leave_types lt
+       where lt.title = s.type_title
+   )
+   and lb.year = extract(year from sysdate) )
+when not matched then
+insert (
+   employee_id,
+   leave_type_id,
+   year,
+   entitlement_days,
+   used_days )
+values
+   ( (
+      select e.id
+        from employees e
+       where e.email = s.email
+   ),(
+      select lt.id
+        from leave_types lt
+       where lt.title = s.type_title
+   ),
+     extract(year from sysdate),
+     s.entitlement,
+     0 );
+
+
+-- =========================================================
+-- 12. SEED LEAVE REQUESTS
+--    One approved request covering today (drives the dashboard's
+--    On-leave-today card), one approved earlier this month (drives
+--    the absence stats), one Pending (exercises the open-request
+--    index). Dates are sysdate-relative on purpose: the samples
+--    stay meaningful on any rebuild date.
+-- =========================================================
+
+merge into leave_requests lr
+using (
+   select 'ali.khan@example.com' email,
+          'Annual' type_title,
+          trunc(sysdate) - 2 start_date,
+          trunc(sysdate) + 1 end_date,
+          'Approved' status,
+          'Long weekend away' reason
+     from dual
+   union all
+   select 'ayesha.ahmed@example.com',
+          'Sick',
+          trunc(sysdate, 'MM'),
+          least(trunc(sysdate, 'MM') + 2, trunc(sysdate)),
+          'Approved',
+          'Flu'
+     from dual
+   union all
+   select 'fatima.sheikh@example.com',
+          'Personal',
+          trunc(sysdate) + 7,
+          trunc(sysdate) + 8,
+          'Pending',
+          'Family event'
+     from dual
+) s on ( lr.employee_id = (
+      select e.id
+        from employees e
+       where e.email = s.email
+   )
+   and lr.leave_type_id = (
+      select lt.id
+        from leave_types lt
+       where lt.title = s.type_title
+   )
+   and lr.start_date = s.start_date )
+when not matched then
+insert (
+   employee_id,
+   leave_type_id,
+   status_id,
+   start_date,
+   end_date,
+   reason,
+   decided_at )
+values
+   ( (
+      select e.id
+        from employees e
+       where e.email = s.email
+   ),(
+      select lt.id
+        from leave_types lt
+       where lt.title = s.type_title
+   ),(
+      select ls.id
+        from leave_statuses ls
+       where ls.title = s.status
+   ),
+     s.start_date,
+     s.end_date,
+     s.reason,
+     case
+        when s.status = 'Pending' then
+            null
+        else
+            systimestamp
+     end );
+
+
+-- =========================================================
+-- 13. SYNC BALANCES FROM APPROVED REQUESTS
+--    used_days is the sum of inclusive calendar days of every
+--    approved request whose start year matches the balance year.
+--    This is the same rule the app's approve path applies, so a
+--    rebuilt database starts with balances that agree with its
+--    request history.
+-- =========================================================
+
+update leave_balances lb
+   set used_days = (
+       select nvl(
+                 sum(lr.end_date - lr.start_date + 1),
+                 0
+              )
+         from leave_requests lr
+        where lr.employee_id = lb.employee_id
+          and lr.leave_type_id = lb.leave_type_id
+          and lr.status_id = (
+              select ls.id
+                from leave_statuses ls
+               where ls.title = 'Approved'
+          )
+          and extract(year from lr.start_date) = lb.year
+   );
+
+
+-- =========================================================
+-- 14. COMMIT
 --    MERGE is DML: without a commit the rows exist only inside
 --    this session's transaction and vanish on disconnect.
 -- =========================================================
@@ -502,7 +741,7 @@ commit;
 
 
 -- =========================================================
--- 10. VERIFY SEEDED DATA
+-- 15. VERIFY SEEDED DATA
 --    Runs AFTER commit, so counts reflect what other
 --    sessions/connections actually see.
 -- =========================================================
@@ -533,4 +772,20 @@ select 'Employment Details',
 union all
 select 'Department Managers',
        count(*)
-  from department_managers;
+  from department_managers
+union all
+select 'Leave Statuses',
+       count(*)
+  from leave_statuses
+union all
+select 'Leave Types',
+       count(*)
+  from leave_types
+union all
+select 'Leave Requests',
+       count(*)
+  from leave_requests
+union all
+select 'Leave Balances',
+       count(*)
+  from leave_balances;

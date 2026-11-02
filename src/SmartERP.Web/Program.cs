@@ -17,6 +17,7 @@ builder.Services.AddScoped<IEmploymentRepository, EmploymentRepository>();
 builder.Services.AddScoped<IDepartmentManagerRepository, DepartmentManagerRepository>();
 builder.Services.AddScoped<ILookupRepository, LookupRepository>();
 builder.Services.AddScoped<IStatisticsRepository, StatisticsRepository>();
+builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
 
 var app = builder.Build();
 
@@ -37,7 +38,7 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Department}/{action=Index}/{id?}")
+    pattern: "{controller=Dashboard}/{action=Index}")
     .WithStaticAssets();
 
 

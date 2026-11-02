@@ -1,0 +1,261 @@
+# SmartERP design system — single source of truth for design decisions.
+# Owned by ui-ux-workflow except the `intent:` block, which is owned by
+# design-intent and merged mechanically (intent.py merge).
+
+project:
+  name: SmartERP
+  description: HR-focused ERP learning project — ASP.NET Core MVC over a hand-built Oracle schema
+  audience: The HR officer who has to answer "who is out today and how many days are left" without opening a spreadsheet
+
+brand:
+  voice:
+    adjectives:
+      - plainspoken
+      - exact
+      - unhurried
+      - ledger-precise
+    anti_patterns:
+      - seamless
+      - empower
+      - unlock
+      - effortless
+      - journey
+      - supercharge
+      - "one platform for everything"
+    reference_lines:
+      - "Nobody is out today. The register is clear."
+      - "Three days of the twenty are used. Seventeen remain."
+      - "This request has been waiting since 27 October."
+  differentiators:
+    deliberate_choices:
+      - Leave records render as ruled register rows, not cards
+      - Status is a rubber stamp carrying a word, never a bare colour dot
+      - Dates read as yyyy-mm-dd in tabular figures so columns align down the page
+      - Day counts are inclusive and always labelled "days"
+      - Balances show entitlement, used and left in one line instead of a chart
+      - One decision per row — approve, reject and cancel sit on the row they decide
+      - No modal dialogs — a decision posts and the page confirms it in place
+      - Warnings quote the real numbers, naming days left rather than saying "insufficient"
+      - Empty states state the fact plainly, with no illustration
+      - Forms label above the field on a hairline rule; no floating labels
+      - Terminology stays HR-native: "waiting for a decision", not "pending approval workflow"
+      - Focus rings are ink blue and always visible
+      - Motion is brief and causal — rows arrive as a wave, nothing moves for decoration
+      - No badge, stamp or icon is ever shown without its word
+      - Every page title names the register it opens, not the software
+    name_swap_test: "A leave register that answers who is out and how many days remain — swap SmartERP for a competitor name and the sentence stops describing their product, because it describes a register rather than a platform."
+
+tokens:
+  color:
+    primitives:
+      ink-900: "#141B24"
+      ink-700: "#2B3644"
+      ink-500: "#4A5768"
+      paper-0: "#FCFAF5"
+      paper-1: "#F3EEE3"
+      rule-200: "#D8D0BF"
+      blue-700: "#1B3A6B"
+      blue-600: "#24508F"
+      ochre-700: "#8A5A00"
+      oxblood-700: "#8C2F2F"
+      slate-500: "#5A6472"
+      moss-700: "#2F6B3C"
+      white-ink: "#FFFFFF"
+    semantic:
+      surface.page: paper-0
+      surface.band: paper-1
+      text.primary: ink-900
+      text.secondary: ink-700
+      text.muted: ink-500
+      rule.hairline: rule-200
+      rule.field: ink-500
+      action.primary.bg: blue-700
+      action.primary.bg.hover: blue-600
+      action.primary.fg: white-ink
+      focus.ring: blue-700
+      status.approved: blue-700
+      status.pending: ochre-700
+      status.rejected: oxblood-700
+      status.cancelled: slate-500
+      feedback.success: moss-700
+    component:
+      stamp.approved.border: status.approved
+      stamp.approved.fg: status.approved
+      stamp.pending.border: status.pending
+      stamp.pending.fg: status.pending
+      stamp.rejected.border: status.rejected
+      stamp.rejected.fg: status.rejected
+      stamp.cancelled.border: status.cancelled
+      stamp.cancelled.fg: status.cancelled
+      button.primary.bg: action.primary.bg
+      button.primary.fg: action.primary.fg
+      field.border: rule.field
+      field.bg: surface.page
+      row.rule: rule.hairline
+      row.band: surface.band
+  typography:
+    heading_family: '"Century Schoolbook", "Bookman Old Style", Georgia, serif'
+    body_family: 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif'
+    mono_family: '"Cascadia Mono", Consolas, "SF Mono", ui-monospace, monospace'
+    scale: [12, 14, 16, 20, 26, 34]
+  spacing:
+    base: 4px
+    scale: [4, 8, 12, 16, 24, 32, 48, 64]
+  radius:
+    scale: [0, 4, 8, 12, 9999]
+  shadow:
+    scale: [none, sm, md, lg]
+  motion:
+    durations_ms: [100, 200, 300, 500]
+    easings:
+      standard: cubic-bezier(0.22, 0.61, 0.36, 1)
+      emphasized: cubic-bezier(0.16, 1, 0.3, 1)
+  status:
+    a11y_aa_pass: true
+    slop_scan_pass: true
+
+components:
+  RegisterPanel:
+    states: [rest, focus, empty, error, success]
+    a11y:
+      role: region
+      keyboard: [Tab]
+      contrast_pairs:
+        - { fg: ink-900, ratio: "16.61:1", pass: true }
+        - { fg: ink-500, ratio: "7.05:1", pass: true }
+    tokens_consumed: [surface.page, surface.band, text.primary, text.muted, rule.hairline]
+  StampBadge:
+    states: [rest, hover]
+    a11y:
+      role: status
+      keyboard: []
+      contrast_pairs:
+        - { fg: ochre-700, ratio: "5.68:1", pass: true }
+        - { fg: oxblood-700, ratio: "7.86:1", pass: true }
+        - { fg: slate-500, ratio: "5.75:1", pass: true }
+        - { fg: blue-700, ratio: "10.80:1", pass: true }
+    tokens_consumed: [status.approved, status.pending, status.rejected, status.cancelled]
+  DecisionButton:
+    states: [rest, hover, active, focus, disabled]
+    a11y:
+      role: button
+      keyboard: [Enter, Space]
+      contrast_pairs:
+        - { fg: white-ink, ratio: "11.27:1", pass: true }
+        - { fg: white-ink, ratio: "8.02:1", pass: true }
+    tokens_consumed: [action.primary.bg, action.primary.bg.hover, action.primary.fg, focus.ring]
+  LedgerField:
+    states: [rest, hover, focus, error, disabled]
+    a11y:
+      role: textbox
+      keyboard: [Tab, Escape]
+      contrast_pairs:
+        - { fg: ink-900, ratio: "16.61:1", pass: true }
+        - { fg: ink-500, ratio: "7.05:1", pass: true }
+    tokens_consumed: [field.border, field.bg, text.primary, focus.ring]
+  AbsenceStat:
+    states: [rest, empty]
+    a11y:
+      role: group
+      keyboard: []
+      contrast_pairs:
+        - { fg: ink-900, ratio: "14.98:1", pass: true }
+    tokens_consumed: [surface.band, text.primary, text.muted, rule.hairline]
+
+screens:
+  LeaveIndex:
+    dominant_action: decide
+    dominant_message: Register of leave requests, open ones first
+    ctas: 2
+    uses_components: [RegisterPanel, StampBadge, DecisionButton]
+    slop_scan: clean
+    hci_scan: pass
+  LeaveCreate:
+    dominant_action: submit
+    dominant_message: One request, dated, waiting for a decision
+    ctas: 2
+    uses_components: [RegisterPanel, LedgerField]
+    slop_scan: clean
+    hci_scan: pass
+  LeaveBalances:
+    dominant_action: set
+    dominant_message: Entitlement, used and left for the year
+    ctas: 2
+    uses_components: [RegisterPanel, LedgerField, AbsenceStat]
+    slop_scan: clean
+    hci_scan: pass
+  DashboardAbsence:
+    dominant_action: read
+    dominant_message: Who is out today and what the month has cost
+    ctas: 1
+    uses_components: [RegisterPanel, AbsenceStat, StampBadge]
+    slop_scan: clean
+    hci_scan: pass
+
+log:
+  last_updated: "2026-10-31"
+  recent_changes:
+    - "TASK-12 initialized the design system: first design.yaml in the project, built from a sealed rollout rather than defaults."
+    - "Direction chosen (leave register book) over Swiss form, green-bar listing and departure board; scores recorded in intent.style.rubric."
+    - "Motion personality productive with a cross-document shared-element signature; see intent.motion."
+
+intent:
+  audience:
+    identity: HR officer at a small company, mid-seniority, running absences, staffing and payroll prep out of one internal tool between interruptions
+    pains:
+      - "Who is actually in the office today?"
+      - "I already approved this, why is it still showing as waiting?"
+      - "I cannot give them more days than they have left."
+      - "I end up checking leave in a spreadsheet because the numbers do not add up."
+      - "Tell me what is left before I say yes, not after."
+    objections:
+      - "If the balance on screen is not the balance payroll uses, the tool is worse than the spreadsheet."
+      - "A second approval screen for a decision I already made wastes my morning."
+      - "Anything I cannot audit later will be questioned at month end."
+    say:
+      - "who is out today"
+      - "waiting for a decision"
+      - "days left"
+      - "entitlement"
+      - "book leave"
+      - "sign it off"
+    never_say:
+      - seamless
+      - empower
+      - unlock
+      - effortless
+      - leverage
+      - journey
+    triggers:
+      - "an employee asks whether their leave was approved"
+      - "month-end balance reconciliation with payroll"
+      - "two people book the same week and someone has to choose"
+    proof_formats:
+      - "the numbers on screen summing to the figure payroll uses"
+      - "a dated decision attached to every approved request"
+      - "row counts that survive a rebuild of the schema"
+    operator_vs_prosperer: Prosperer is the HR officer living in the screens; operator is the developer who rebuilds the schema, and that person's material stays in AGENTS.md and README
+  style:
+    direction: "A bound leave register — ruled ink lines on warm paper, engraved serif headings, and rubber-stamped decisions"
+    rubric:
+      leave-register-book: 61
+      swiss-institutional-form: 60
+      green-bar-listing: 57
+      split-flap-board: 45
+    rejected:
+      - "Swiss institutional form scored 60 — disciplined and buildable, but it says nothing about leave and drifts toward the unnamed default."
+      - "Green-bar listing scored 57 — instantly recognisable, but zebra bands across an entire app tire the eye and scale poorly past tables."
+      - "Split-flap board scored 45 — unmistakable, yet a station board has nothing to do with an HR desk and strains AA across dense tables."
+  motion:
+    personality: productive
+    signature: "Cross-document shared element — the register header (title over its ruled underline) carries from list to form to balances via the View Transitions API, so navigating feels like turning one register page; falls back to a plain cut without support, and to a short opacity swap under reduced-motion"
+  delivery:
+    gates_run: "2026-10-31"
+    results:
+      audience: pass
+      style: pass
+      motion: pass
+      delivery: pass
+    exceptions:
+      - "Launch assets (OG images, social cards): criterion is delivery-standard's launch-assets row for public surfaces; compensating control is that this tool has no public URL — it runs from a local connection string — so the deliverable that matters, page titles and real content on every state, is built."
+      - "Ops section on the leave screens: criterion is delivery-standard's ops row; compensating control is that operator material lives in README and AGENTS.md (rebuild scripts, connection string, constraint list), keeping operator vocabulary off the HR officer's path as marketing.md requires."

@@ -17,6 +17,27 @@ html {
   min-height: 100%;
 }
 
+/* Skip link: hidden until focused, then pinned to the top-left. Uses the
+   design.yaml action.primary tokens (blue-700 on white). */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 2000;
+  padding: 12px 18px;
+  background: #1b3a6b;
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+}
+
+.skip-link:focus {
+  left: 0;
+  outline: 2px solid #1b3a6b;
+  outline-offset: 2px;
+}
+
 body {
   margin-bottom: 60px;
 }

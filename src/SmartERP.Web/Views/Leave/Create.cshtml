@@ -1,0 +1,85 @@
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using SmartERP.Web.Models
+
+@model LeaveRequestCreateViewModel
+
+@{
+    ViewData["Title"] = "New leave request";
+
+    var employees = (IEnumerable<SelectListItem>)ViewData["Employees"]!;
+    var leaveTypes = (IEnumerable<SelectListItem>)ViewData["LeaveTypes"]!;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/leave.css" asp-append-version="true" />
+}
+
+<div class="register-surface">
+    <div class="register-header mb-3">
+        <h1 class="register-title">New leave request</h1>
+        <p class="register-subtitle mb-0">
+            One dated request. It sits on the register as waiting for a decision until
+            someone signs it off or turns it down.
+        </p>
+    </div>
+
+    <div class="register-panel register-form">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="field">
+                <label asp-for="EmployeeId" class="control-label"></label>
+                <select asp-for="EmployeeId" asp-items="employees" class="form-select">
+                    <option value="">Select employee</option>
+                </select>
+                <span asp-validation-for="EmployeeId" class="text-danger"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="LeaveTypeId" class="control-label"></label>
+                <select asp-for="LeaveTypeId" asp-items="leaveTypes" class="form-select">
+                    <option value="">Select leave type</option>
+                </select>
+                <span asp-validation-for="LeaveTypeId" class="text-danger"></span>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6 field">
+                    <label asp-for="StartDate" class="control-label"></label>
+                    <input asp-for="StartDate" type="date" class="form-control" />
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 field">
+                    <label asp-for="EndDate" class="control-label"></label>
+                    <input asp-for="EndDate" type="date" class="form-control" />
+                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="field">
+                <label asp-for="Reason" class="control-label"></label>
+                <textarea asp-for="Reason" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Reason" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="submit" class="btn btn-register">Submit request</button>
+                @if (Model.EmployeeId > 0)
+                {
+                    <a asp-action="Index" asp-route-employeeId="@Model.EmployeeId" class="btn btn-stamp">Back to register</a>
+                }
+                else
+                {
+                    <a asp-action="Index" class="btn btn-stamp">Back to register</a>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

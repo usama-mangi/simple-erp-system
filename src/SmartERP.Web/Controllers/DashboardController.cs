@@ -12,7 +12,7 @@ public class DashboardController(
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        // The four reads are independent; one failure only costs the section
+        // The five reads are independent; one failure only costs the section
         // itself, so each gets its own try to build a page with everything
         // that did load. If the trend fails the KPI tiles cannot compute
         // (they are derived from it), which is when the page drops to the
@@ -49,6 +49,15 @@ public class DashboardController(
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to load watchlists for dashboard");
+            }
+
+            try
+            {
+                model.Absence = await _statisticsRepository.GetAbsenceStatsAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load absence stats for dashboard");
             }
 
             return View(model);

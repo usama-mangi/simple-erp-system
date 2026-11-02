@@ -1,0 +1,108 @@
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using SmartERP.Web.Models
+
+@model LeaveBalancesViewModel
+
+@{
+    ViewData["Title"] = $"Leave balances - {Model.Employee.FirstName} {Model.Employee.LastName}";
+
+    var hasAnyBalance = Model.Balances.Any();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/leave.css" asp-append-version="true" />
+}
+
+<div class="register-surface">
+    <div class="register-header d-flex justify-content-between align-items-end flex-wrap gap-3 mb-3">
+        <div>
+            <h1 class="register-title">Leave balances</h1>
+            <p class="register-subtitle mb-1">
+                @Model.Employee.FirstName @Model.Employee.LastName, year @Model.Year
+            </p>
+            <p class="register-meta mb-0">Read @DateTime.Today.ToString("yyyy-MM-dd")</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-action="Balances" asp-route-employeeId="@Model.Employee.Id" asp-route-year="@(Model.Year - 1)"
+               class="btn btn-stamp">&larr; @(Model.Year - 1)</a>
+            <a asp-action="Balances" asp-route-employeeId="@Model.Employee.Id" asp-route-year="@(Model.Year + 1)"
+               class="btn btn-stamp">@(Model.Year + 1) &rarr;</a>
+            <a asp-action="Index" asp-route-employeeId="@Model.Employee.Id" class="btn btn-stamp">Register</a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert decision-seal mb-3" role="status">
+            <span class="seal-word">Recorded</span>
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="register-panel">
+        <h2 class="h5 mb-3">Entitlement for @Model.Year</h2>
+
+        @if (!hasAnyBalance)
+        {
+            <p class="register-empty">No entitlement has been set for this year yet.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="register-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Leave type</th>
+                            <th scope="col" class="text-end">Entitlement</th>
+                            <th scope="col" class="text-end">Used</th>
+                            <th scope="col" class="text-end">Left</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var type in Model.LeaveTypes)
+                        {
+                            var balance = Model.Balances.FirstOrDefault(b => b.LeaveTypeId == type.Id);
+                            <tr>
+                                <td class="register-employee">@type.Title</td>
+                                <td class="text-end register-days">
+                                    @(balance is null ? "Not set" : balance.EntitlementDays.ToString("0.#"))
+                                </td>
+                                <td class="text-end register-days">
+                                    @(balance is null ? "0" : balance.UsedDays.ToString("0.#"))
+                                </td>
+                                <td class="text-end register-days">
+                                    @if (balance is null)
+                                    {
+                                        <text>Not set</text>
+                                    }
+                                    else if (balance.RemainingDays > 0)
+                                    {
+                                        @balance.RemainingDays.ToString("0.#")
+                                    }
+                                    else
+                                    {
+                                        <span class="balance-left--empty">@balance.RemainingDays.ToString("0.#")</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>    <partial name="_BalanceUpsert" model="Model.Upsert" />
+</div>
+
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }

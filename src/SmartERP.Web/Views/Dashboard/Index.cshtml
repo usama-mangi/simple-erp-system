@@ -312,6 +312,70 @@
     </div>
 </div>
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/leave.css" asp-append-version="true" />
+}
+
+<!-- Absence: who is out today, and what the month has cost so far -->
+<div class="row g-3 mb-3">
+    <div class="col-lg-4">
+        <div class="register-panel h-100">
+            <h6 class="mb-3">Absence this month</h6>
+            <div class="absence-strip">
+                <div class="absence-stat">
+                    <span class="value">@Model.Absence.DaysLostThisMonth</span>
+                    <span class="label">Days lost</span>
+                </div>
+                <div class="absence-stat">
+                    <span class="value">@Model.Absence.PendingRequests</span>
+                    <span class="label">Waiting</span>
+                </div>
+                <div class="absence-stat">
+                    <span class="value">@Model.Absence.OnLeaveToday</span>
+                    <span class="label">Out today</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="register-panel h-100">
+            <h6 class="mb-3">On leave today</h6>
+            @if (Model.Lists.OnLeaveToday.Count == 0)
+            {
+                <p class="register-empty">Nobody is out today.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="register-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Employee</th>
+                                <th scope="col">Position</th>
+                                <th scope="col">Department</th>
+                                <th scope="col">Since</th>
+                                <th scope="col" class="text-end">Day</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var entry in Model.Lists.OnLeaveToday)
+                            {
+                                <tr>
+                                    <td class="register-employee">@entry.EmployeeName</td>
+                                    <td>@entry.PositionName</td>
+                                    <td>@entry.DepartmentName</td>
+                                    <td class="register-dates">@entry.StartDate.ToString("yyyy-MM-dd")</td>
+                                    <td class="text-end register-days">@entry.DaysInStatus</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script id="dashboard-data" type="application/json">@Html.Raw(chartPayload)</script>
     <script src="~/lib/chart/chart.umd.min.js"></script>

@@ -1,0 +1,197 @@
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using SmartERP.Web.Models
+
+@model LeaveIndexViewModel
+
+@{
+    ViewData["Title"] = Model.EmployeeId is null
+        ? "Leave register"
+        : $"Leave register - {Model.EmployeeName}";
+
+    string emptyMessage;
+    if (!string.IsNullOrEmpty(Model.EmployeeName))
+    {
+        emptyMessage = $"{Model.EmployeeName} has no requests on this register.";
+    }
+    else if (Model.StatusId is not null)
+    {
+        emptyMessage = "Nothing on the register matches this filter.";
+    }
+    else
+    {
+        emptyMessage = "No leave requests on the register yet.";
+    }
+
+    string StampFor(double statusId)
+    {
+        if (statusId == Model.Statuses.Approved) return "stamp--approved";
+        if (statusId == Model.Statuses.Pending) return "stamp--pending";
+        if (statusId == Model.Statuses.Rejected) return "stamp--rejected";
+        return "stamp--cancelled";
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/leave.css" asp-append-version="true" />
+}
+
+<div class="register-surface">
+    <div class="register-header d-flex justify-content-between align-items-end flex-wrap gap-3 mb-3">
+        <div>
+            <h1 class="register-title">Leave register</h1>
+            <p class="register-subtitle mb-1">
+                @if (!string.IsNullOrEmpty(Model.EmployeeName))
+                {
+                    @Model.EmployeeName
+                }
+                else
+                {
+                    <text>Open requests are listed first, then everything else by start date.</text>
+                }
+            </p>
+            <p class="register-meta mb-0">Read @DateTime.Today.ToString("yyyy-MM-dd")</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            @if (Model.EmployeeId is { } scopedEmployeeId)
+            {
+                <a asp-action="Balances" asp-route-employeeId="@scopedEmployeeId" class="btn btn-stamp">Balances</a>
+                <a asp-action="Create" asp-route-employeeId="@scopedEmployeeId" class="btn btn-register">New request</a>
+            }
+            else
+            {
+                <a asp-action="Create" class="btn btn-register">New request</a>
+            }
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert decision-seal mb-3" role="status">
+            <span class="seal-word">Recorded</span>
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <nav class="status-tabs mb-3" aria-label="Filter the register by status">
+        @foreach (var option in Model.StatusOptions ?? Enumerable.Empty<SelectListItem>())
+        {
+            <a class="status-tab @(option.Selected ? "is-active" : null)"
+               asp-action="Index"
+               asp-route-employeeId="@Model.EmployeeId"
+               asp-route-statusId="@(string.IsNullOrEmpty(option.Value) ? null : option.Value)"
+               aria-current="@(option.Selected ? "page" : null)">@option.Text</a>
+        }
+    </nav>
+
+    @if (Model.EmployeeId is null && Model.EmployeeOptions is not null)
+    {
+        <form asp-action="Index" method="get" class="register-filter mb-3">
+            <label for="employee-filter">Employee</label>
+            <select id="employee-filter" name="employeeId" asp-items="Model.EmployeeOptions" class="form-select">
+                <option value="">All employees</option>
+            </select>
+            @if (Model.StatusId is not null)
+            {
+                <input type="hidden" name="statusId" value="@Model.StatusId.Value" />
+            }
+            <button type="submit" class="btn btn-stamp">Filter</button>
+        </form>
+    }
+
+    <div class="register-panel">
+        @if (!Model.Requests.Any())
+        {
+            <p class="register-empty">@emptyMessage</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="register-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Employee</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Dates</th>
+                            <th scope="col" class="text-end">Days</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var request in Model.Requests)
+                        {
+                            <tr>
+                                <td class="register-employee">@request.EmployeeName</td>
+                                <td>@request.LeaveTypeTitle</td>
+                                <td class="register-dates">
+                                    @request.StartDate.ToString("yyyy-MM-dd")
+                                    &rarr;
+                                    @request.EndDate.ToString("yyyy-MM-dd")
+                                </td>
+                                <td class="text-end register-days">@request.Days</td>
+                                <td class="register-reason">
+                                    @if (!string.IsNullOrWhiteSpace(request.Reason))
+                                    {
+                                        @request.Reason
+                                    }
+                                    else
+                                    {
+                                        <text>None</text>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="stamp @StampFor(request.StatusId)">@request.StatusTitle</span>
+                                </td>
+                                <td>
+                                    <div class="register-actions">
+                                        @if (request.StatusId == Model.Statuses.Pending)
+                                        {
+                                            <form asp-action="Approve" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@request.Id" />
+                                                <input type="hidden" name="employeeId" value="@Model.EmployeeId" />
+                                                <input type="hidden" name="statusId" value="@Model.StatusId" />
+                                                <button type="submit" class="btn btn-register">Approve</button>
+                                            </form>
+
+                                            <form asp-action="Reject" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@request.Id" />
+                                                <input type="hidden" name="employeeId" value="@Model.EmployeeId" />
+                                                <input type="hidden" name="statusId" value="@Model.StatusId" />
+                                                <button type="submit" class="btn btn-stamp btn-stamp--reject">Reject</button>
+                                            </form>
+                                        }
+
+                                        @if (request.StatusId == Model.Statuses.Pending
+                                             || request.StatusId == Model.Statuses.Approved)
+                                        {
+                                            <form asp-action="Cancel" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@request.Id" />
+                                                <input type="hidden" name="employeeId" value="@Model.EmployeeId" />
+                                                <input type="hidden" name="statusId" value="@Model.StatusId" />
+                                                <button type="submit" class="btn btn-stamp btn-stamp--cancel">Cancel</button>
+                                            </form>
+                                        }
+
+                                        <a asp-action="Balances"
+                                           asp-route-employeeId="@request.EmployeeId"
+                                           asp-route-year="@request.StartDate.Year"
+                                           class="btn btn-stamp">Balances</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

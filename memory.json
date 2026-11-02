@@ -55,6 +55,21 @@
       "text": "positions is master data (unique title) referenced by employment_details.position_id; free-text job_title dropped entirely (user decision). Rebuild scripts 01_schema/04_seed carry the canonical shape; 06_positions.sql is the guarded migration for populated installs, written with every statement /-terminated and dynamic SQL inside guards because PL/SQL compilers resolve referenced columns at compile time. employment ids in live DB range in the 20s-30s: never guess identity ids in HTTP tests, read dropdown option values from the page.",
       "cat": "schema-design",
       "updated": "2026-10-31T07:11:17.813014+00:00"
+    },
+    "leave-domain-rules": {
+      "text": "Leave domain (db/01_schema.sql, 07_leave.sql): uq_lr_open_request is a function-based unique index binding leave_statuses.id = 1 to Pending, so Pending must be the first row inserted into leave_statuses and the seed raises -20001 if it is not id 1. leave_requests allows end_date = start_date (single-day). leave_balances.used_days moves only in two places: ApproveAsync adds inclusive calendar days (same transaction as the status flip; a 0-row balance update rolls back with InsufficientLeaveBalanceException), CancelAsync subtracts them for an Approved request only. Controllers resolve Pending/Approved/Rejected/Cancelled ids from ILookupRepository by title, never literals. chk_bal_used (0 <= used <= entitlement) is the safety net; the app pre-checks entitlement so the user sees days remaining.",
+      "cat": "architecture",
+      "updated": "2026-11-02T05:17:14.650886+00:00"
+    },
+    "employee-purge-includes-leave": {
+      "text": "DeleteWithDetailsAsync in EmployeeRepository purges employment_details, department_managers, leave_requests then leave_balances inside one transaction before deleting the employee; without the leave deletes FK_LR_EMPLOYEE/FK_BAL_EMPLOYEE fail the destructive path with ORA-02292. HasDependenciesAsync still counts only employment_details + department_managers on purpose: an employee with only leave history soft-deletes (is_deleted = 1) and keeps that history.",
+      "cat": "codebase",
+      "updated": "2026-11-02T05:17:14.749948+00:00"
+    },
+    "leave-ui-scope": {
+      "text": "TASK-12 UI: leave.css (register-book direction from design.yaml intent.style) is loaded per view through the Styles section, not from _Layout, so only Leave screens and the Dashboard absence strip pick up its tokens. design.yaml is the project's first design system file.",
+      "cat": "pattern",
+      "updated": "2026-11-02T05:17:14.844433+00:00"
     }
   }
 }

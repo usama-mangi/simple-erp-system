@@ -35,6 +35,18 @@ public class LookupRepository(
           FROM positions
       ORDER BY title";
 
+    private const string LeaveTypeQuery = @"
+        SELECT id, title
+          FROM leave_types
+      ORDER BY title";
+
+    // Ordered by id, not title: Pending seeds as id 1 and callers resolve it
+    // by title, so keeping the seed order visible makes the binding obvious.
+    private const string LeaveStatusQuery = @"
+        SELECT id, title
+          FROM leave_statuses
+      ORDER BY id";
+
     public async Task<IEnumerable<LookupItem>> GetGendersAsync()
         => await ReadAsync(GenderQuery);
 
@@ -46,6 +58,12 @@ public class LookupRepository(
 
     public async Task<IEnumerable<LookupItem>> GetPositionsAsync()
         => await ReadAsync(PositionsQuery);
+
+    public async Task<IEnumerable<LookupItem>> GetLeaveTypesAsync()
+        => await ReadAsync(LeaveTypeQuery);
+
+    public async Task<IEnumerable<LookupItem>> GetLeaveStatusesAsync()
+        => await ReadAsync(LeaveStatusQuery);
 
     private async Task<IEnumerable<LookupItem>> ReadAsync(string query)
     {

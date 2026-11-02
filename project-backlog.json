@@ -7,14 +7,14 @@
     {
       "id": "TASK-01",
       "title": "Fix EmployeeController and EmployeeRepository",
-      "status": "testing",
+      "status": "closed",
       "dependencies": [],
       "notes": "Repository bugs fixed (GetByIdAsync join/aliases/null end_date, UpdateAsync detail statement, DeleteAsync nonexistent column, CreateWithDetailsAsync RETURNING id) and EmployeeController completed (create with conditional details routing, update, delete). Awaiting user verification against live Oracle. double->decimal refactor intentionally deferred."
     },
     {
       "id": "TASK-02",
       "title": "Build employment_details feature: lookup repos, repository, controller, views",
-      "status": "testing",
+      "status": "closed",
       "dependencies": [
         "[\"TASK-01\"]"
       ],
@@ -23,7 +23,7 @@
     {
       "id": "TASK-03",
       "title": "Build department_managers feature",
-      "status": "testing",
+      "status": "closed",
       "dependencies": [
         "[\"TASK-01\"]"
       ],
@@ -32,7 +32,7 @@
     {
       "id": "TASK-04",
       "title": "Sync docs and db scripts with actual codebase",
-      "status": "testing",
+      "status": "closed",
       "dependencies": [
         "[\"TASK-01\"]"
       ],
@@ -57,7 +57,7 @@
     {
       "id": "TASK-07",
       "title": "Employee soft delete with double-gated destructive dependencies purge",
-      "status": "testing",
+      "status": "closed",
       "dependencies": [
         "[\"TASK-01\"]"
       ],
@@ -66,7 +66,7 @@
     {
       "id": "TASK-08",
       "title": "Replace-current assignment flow with confirmation; sanitize all user-facing errors",
-      "status": "testing",
+      "status": "closed",
       "dependencies": [
         "[\"TASK-02\"]"
       ],
@@ -75,7 +75,7 @@
     {
       "id": "TASK-09",
       "title": "Adhere to Step 8 spec: LOWER(email) index, sp_assign_manager, spec-named repo contracts, async tx pattern, composed pages",
-      "status": "testing",
+      "status": "closed",
       "dependencies": [
         "[\"TASK-02\"",
         "\"TASK-03\"]"
@@ -99,9 +99,9 @@
     {
       "id": "TASK-12",
       "title": "Option A.2: leave_types, leave_requests, leave_balances",
-      "status": "to-do",
+      "status": "closed",
       "dependencies": [],
-      "notes": "Leave domain: leave_types lookup, leave_requests (employee, type, start, end, status), one open request per employee via function-based unique index like uq_det_current_job, balances per employee/year. Dashboard: dated On Leave entries and absence stats."
+      "notes": "Done. DB: leave_types/leave_statuses/leave_requests/leave_balances + uq_lr_open_request (Pending id 1 guard); 00/01/03/04 updated, db/07_leave.sql re-runnable migration (ran live twice, second run no-op). Data: LeaveRequest/LeaveBalance/AbsenceStats/LeaveStatusIds, ILeaveRepository (+typed exceptions: DuplicateOpenLeaveRequest, InvalidLeaveDates, InsufficientLeaveBalance), leave lookups in ILookupRepository, statistics OnLeaveToday watchlist + GetAbsenceStats. Web: LeaveController (Index/Create/Approve/Reject/Cancel/Balances/UpsertBalance), leave views + scoped leave.css, nav + Employee Details links, dashboard On-leave-today card and absence strip. Gap found and fixed beyond the plan: DeleteWithDetailsAsync now purges leave_requests/leave_balances before employees (FK_LR_EMPLOYEE/FK_BAL_EMPLOYEE would otherwise block the destructive delete); Delete view help text updated. Live smoke on populated db: overlap and duplicate-open inline errors, approve consumed 2 days then cancel refunded them, over-entitlement gate named remaining days, reject + terminal-state guard, entitlement-below-used gate, purge probe employee with job+leave rows deleted cleanly. DB restored to pre-smoke state (4 requests incl. prior residue, 3 balances). Build green; only pre-existing NU1902/NU1903 warnings."
     },
     {
       "id": "TASK-13",
@@ -133,62 +133,63 @@
     }
   ],
   "log": {
-    "last_updated": "2026-10-31T07:11:17.474002+00:00",
+    "last_updated": "2026-11-02T05:17:00.174703+00:00",
     "recent_changes": [
       {
         "action": "update",
-        "task": "TASK-11",
+        "task": "TASK-12",
         "old_status": "active",
         "new_status": "closed",
-        "at": "2026-10-31T07:11:17.473925+00:00"
+        "at": "2026-11-02T05:17:00.174686+00:00"
       },
       {
         "action": "update",
-        "task": "TASK-11",
-        "old_status": "to-do",
-        "new_status": "active",
-        "at": "2026-10-31T06:48:37.803576+00:00"
+        "task": "TASK-09",
+        "old_status": "testing",
+        "new_status": "closed",
+        "at": "2026-10-31T10:48:00.359498+00:00"
       },
       {
         "action": "update",
-        "task": "TASK-16",
-        "old_status": "to-do",
-        "new_status": "to-do",
-        "at": "2026-10-31T06:48:32.346401+00:00"
+        "task": "TASK-08",
+        "old_status": "testing",
+        "new_status": "closed",
+        "at": "2026-10-31T10:47:46.997756+00:00"
       },
       {
         "action": "update",
-        "task": "TASK-15",
-        "old_status": "to-do",
-        "new_status": "to-do",
-        "at": "2026-10-31T06:48:32.192032+00:00"
+        "task": "TASK-07",
+        "old_status": "testing",
+        "new_status": "closed",
+        "at": "2026-10-31T10:47:27.501455+00:00"
       },
       {
         "action": "update",
-        "task": "TASK-14",
-        "old_status": "to-do",
-        "new_status": "to-do",
-        "at": "2026-10-31T06:48:32.060462+00:00"
+        "task": "TASK-04",
+        "old_status": "testing",
+        "new_status": "closed",
+        "at": "2026-10-31T10:45:09.356195+00:00"
       },
       {
         "action": "update",
-        "task": "TASK-13",
-        "old_status": "to-do",
-        "new_status": "to-do",
-        "at": "2026-10-31T06:48:31.922022+00:00"
+        "task": "TASK-03",
+        "old_status": "testing",
+        "new_status": "closed",
+        "at": "2026-10-31T10:45:05.935343+00:00"
       },
       {
         "action": "update",
-        "task": "TASK-12",
-        "old_status": "to-do",
-        "new_status": "to-do",
-        "at": "2026-10-31T06:48:31.776689+00:00"
+        "task": "TASK-02",
+        "old_status": "testing",
+        "new_status": "closed",
+        "at": "2026-10-31T10:45:01.165884+00:00"
       },
       {
-        "action": "add",
-        "task": "TASK-16",
-        "status": "to-do",
-        "at": "2026-10-31T06:48:20.758626+00:00"
+        "action": "update",
+        "task": "TASK-01",
+        "old_status": "testing",
+        "new_status": "closed",
+        "at": "2026-10-31T10:44:55.203229+00:00"
       }
     ]
   }

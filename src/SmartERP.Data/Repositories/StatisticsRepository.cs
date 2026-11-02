@@ -192,6 +192,67 @@ public class StatisticsRepository(
         ORDER BY
             d.name";
 
+    // Approved requests whose range covers today. The employment_details join
+    // is a LEFT one on purpose: someone on leave without an open assignment
+    // still belongs on the list, just without a position to show.
+    private const string OnLeaveTodayQuery = @"
+        SELECT
+            e.first_name || ' ' || e.last_name AS employee_name,
+            NVL(p.title, 'No current position') AS position_name,
+            NVL(d.name, 'No department')        AS department_name,
+            NVL(ed.salary, 0)                   AS salary,
+            lr.start_date                       AS start_date,
+            TRUNC(SYSDATE) - lr.start_date + 1  AS days_in_status
+        FROM
+            leave_requests lr
+        JOIN
+            employees e ON e.id = lr.employee_id AND e.is_deleted = 0
+        JOIN
+            leave_statuses ls ON ls.id = lr.status_id
+        LEFT JOIN
+            employment_details ed ON ed.employee_id = e.id AND ed.end_date IS NULL
+        LEFT JOIN
+            positions p ON p.id = ed.position_id
+        LEFT JOIN
+            departments d ON d.id = ed.department_id
+        WHERE
+            ls.title = 'Approved'
+            AND lr.start_date <= TRUNC(SYSDATE)
+            AND lr.end_date >= TRUNC(SYSDATE)
+        ORDER BY
+            lr.start_date, e.last_name";
+
+    // One aggregate row: month overlap for approved leave, the pending queue,
+    // and who is out today. The overlap is the request's days intersected with
+    // the current calendar month, floored at zero for ranges that miss it.
+    private const string AbsenceStatsQuery = @"
+        SELECT
+            NVL(SUM(
+                CASE
+                    WHEN ls.title = 'Approved' THEN
+                        GREATEST(
+                            0,
+                            LEAST(lr.end_date, LAST_DAY(TRUNC(SYSDATE)))
+                              - GREATEST(lr.start_date, TRUNC(SYSDATE, 'MM'))
+                              + 1
+                        )
+                    ELSE 0
+                END
+            ), 0) AS days_lost,
+            COUNT(CASE WHEN ls.title = 'Pending' THEN 1 END) AS pending,
+            COUNT(CASE
+                WHEN ls.title = 'Approved'
+                 AND lr.start_date <= TRUNC(SYSDATE)
+                 AND lr.end_date >= TRUNC(SYSDATE)
+                THEN 1
+            END) AS on_leave_today
+        FROM
+            leave_requests lr
+        JOIN
+            employees e ON e.id = lr.employee_id AND e.is_deleted = 0
+        JOIN
+            leave_statuses ls ON ls.id = lr.status_id";
+
     public async Task<WorkforceTrend> GetWorkforceTrendAsync()
     {
         try
@@ -344,6 +405,7 @@ public class StatisticsRepository(
             var probation = new List<WatchlistEntry>();
             var pendingExits = new List<WatchlistEntry>();
             var unmanaged = new List<UnmanagedDepartment>();
+            var onLeaveToday = new List<WatchlistEntry>();
 
             using (var connection = await _dbConnection.CreateOpenConnectionAsync())
             {
@@ -388,9 +450,52 @@ public class StatisticsRepository(
                         ));
                     }
                 }
+                using (var command = new OracleCommand(OnLeaveTodayQuery, (OracleConnection)connection))
+                {
+                    command.BindByName = true;
+
+                    using var reader = await command.ExecuteReaderAsync();
+                    while (await reader.ReadAsync())
+                    {
+                        onLeaveToday.Add(MapWatchlistEntry(reader));
+                    }
+                }
             }
 
-            return new Watchlists(probation, pendingExits, unmanaged);
+            return new Watchlists(probation, pendingExits, unmanaged, onLeaveToday);
+        }
+        catch (OracleException ex)
+        {
+            _oracleExceptionHandler
+                .HandlePermissionExceptions(ex)
+                .HandleReadExceptions(ex);
+
+            throw new DatabaseAccessException(ex);
+        }
+    }
+
+    public async Task<AbsenceStats> GetAbsenceStatsAsync()
+    {
+        try
+        {
+            using var connection = await _dbConnection.CreateOpenConnectionAsync();
+            using var command = new OracleCommand(AbsenceStatsQuery, (OracleConnection)connection)
+            {
+                BindByName = true
+            };
+
+            using var reader = await command.ExecuteReaderAsync();
+
+            if (await reader.ReadAsync())
+            {
+                return new AbsenceStats(
+                    Convert.ToInt32(reader.GetDouble(reader.GetOrdinal("days_lost"))),
+                    Convert.ToInt32(reader.GetDouble(reader.GetOrdinal("pending"))),
+                    Convert.ToInt32(reader.GetDouble(reader.GetOrdinal("on_leave_today")))
+                );
+            }
+
+            return new AbsenceStats(0, 0, 0);
         }
         catch (OracleException ex)
         {

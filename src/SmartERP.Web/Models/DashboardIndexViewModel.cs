@@ -17,7 +17,10 @@ public class DashboardIndexViewModel
 
     public IEnumerable<DepartmentPayroll> Payrolls { get; set; } = [];
 
-    public Watchlists Lists { get; set; } = new([], [], []);
+    public Watchlists Lists { get; set; } = new([], [], [], []);
+
+    // Absence strip: days lost this month, the pending queue, who is out now.
+    public AbsenceStats Absence { get; set; } = new(0, 0, 0);
 
     // The month-end window of the trend series, so the view can caption the
     // charts ("last 24 months") without guessing.

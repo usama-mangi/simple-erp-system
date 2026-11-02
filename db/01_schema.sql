@@ -105,6 +105,64 @@ create table if not exists department_managers (
        or end_date > start_date ) -- Unique check constraint name
 );
 
+create table if not exists leave_types (
+   id         number generated always as identity,
+   title      varchar2(30) not null,
+   created_at timestamp default systimestamp not null,
+   updated_at timestamp,
+   constraint pk_leave_type_id primary key ( id ),
+   constraint uq_leave_types_title unique ( title )
+);
+
+create table if not exists leave_statuses (
+   id         number generated always as identity,
+   title      varchar2(20) not null,
+   created_at timestamp default systimestamp not null,
+   updated_at timestamp,
+   constraint pk_leave_status_id primary key ( id ),
+   constraint uq_leave_statuses_title unique ( title )
+);
+
+create table if not exists leave_requests (
+   id            number generated always as identity,
+   employee_id   number not null,
+   leave_type_id number not null,
+   status_id     number not null,
+   start_date    date not null,
+   end_date      date not null,
+   reason        varchar2(200),
+   decided_at    timestamp,
+   created_at    timestamp default systimestamp not null,
+   updated_at    timestamp,
+   constraint pk_leave_request_id primary key ( id ),
+   constraint fk_lr_employee foreign key ( employee_id )
+      references employees ( id ),
+   constraint fk_lr_leave_type foreign key ( leave_type_id )
+      references leave_types ( id ),
+   constraint fk_lr_status foreign key ( status_id )
+      references leave_statuses ( id ),
+   constraint chk_lr_dates check ( end_date >= start_date ) -- a single-day leave is legal
+);
+
+create table if not exists leave_balances (
+   id               number generated always as identity,
+   employee_id      number not null,
+   leave_type_id    number not null,
+   year             number(4) not null,
+   entitlement_days number(5,1) not null,
+   used_days        number(5,1) default 0 not null,
+   created_at       timestamp default systimestamp not null,
+   updated_at       timestamp,
+   constraint pk_leave_balance_id primary key ( id ),
+   constraint fk_bal_employee foreign key ( employee_id )
+      references employees ( id ),
+   constraint fk_bal_leave_type foreign key ( leave_type_id )
+      references leave_types ( id ),
+   constraint uq_bal_employee_type_year unique ( employee_id, leave_type_id, year ),
+   constraint chk_bal_year check ( year between 2000 and 2100 ),
+   constraint chk_bal_used check ( used_days >= 0 and used_days <= entitlement_days )
+);
+
 create unique index uq_det_current_job on
    employment_details (
       case
@@ -124,6 +182,22 @@ create unique index uq_dept_current_manager on
             end_date
          is null then
                manager_id
+         else
+            null
+      end
+   );
+
+-- One open (Pending) leave request per employee, the leave-domain twin of
+-- uq_det_current_job. The literal 1 is leave_statuses.Pending's id: 04_seed
+-- inserts Pending first and guards that it lands on 1, because this index
+-- expression cannot join to the statuses table.
+create unique index uq_lr_open_request on
+   leave_requests (
+      case
+         when
+            status_id = 1
+         then
+               employee_id
          else
             null
       end

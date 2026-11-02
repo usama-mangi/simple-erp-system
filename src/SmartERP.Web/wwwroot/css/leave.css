@@ -1,0 +1,505 @@
+/* Leave register surface for TASK-12.
+   Direction: a bound leave register, ruled ink lines on warm paper with
+   rubber-stamped decisions (design.yaml intent.style). Loaded only by the
+   leave screens and the dashboard absence strip, so the rest of the app is
+   untouched. Tokens first, then treatment, then motion. */
+
+/* Cross-document shared elements: the register header carries between the
+   leave screens, and the active status tab morphs so the filter rule slides
+   rather than jumping. Browsers without support simply navigate. */
+@view-transition {
+  navigation: auto;
+}
+
+:root {
+  --ink-900: #141b24;
+  --ink-700: #2b3644;
+  --ink-500: #4a5768;
+  --paper-0: #fcfaf5;
+  --paper-1: #f3eee3;
+  --paper-2: #ede6d8;
+  --rule-200: #d8d0bf;
+  --blue-700: #1b3a6b;
+  --blue-600: #24508f;
+  --ochre-700: #8a5a00;
+  --oxblood-700: #8c2f2f;
+  --slate-500: #5a6472;
+  --moss-700: #2f6b3c;
+
+  --heading-family: "Century Schoolbook", "Bookman Old Style", Georgia, serif;
+  --body-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono-family: "Cascadia Mono", Consolas, "SF Mono", ui-monospace, monospace;
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-emph: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------------------------------------------------------- header */
+
+.register-header {
+  view-transition-name: register-header;
+}
+
+.register-title {
+  font-family: var(--heading-family);
+  font-size: 34px;
+  line-height: 1.15;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 3px double var(--ink-700);
+}
+
+.register-subtitle {
+  font-family: var(--body-family);
+  font-size: 14px;
+  color: var(--ink-500);
+}
+
+.register-meta {
+  font-family: var(--mono-family);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+/* ---------------------------------------------------------- panel */
+
+.register-panel {
+  background: var(--paper-0);
+  border: 1px solid var(--rule-200);
+  border-radius: 4px;
+  padding: 20px;
+  box-shadow: 0 1px 0 var(--rule-200);
+}
+
+.register-panel + .register-panel {
+  margin-top: 24px;
+}
+
+.register-empty {
+  margin: 0;
+  padding: 24px 4px;
+  font-family: var(--heading-family);
+  font-size: 20px;
+  color: var(--ink-700);
+}
+
+/* ---------------------------------------------------------- status tabs */
+
+.status-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid var(--rule-200);
+}
+
+.status-tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+}
+
+.status-tab:hover {
+  color: var(--ink-900);
+  background: var(--paper-1);
+}
+
+.status-tab.is-active {
+  color: var(--blue-700);
+  border-bottom-color: var(--blue-700);
+  view-transition-name: active-tab;
+}
+
+/* ---------------------------------------------------------- register table */
+
+.register-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.register-table th {
+  text-align: left;
+  font-family: var(--body-family);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ink-700);
+  white-space: nowrap;
+}
+
+.register-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--rule-200);
+  vertical-align: middle;
+  color: var(--ink-900);
+  font-size: 15px;
+}
+
+.register-table tbody tr:nth-child(even) {
+  background: var(--paper-1);
+}
+
+.register-table tbody tr:hover {
+  background: var(--paper-2);
+}
+
+.register-table td.text-end,
+.register-table th.text-end {
+  text-align: right;
+}
+
+.register-employee {
+  font-weight: 600;
+}
+
+.register-dates {
+  font-family: var(--mono-family);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.register-days {
+  font-family: var(--mono-family);
+  font-weight: 700;
+}
+
+.register-reason {
+  font-size: 13px;
+  color: var(--ink-500);
+}
+
+.register-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ---------------------------------------------------------- stamps */
+
+.stamp {
+  display: inline-block;
+  padding: 3px 10px;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+  font-family: var(--body-family);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.stamp--approved { color: var(--blue-700); }
+.stamp--pending { color: var(--ochre-700); }
+.stamp--rejected { color: var(--oxblood-700); }
+.stamp--cancelled { color: var(--slate-500); }
+
+/* ---------------------------------------------------------- buttons */
+
+.btn-register,
+.btn-register:hover,
+.btn-register:focus {
+  min-height: 44px;
+  padding: 6px 16px;
+  border-radius: 4px;
+  background: var(--blue-700);
+  border: 1px solid var(--blue-700);
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn-register:hover,
+.btn-register:focus {
+  background: var(--blue-600);
+  border-color: var(--blue-600);
+  color: #fff;
+}
+
+.btn-stamp {
+  min-height: 44px;
+  padding: 6px 14px;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid var(--ink-500);
+  color: var(--ink-700);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-stamp:hover {
+  background: var(--paper-1);
+  color: var(--ink-900);
+  border-color: var(--ink-700);
+}
+
+.btn-stamp--reject { color: var(--oxblood-700); border-color: var(--oxblood-700); }
+.btn-stamp--reject:hover { color: var(--oxblood-700); background: var(--paper-1); }
+.btn-stamp--cancel { color: var(--slate-500); border-color: var(--slate-500); }
+.btn-stamp--cancel:hover { color: var(--ink-900); }
+
+/* ---------------------------------------------------------- fields */
+
+.register-form {
+  max-width: 640px;
+}
+
+.field {
+  margin-bottom: 20px;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--ink-700);
+}
+
+.field .form-control,
+.field .form-select {
+  min-height: 44px;
+  border: 1px solid var(--ink-500);
+  border-radius: 4px;
+  background: var(--paper-0);
+  color: var(--ink-900);
+  box-shadow: none;
+}
+
+.field .form-control:focus,
+.field .form-select:focus {
+  border-color: var(--blue-700);
+  outline: 2px solid var(--blue-700);
+  outline-offset: 1px;
+  box-shadow: none;
+}
+
+.field .text-danger,
+.field .field-validation-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--oxblood-700);
+}
+
+.register-form .btn-register {
+  min-width: 160px;
+}
+
+/* ---------------------------------------------------------- balances */
+
+.balance-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  font-family: var(--mono-family);
+  font-size: 13px;
+  color: var(--ink-700);
+}
+
+.balance-line strong {
+  color: var(--ink-900);
+}
+
+.balance-left--empty {
+  color: var(--oxblood-700);
+  font-weight: 700;
+}
+
+/* ---------------------------------------------------------- feedback */
+
+.alert.decision-seal {
+  position: relative;
+  background: var(--paper-0);
+  border: 2px solid var(--moss-700);
+  border-radius: 4px;
+  color: var(--ink-900);
+  transform: rotate(-1.2deg);
+  transform-origin: left center;
+  max-width: 640px;
+}
+
+.alert.decision-seal .seal-word {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 2px 8px;
+  border: 2px solid var(--moss-700);
+  border-radius: 4px;
+  color: var(--moss-700);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.register-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.register-filter label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-700);
+  margin: 0;
+}
+
+.register-filter .form-select {
+  min-height: 44px;
+  border: 1px solid var(--ink-500);
+  border-radius: 4px;
+  background: var(--paper-0);
+  color: var(--ink-900);
+}
+
+/* ---------------------------------------------------------- dashboard strip */
+
+.absence-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 32px;
+}
+
+.absence-stat {
+  min-width: 96px;
+}
+
+.absence-stat .value {
+  display: block;
+  font-family: var(--heading-family);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink-900);
+  font-variant-numeric: tabular-nums;
+}
+
+.absence-stat .label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+/* ---------------------------------------------------------- motion
+   Personality: productive. Entrances ease out, exits ease in, travel stays
+   small, and siblings never share a delay. The seal press is causal: it
+   lands because a decision was just recorded. */
+
+@keyframes register-row-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes register-panel-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes register-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes seal-press {
+  0% { opacity: 0; transform: rotate(-1.2deg) scale(1.3); }
+  45% { opacity: 1; transform: rotate(-1.2deg) scale(0.97); }
+  72% { transform: rotate(-1.2deg) scale(1.02); }
+  100% { opacity: 1; transform: rotate(-1.2deg) scale(1); }
+}
+
+.register-table tbody tr {
+  animation: register-row-in 200ms var(--ease) both;
+}
+
+/* Rows past the twelfth arrive together: staggering a full page of history
+   would delay reading it, and the wave only needs to read on the first screen. */
+.register-table tbody tr:nth-child(1) { animation-delay: 40ms; }
+.register-table tbody tr:nth-child(2) { animation-delay: 80ms; }
+.register-table tbody tr:nth-child(3) { animation-delay: 120ms; }
+.register-table tbody tr:nth-child(4) { animation-delay: 160ms; }
+.register-table tbody tr:nth-child(5) { animation-delay: 200ms; }
+.register-table tbody tr:nth-child(6) { animation-delay: 240ms; }
+.register-table tbody tr:nth-child(7) { animation-delay: 280ms; }
+.register-table tbody tr:nth-child(8) { animation-delay: 320ms; }
+.register-table tbody tr:nth-child(9) { animation-delay: 360ms; }
+.register-table tbody tr:nth-child(10) { animation-delay: 400ms; }
+.register-table tbody tr:nth-child(n + 11) { animation: none; }
+
+.register-panel {
+  animation: register-panel-in 240ms var(--ease) both;
+}
+
+.register-header,
+.status-tabs,
+.register-filter {
+  animation: register-panel-in 220ms var(--ease) both;
+}
+
+.register-header { animation-delay: 40ms; }
+.status-tabs { animation-delay: 90ms; }
+.register-filter { animation-delay: 130ms; }
+
+.alert.decision-seal {
+  animation: seal-press 320ms var(--ease-emph) both;
+}
+
+/* Reduced motion: movement goes, the fade stays. Delays reset so nothing
+   appears to hang; the view-transition morph drops to a plain opacity swap. */
+@media (prefers-reduced-motion: reduce) {
+  .register-table tbody tr,
+  .register-panel,
+  .register-header,
+  .status-tabs,
+  .register-filter,
+  .alert.decision-seal {
+    animation: register-fade 120ms linear both !important;
+    animation-delay: 0ms !important;
+    transform: none;
+  }
+
+  .alert.decision-seal {
+    transform: none;
+  }
+
+  ::view-transition-group(*) {
+    animation-duration: 1ms;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 100ms;
+  }
+}
+
+/* ---------------------------------------------------------- focus */
+
+.register-surface :focus-visible,
+.status-tab:focus-visible,
+.btn-register:focus-visible,
+.btn-stamp:focus-visible {
+  outline: 2px solid var(--blue-700);
+  outline-offset: 2px;
+}

@@ -16,6 +16,11 @@ public interface IStatisticsRepository
     // Open-job payroll aggregates per department, sorted by salary total.
     Task<IEnumerable<DepartmentPayroll>> GetPayrollByDepartmentAsync();
 
-    // Probation watchlist, near-door list and managerless departments.
+    // Probation watchlist, near-door list, managerless departments and
+    // everyone whose approved leave covers today.
     Task<Watchlists> GetWatchlistsAsync();
+
+    // Days lost to approved leave this month, requests awaiting a decision,
+    // and how many people are out right now.
+    Task<AbsenceStats> GetAbsenceStatsAsync();
 }
