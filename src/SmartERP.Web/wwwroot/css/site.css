@@ -50,3 +50,10 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+/* Department reporting tree: indentation is decoration only. The Reports to
+   column carries the relationship in text, so no meaning depends on it.
+   1rem per level is a spacing-scale step (16px). */
+.dept-tree-indent {
+  display: inline-block;
+  padding-left: calc(var(--tree-depth, 0) * 1rem);
+}

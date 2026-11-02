@@ -38,6 +38,26 @@
         <dt>Established</dt>
         <dd>@Model.Department.Established.ToString("dd MMM yyyy")</dd>
 
+        <dt>Reports to</dt>
+        <dd>
+            @if (Model.Department.ParentDepartmentId is { } parentId)
+            {
+                <a asp-controller="Department" asp-action="Details" asp-route-id="@parentId">
+                    @Model.Department.ParentName
+                </a>
+            }
+            else
+            {
+                <span>Top-level department</span>
+            }
+        </dd>
+
+        <dt>Open headcount</dt>
+        <dd>@Model.DirectHeadcount</dd>
+
+        <dt>Including sub-departments</dt>
+        <dd>@Model.RollupHeadcount</dd>
+
         <dt>Last Updated</dt>
         <dd>
             @if (Model.Department.UpdatedAt == default)
@@ -57,6 +77,42 @@
     <a asp-controller="Department" asp-action="Delete" asp-route-id="@Model.Department.Id" class="btn btn-danger">Delete</a>
     <a asp-controller="Department" asp-action="Index" class="btn btn-secondary">Back to List</a>
 </div>
+
+<h3 class="mt-4">Departments reporting here</h3>
+
+@if (!Model.Children.Any())
+{
+    <p class="text-muted">No department reports here.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-sm align-middle">
+            <caption class="visually-hidden">Departments that report to @Model.Department.Name.</caption>
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Code</th>
+                    <th scope="col">Department</th>
+                    <th scope="col">Open headcount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var child in Model.Children)
+                {
+                    <tr>
+                        <th scope="row">@child.Code</th>
+                        <td>
+                            <a asp-controller="Department" asp-action="Details" asp-route-id="@child.Id">
+                                @child.Name
+                            </a>
+                        </td>
+                        <td>@child.DirectHeadcount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
 
 <h3 class="mt-4">Management</h3>
 

@@ -4,10 +4,15 @@
 
 <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
     <h2>Department Registry</h2>
-    <a asp-controller="Department" asp-action="Create" class="btn btn-primary">
-        <i class="bi bi-plus"></i>
-        Create Department
-    </a>
+    <div>
+        <a asp-controller="Department" asp-action="Hierarchy" class="btn btn-outline-secondary">
+            Reporting structure
+        </a>
+        <a asp-controller="Department" asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus"></i>
+            Create Department
+        </a>
+    </div>
 </div>
 
 @if (TempData["SuccessMessage"] != null)
@@ -32,6 +37,7 @@
             <tr>
                 <th scope="col">Code</th>
                 <th scope="col">Name</th>
+                <th scope="col">Reports to</th>
                 <th scope="col">Location</th>
                 <th scope="col">Established</th>
                 <th scope="col">Actions</th>
@@ -43,6 +49,7 @@
                 <tr>
                     <th scope="col">@dept.Code</th>
                     <td>@dept.Name</td>
+                    <td>@(dept.ParentName ?? "Top level")</td>
                     <td>@dept.Location</td>
                     <td>@dept.Established.ToString("dd-mm-yyyy")</td>
                     <td class="justify-space-between">

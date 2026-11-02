@@ -34,6 +34,15 @@
                 <span asp-validation-for="Established" class="text-danger"></span>
             </div>
 
+            <div class="form-group mb-3">
+                <label asp-for="ParentDepartmentId" class="control-label">Reports to</label>
+                <select asp-for="ParentDepartmentId" asp-items="Model.ParentOptions" class="form-select">
+                    <option value="">No parent — top level</option>
+                </select>
+                <div class="form-text">Leave blank for a top-level department.</div>
+                <span asp-validation-for="ParentDepartmentId" class="text-danger"></span>
+            </div>
+
             <div class="form-group">
                 <button type="submit" class="btn btn-primary">Create Department</button>
                 <a asp-action="Index" class="btn btn-secondary">Back to List</a>

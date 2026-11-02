@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using SmartERP.Web.Validations;
 
 namespace SmartERP.Web.Models;
@@ -22,4 +23,9 @@ public class DepartmentCreateViewModel
     [Required(ErrorMessage = "You must provide the date of establishment of a department.")]
     [DateRangeInPast(null, ErrorMessage = "Established date must be before or on today.")]
     public DateTime Established { get; set; }
+
+    // Null creates a top-level department.
+    public double? ParentDepartmentId { get; set; }
+
+    public IEnumerable<SelectListItem> ParentOptions { get; set; } = Enumerable.Empty<SelectListItem>();
 }

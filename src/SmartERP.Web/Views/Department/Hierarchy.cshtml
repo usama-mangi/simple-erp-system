@@ -1,0 +1,57 @@
+@using SmartERP.Web.Models
+
+@model DepartmentHierarchyViewModel
+
+@{
+    ViewData["Title"] = "Reporting Structure";
+}
+
+<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+    <h2>Reporting structure</h2>
+    <a asp-controller="Department" asp-action="Index" class="btn btn-secondary">Back to Departments</a>
+</div>
+
+<p class="text-muted">Every department, what it reports to, and the open headcount under it.</p>
+
+@if (!Model.Nodes.Any())
+{
+    <p>No departments are set up yet.</p>
+    <a asp-controller="Department" asp-action="Create" class="btn btn-primary">Create Department</a>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+            <caption class="visually-hidden">
+                Departments in reporting order, with the department each one reports to and its open headcount.
+            </caption>
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Department</th>
+                    <th scope="col">Code</th>
+                    <th scope="col">Reports to</th>
+                    <th scope="col">Open headcount</th>
+                    <th scope="col">Including sub-departments</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var node in Model.Nodes)
+                {
+                    <tr>
+                        <th scope="row" class="fw-normal">
+                            <span class="dept-tree-indent" style="--tree-depth:@node.Depth">
+                                <a asp-controller="Department" asp-action="Details" asp-route-id="@node.Id">
+                                    @node.Name
+                                </a>
+                            </span>
+                        </th>
+                        <td>@node.Code</td>
+                        <td>@(node.ParentName ?? "Top level")</td>
+                        <td>@node.DirectHeadcount</td>
+                        <td>@node.RollupHeadcount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

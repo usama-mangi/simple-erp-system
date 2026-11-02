@@ -28,7 +28,10 @@ public class OracleExceptionHandler()
             if (ex.Message.ToLower().Replace('_', ' ').Contains(
                     constraint.ConstraintName.ToLower().Replace('_', ' ')))
             {
-                throw constraint.FieldException;
+                // Throw the typed exception itself: controllers catch it and
+                // read FieldName to place the message on the right input.
+                // FieldException keeps the original OracleException as inner.
+                throw constraint;
             }
         }
 

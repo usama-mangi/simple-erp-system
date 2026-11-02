@@ -20,16 +20,21 @@ create table if not exists employment_status (
 );
 
 create table if not exists departments (
-   id          number generated always as identity,
-   name        varchar2(30) not null,
-   code        varchar2(3) not null,
-   location    varchar2(50) not null,
-   established date not null,
-   created_at  timestamp default systimestamp not null,
-   updated_at  timestamp,
+   id                   number generated always as identity,
+   name                 varchar2(30) not null,
+   code                 varchar2(3) not null,
+   location             varchar2(50) not null,
+   established          date not null,
+   parent_department_id number, -- null = top-level department
+   created_at           timestamp default systimestamp not null,
+   updated_at           timestamp,
    constraint pk_department_id primary key ( id ),
    constraint uq_departments_name unique ( name ),
-   constraint uq_departments_code unique ( code )
+   constraint uq_departments_code unique ( code ),
+   constraint fk_dept_parent foreign key ( parent_department_id )
+      references departments ( id ),
+   constraint chk_dept_parent_not_self check ( parent_department_id is null
+       or parent_department_id != id )
 );
 
 create table if not exists employees (

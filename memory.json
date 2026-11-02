@@ -70,6 +70,16 @@
       "text": "TASK-12 UI: leave.css (register-book direction from design.yaml intent.style) is loaded per view through the Styles section, not from _Layout, so only Leave screens and the Dashboard absence strip pick up its tokens. design.yaml is the project's first design system file.",
       "cat": "pattern",
       "updated": "2026-11-02T05:17:14.844433+00:00"
+    },
+    "oracle-constraint-handler-throws-typed": {
+      "text": "OracleExceptionHandler.HandleConstraintExceptions used to throw constraint.FieldException, which every typed ConstraintException sets to its inner OracleException. That made every controller catch (ConstraintException) dead code and let raw ORA text reach the web layer. TASK-13 changed it to throw constraint (the typed exception); FieldException stays as the inner OracleException. Verified live: duplicate department name now renders the friendly Name error with no ORA text. Any new constraint mapping relies on this throw.",
+      "cat": "codebase",
+      "updated": "2026-11-02T05:41:28.199680+00:00"
+    },
+    "department-hierarchy-contract": {
+      "text": "Department hierarchy: departments.parent_department_id is a nullable self-FK (fk_dept_parent); chk_dept_parent_not_self blocks parent=id and db/08_department_hierarchy.sql adds both to populated DBs. Depth is not constrained by Oracle, so DepartmentController.Update rejects self and descendants: WouldCreateCycleAsync walks ancestors with START WITH parent CONNECT BY NOCYCLE PRIOR parent_department_id = id. GetParentCandidatesAsync(excludeId) walks the excluded department's subtree, so the update dropdown can never offer a cycle. GetHierarchyAsync returns depth-first DepartmentNode rows (dept_tree sort_path) with direct headcount (open employment_details rows on non-deleted employees) and rollup (COUNT DISTINCT employee_id across the subtree). Deleting a department with reports is blocked by the FK (ChildFoundException), no cascade.",
+      "cat": "architecture",
+      "updated": "2026-11-02T05:41:28.199671+00:00"
     }
   }
 }

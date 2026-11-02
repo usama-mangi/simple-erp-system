@@ -106,9 +106,9 @@
     {
       "id": "TASK-13",
       "title": "Option A.3: departments.parent_department_id org hierarchy",
-      "status": "to-do",
+      "status": "closed",
       "dependencies": [],
-      "notes": "departments.parent_department_id self FK nullable. Org-tree reads (headcount rollups, org chart)."
+      "notes": "Done. DB: departments.parent_department_id nullable self-FK (fk_dept_parent) + chk_dept_parent_not_self in 01_schema; db/08_department_hierarchy.sql guarded migration ran twice on the live instance (second run no-op). Data: Department.ParentDepartmentId/ParentName, DepartmentNode, DepartmentParentSelfException, IDepartmentRepository.GetHierarchyAsync/GetParentCandidatesAsync/WouldCreateCycleAsync. Hierarchy read is one recursive CTE: dept_tree depth-first via sort_path, subtree x rollup counting distinct employees with open employment_details on non-deleted employees; direct headcount uses the same definition. Cycle guard walks ancestors with CONNECT BY NOCYCLE. Web: parent select on Create/Update (blank = top level, update excludes self and descendants), self/cycle ModelState errors, Details parent link + child list + direct/rollup headcount, new Department/Hierarchy page, Reports to column and Reporting structure link on Department Index; README/AGENTS/design.yaml updated. Unplanned but required fix: OracleExceptionHandler threw constraint.FieldException (the inner OracleException) instead of the typed ConstraintException, so every controller catch (ConstraintException) was dead and raw ORA text could reach the UI; now throws the typed exception, verified duplicate-name create shows the friendly Name error with no ORA text. Also Department Delete now surfaces ChildFoundException text and Update success says updated instead of created. Live smoke passed: create child under Operations, tree/indent, rollup 1 -> 3 after reparenting Marketing, self-parent and cycle rejected, delete blocked with reason, blank parent clears, temp child deleted. DB restored: 5 seeded departments, every parent_department_id null. Build green, only pre-existing NU1902/NU1903 warnings. Known pre-existing issue left alone: Department Index delete confirm attribute has malformed nested quotes; belongs with TASK-06."
     },
     {
       "id": "TASK-14",
@@ -133,8 +133,22 @@
     }
   ],
   "log": {
-    "last_updated": "2026-11-02T05:17:00.174703+00:00",
+    "last_updated": "2026-11-02T05:41:27.913067+00:00",
     "recent_changes": [
+      {
+        "action": "update",
+        "task": "TASK-13",
+        "old_status": "active",
+        "new_status": "closed",
+        "at": "2026-11-02T05:41:27.913039+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-13",
+        "old_status": "to-do",
+        "new_status": "active",
+        "at": "2026-11-02T05:25:27.650141+00:00"
+      },
       {
         "action": "update",
         "task": "TASK-12",
@@ -176,20 +190,6 @@
         "old_status": "testing",
         "new_status": "closed",
         "at": "2026-10-31T10:45:05.935343+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-02",
-        "old_status": "testing",
-        "new_status": "closed",
-        "at": "2026-10-31T10:45:01.165884+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-01",
-        "old_status": "testing",
-        "new_status": "closed",
-        "at": "2026-10-31T10:44:55.203229+00:00"
       }
     ]
   }
