@@ -126,10 +126,10 @@
     },
     {
       "id": "TASK-16",
-      "title": "Option B: new HR domains (requisitions, reviews, documents)",
+      "title": "Requisitions + candidates: full flow (pipeline + hire-to-employee conversion)",
       "status": "to-do",
       "dependencies": [],
-      "notes": "Umbrella to-do, scope decided when Option A lands: requisitions and candidates, review_cycles and reviews (employee-to-employee FK), documents with expiry watchlist. Deferred until after Option A."
+      "notes": "Split from the Option B umbrella (2026-11-03). Full flow incl. hire conversion: requisitions (department/position FK, openings, status), candidates, applications (stage pipeline), and hire -> employee + employment_details in one transaction. TASK-18 documents and TASK-19 reviews land first."
     },
     {
       "id": "TASK-17",
@@ -137,11 +137,69 @@
       "status": "closed",
       "dependencies": [],
       "notes": "design-intent REMEDIATE run: 15 views + register.css + design.yaml. Diagnosed: Bootstrap components, raw colours, missing empty states, heading-order and label a11y bugs."
+    },
+    {
+      "id": "TASK-18",
+      "title": "Documents: metadata vault + expiry watchlist",
+      "status": "closed",
+      "dependencies": [
+        "[]"
+      ],
+      "notes": "Build green, already implemented."
+    },
+    {
+      "id": "TASK-19",
+      "title": "Performance reviews: review_cycles + manager reviews",
+      "status": "closed",
+      "dependencies": [
+        "[]"
+      ],
+      "notes": "Build green; minimal review domain implemented."
     }
   ],
   "log": {
-    "last_updated": "2026-11-03T07:12:37.099483+00:00",
+    "last_updated": "2026-11-03T09:37:57.407619+00:00",
     "recent_changes": [
+      {
+        "action": "update",
+        "task": "TASK-19",
+        "old_status": "active",
+        "new_status": "closed",
+        "at": "2026-11-03T09:37:57.407586+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-19",
+        "old_status": "to-do",
+        "new_status": "active",
+        "at": "2026-11-03T09:24:26.674509+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-18",
+        "old_status": "to-do",
+        "new_status": "closed",
+        "at": "2026-11-03T09:24:26.341670+00:00"
+      },
+      {
+        "action": "add",
+        "task": "TASK-19",
+        "status": "to-do",
+        "at": "2026-11-03T07:21:50.574758+00:00"
+      },
+      {
+        "action": "add",
+        "task": "TASK-18",
+        "status": "to-do",
+        "at": "2026-11-03T07:21:50.341468+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-16",
+        "old_status": "to-do",
+        "new_status": "to-do",
+        "at": "2026-11-03T07:21:50.132833+00:00"
+      },
       {
         "action": "update",
         "task": "TASK-06",
@@ -155,47 +213,6 @@
         "old_status": "to-do",
         "new_status": "active",
         "at": "2026-11-03T06:50:26.684043+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-05",
-        "old_status": "active",
-        "new_status": "closed",
-        "at": "2026-11-03T06:25:13.292462+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-05",
-        "old_status": "to-do",
-        "new_status": "active",
-        "at": "2026-11-03T06:06:03.824262+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-17",
-        "old_status": "active",
-        "new_status": "closed",
-        "at": "2026-11-03T05:57:52.321706+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-17",
-        "old_status": "to-do",
-        "new_status": "active",
-        "at": "2026-11-02T12:53:04.446731+00:00"
-      },
-      {
-        "action": "add",
-        "task": "TASK-17",
-        "status": "to-do",
-        "at": "2026-11-02T12:51:02.761402+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-15",
-        "old_status": "active",
-        "new_status": "closed",
-        "at": "2026-11-02T06:55:29.315541+00:00"
       }
     ]
   }

@@ -9,6 +9,9 @@
 # sonarqube files
 .sonarqube
 
+# design mocks
+docs/design-mocks
+
 # User-specific files
 *.rsuser
 *.suo

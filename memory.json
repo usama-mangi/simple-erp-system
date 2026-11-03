@@ -110,6 +110,16 @@
       "text": "Departments have NO soft delete: DELETE is hard and blocked by FK (ORA-2292) from employment_details (open+closed rows), department_managers, or child departments (no ON DELETE actions anywhere). Department/Delete GET page disables the destructive submit and lists blockers when HasDependenciesAsync hits; POST double-checks via ORA-2292 -> ChildFoundException -> TempData message, row survives. Missing-Id POST surfaces as 404 (GetByIdAsync(0) -> NotFound), matching employee delete. The 11-03 IOracleExceptionHandler migration commit had missed AppUserRepository (concrete ctor, concrete type unregistered) which broke app startup in Development; fixed by taking IOracleExceptionHandler.",
       "cat": "architecture",
       "updated": "2026-11-03T07:12:37.255529+00:00"
+    },
+    "db-layout-convention": {
+      "text": "db/ layout (TASK-18): only numbered files under db/migrations/ are changes; everything else is the current system (drop, schema=canonical, seed, procedures, triggers). Fresh installs run rebuild.sql (destructive); populated installs run upgrade.sql (guarded, re-runnable migrations, no data reload). seed.sql is the single merged dataset (sample cast + 250-employee bulk + document fixtures, dates sysdate-relative) and seeds ali.khan as Admin. 05_migrate/05_test deleted. README/AGENTS describe this layout; memory paths updated.",
+      "cat": "architecture",
+      "updated": "2026-11-03T08:59:39.585551+00:00"
+    },
+    "documents-vault-contract": {
+      "text": "Document vault (TASK-18): documents = metadata only (type_id/title/issued_on/expires_at/note), chk_doc_dates allows expires_at >= issued_on or NULL expiry, no file storage, never referenced by other tables. Employee destructive purge deletes documents rows too (after leave rows); HasDependenciesAsync counts employment_details + department_managers + leave_requests + leave_balances + documents. Dashboard expiry watchlist = documents expiring within 30 days (incl. already lapsed, negative days_left), one query on IStatisticsRepository.GetWatchlistsAsync feeding the 4th action-lists card. Document actions are inline POST + static confirm (metadata-only, no confirmation page), no Admin gate (metadata, single-tenant HR role model).",
+      "cat": "architecture",
+      "updated": "2026-11-03T08:59:39.788605+00:00"
     }
   }
 }
