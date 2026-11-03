@@ -53,6 +53,7 @@ tokens:
       ink-500: "#4A5768"
       paper-0: "#FCFAF5"
       paper-1: "#F3EEE3"
+      paper-2: "#EDE6D8"
       rule-200: "#D8D0BF"
       blue-700: "#1B3A6B"
       blue-600: "#24508F"
@@ -67,6 +68,7 @@ tokens:
       text.primary: ink-900
       text.secondary: ink-700
       text.muted: ink-500
+      text.link: blue-700
       rule.hairline: rule-200
       rule.field: ink-500
       action.primary.bg: blue-700
@@ -87,6 +89,8 @@ tokens:
       stamp.rejected.fg: status.rejected
       stamp.cancelled.border: status.cancelled
       stamp.cancelled.fg: status.cancelled
+      stamp.current.border: feedback.success
+      stamp.current.fg: feedback.success
       button.primary.bg: action.primary.bg
       button.primary.fg: action.primary.fg
       field.border: rule.field
@@ -134,6 +138,7 @@ components:
         - { fg: oxblood-700, ratio: "7.86:1", pass: true }
         - { fg: slate-500, ratio: "5.75:1", pass: true }
         - { fg: blue-700, ratio: "10.80:1", pass: true }
+        - { fg: moss-700, ratio: "6.12:1", pass: true }
     tokens_consumed: [status.approved, status.pending, status.rejected, status.cancelled]
   DecisionButton:
     states: [rest, hover, active, focus, disabled]
@@ -161,6 +166,15 @@ components:
       contrast_pairs:
         - { fg: ink-900, ratio: "14.98:1", pass: true }
     tokens_consumed: [surface.band, text.primary, text.muted, rule.hairline]
+  RecordSheet:
+    states: [rest]
+    a11y:
+      role: region
+      keyboard: []
+      contrast_pairs:
+        - { fg: ink-500, ratio: "7.05:1", pass: true }
+        - { fg: ink-900, ratio: "16.61:1", pass: true }
+    tokens_consumed: [surface.page, text.muted, text.primary, rule.hairline]
 
 screens:
   LeaveIndex:
@@ -198,10 +212,103 @@ screens:
     uses_components: [RegisterPanel]
     slop_scan: clean
     hci_scan: pass
+  EmployeeIndex:
+    dominant_action: read
+    dominant_message: Everyone on the books, with current contact details
+    ctas: 1
+    uses_components: [RegisterPanel]
+    slop_scan: clean
+    hci_scan: pass
+  EmployeeDetails:
+    dominant_action: update
+    dominant_message: One person's record, assignment history and status changes
+    ctas: 2
+    uses_components: [RegisterPanel, RecordSheet]
+    slop_scan: clean
+    hci_scan: pass
+  EmployeeCreate:
+    dominant_action: submit
+    dominant_message: One person, their contact details, and optionally a first assignment
+    ctas: 2
+    uses_components: [RegisterPanel, LedgerField]
+    slop_scan: clean
+    hci_scan: pass
+  EmployeeUpdate:
+    dominant_action: submit
+    dominant_message: Changes to one person's record, saved on the spot
+    ctas: 2
+    uses_components: [RegisterPanel, LedgerField]
+    slop_scan: clean
+    hci_scan: pass
+  EmployeeDelete:
+    dominant_action: remove
+    dominant_message: Remove one person from the register, with a clear read on dependent records
+    ctas: 2
+    uses_components: [RegisterPanel, RecordSheet]
+    slop_scan: clean
+    hci_scan: pass
+  DepartmentIndex:
+    dominant_action: read
+    dominant_message: Every department, what reports into it, and where it is based
+    ctas: 2
+    uses_components: [RegisterPanel]
+    slop_scan: clean
+    hci_scan: pass
+  DepartmentDetails:
+    dominant_action: update
+    dominant_message: One department's record, what reports to it and who manages it
+    ctas: 2
+    uses_components: [RegisterPanel, RecordSheet]
+    slop_scan: clean
+    hci_scan: pass
+  DepartmentCreate:
+    dominant_action: submit
+    dominant_message: One new node in the reporting tree
+    ctas: 2
+    uses_components: [RegisterPanel, LedgerField]
+    slop_scan: clean
+    hci_scan: pass
+  DepartmentUpdate:
+    dominant_action: submit
+    dominant_message: Changes to one department's record, saved on the spot
+    ctas: 2
+    uses_components: [RegisterPanel, LedgerField]
+    slop_scan: clean
+    hci_scan: pass
+  EmploymentIndex:
+    dominant_action: read
+    dominant_message: Every assignment for one person; the open row is current
+    ctas: 1
+    uses_components: [RegisterPanel]
+    slop_scan: clean
+    hci_scan: pass
+  EmploymentCreate:
+    dominant_action: submit
+    dominant_message: One dated assignment; an open one ends on this start date
+    ctas: 2
+    uses_components: [RegisterPanel, LedgerField]
+    slop_scan: clean
+    hci_scan: pass
+  DepartmentManagersIndex:
+    dominant_action: read
+    dominant_message: Who manages one department, open row first
+    ctas: 1
+    uses_components: [RegisterPanel]
+    slop_scan: clean
+    hci_scan: pass
+  DepartmentManagersCreate:
+    dominant_action: submit
+    dominant_message: One dated mandate; the open row must be closed first
+    ctas: 2
+    uses_components: [RegisterPanel, LedgerField]
+    slop_scan: clean
+    hci_scan: pass
 
 log:
-  last_updated: "2026-11-02"
+  last_updated: "2026-11-03"
   recent_changes:
+    - "TASK-17 remediated the employee and department area onto the register system; every screen sets a title, lists have empty states with a Create path, record pages use a breadcrumb and the RecordSheet, feedback matches decision-seal, and all 13 screens plus the RecordSheet component are recorded above."
+    - "TASK-17 added stamp.current (moss ink, open assignment or manager row) and the text.link token; no existing token was changed."
     - "TASK-13 added the reporting-structure screen, reusing RegisterPanel and the existing tokens; indentation is decorative and the Reports to column carries the relationship."
     - "TASK-14 added a Status history subsection to Employee Details (When / From / To / Note) backed by the append-only status_events table; no new component or token."
     - "TASK-12 initialized the design system: first design.yaml in the project, built from a sealed rollout rather than defaults."
@@ -259,7 +366,7 @@ intent:
     personality: productive
     signature: "Cross-document shared element — the register header (title over its ruled underline) carries from list to form to balances via the View Transitions API, so navigating feels like turning one register page; falls back to a plain cut without support, and to a short opacity swap under reduced-motion"
   delivery:
-    gates_run: "2026-10-31"
+    gates_run: "2026-11-03"
     results:
       audience: pass
       style: pass

@@ -19,83 +19,90 @@
     var showActions = (bool)(ViewData["ShowActions"] ?? false);
 }
 
-<div class="table-responsive">
-    <table class="table table-bordered table-hover">
-        <thead>
-            <tr>
-                <th scope="col">Position</th>
-                <th scope="col">Salary</th>
-                <th scope="col">Department</th>
-                <th scope="col">Type</th>
-                <th scope="col">Status</th>
-                <th scope="col">Start</th>
-                <th scope="col">End</th>
-                <th scope="col">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (!Model.Details.Any())
-            {
-                <tr><td colspan="8" class="text-center">No assignments recorded yet.</td></tr>
-            }
-            @foreach (var detail in Model.Details)
-            {
-                <tr>
-                    <td>@detail.PositionName</td>
-                    <td>@detail.Salary.ToString("N")</td>
-                    <td>@Title(departmentTitles, detail.DepartmentId)</td>
-                    <td>@Title(employmentTypeTitles, detail.EmploymentTypeId)</td>
-                    <td>@Title(employmentStatusTitles, detail.EmploymentStatusId)</td>
-                    <td>@detail.StartDate.ToShortDateString()</td>
-                    <td>
-                        @if (detail.EndDate is null)
-                        {
-                            <span class="badge bg-success">Current</span>
-                        }
-                        else
-                        {
-                            <span>@detail.EndDate.Value.ToShortDateString()</span>
-                        }
-                    </td>
-                    <td>
-                        @if (detail.EndDate is null)
-                        {
-                            <form asp-controller="Employment" asp-action="Close" method="post"
-                                  class="d-flex align-items-center gap-2">
-                                <input type="date" name="EndDate" required
-                                       class="form-control form-control-sm" />
-                                <button type="submit" class="btn btn-outline-secondary btn-sm">Close</button>
-                                <input type="hidden" name="EmployeeId" value="@Model.Employee.Id" />
-                            </form>
-                        }
-                        else
-                        {
-                            <span class="text-muted">Closed</span>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+<div class="register-panel register-panel--scroll">
+    @if (!Model.Details.Any())
+    {
+        <p class="register-empty">No assignments on the record yet.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="register-table">
+                <caption class="visually-hidden">Assignment history for this employee, most recent first.</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Position</th>
+                        <th scope="col">Salary</th>
+                        <th scope="col">Department</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Start</th>
+                        <th scope="col">End</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var detail in Model.Details)
+                    {
+                        <tr>
+                            <td>@detail.PositionName</td>
+                            <td>@detail.Salary.ToString("N")</td>
+                            <td>@Title(departmentTitles, detail.DepartmentId)</td>
+                            <td>@Title(employmentTypeTitles, detail.EmploymentTypeId)</td>
+                            <td>@Title(employmentStatusTitles, detail.EmploymentStatusId)</td>
+                            <td class="register-dates">@detail.StartDate.ToString("yyyy-MM-dd")</td>
+                            <td>
+                                @if (detail.EndDate is null)
+                                {
+                                    <span class="stamp stamp--current">Current</span>
+                                }
+                                else
+                                {
+                                    <span class="register-dates">@detail.EndDate.Value.ToString("yyyy-MM-dd")</span>
+                                }
+                            </td>
+                            <td>
+                                @if (detail.EndDate is null)
+                                {
+                                    <form asp-controller="Employment" asp-action="Close" method="post"
+                                          class="d-flex align-items-center gap-2">
+                                        <label class="visually-hidden" for="close-date-@detail.Id">End date</label>
+                                        <input id="close-date-@detail.Id" type="date" name="EndDate" required
+                                               class="form-control" />
+                                        <button type="submit" class="btn btn-stamp">Close</button>
+                                        <input type="hidden" name="EmployeeId" value="@Model.Employee.Id" />
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="register-reason">Closed</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
 
 @if (showActions)
 {
-    <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+    <div class="d-flex flex-wrap align-items-center gap-3 mt-3">
         <a asp-controller="Employment" asp-action="Create" asp-route-employeeId="@Model.Employee.Id"
-           class="btn btn-primary">Add job</a>
+           class="btn btn-register">Add job</a>
 
         @if (Model.DepartmentOptions is not null)
         {
             <form asp-controller="Employment" asp-action="TransferDepartment" method="post"
-                  class="d-flex align-items-center gap-2">
-                <label class="col-form-label" for="transfer-department">Change department</label>
+                  class="register-filter">
+                <label for="transfer-department">Change department</label>
                 <select id="transfer-department" name="DepartmentId" required
                         asp-items="Model.DepartmentOptions"
-                        class="form-select form-select-sm" style="width: auto;">
+                        class="form-select">
                     <option value="">Select department</option>
                 </select>
-                <button type="submit" class="btn btn-outline-primary btn-sm">Transfer</button>
+                <button type="submit" class="btn btn-stamp">Transfer</button>
                 <input type="hidden" name="EmployeeId" value="@Model.Employee.Id" />
             </form>
         }

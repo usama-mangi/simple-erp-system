@@ -1,53 +1,63 @@
 @model DepartmentUpdateViewModel;
 @{
-    ViewData["Title"] = $"Update Department {Model.Name}";
+    ViewData["Title"] = $"Update department - {Model.Name}";
 }
 
-<h2>Update Department</h2>
+@section Styles {
+    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
+}
 
-<div class="row">
-    <div class="col-md-4">
+<div class="register-surface">
+    <a class="register-back" asp-controller="Department" asp-action="Index">Back to register</a>
+
+    <div class="register-header mb-3">
+        <h1 class="register-title">Update department</h1>
+        <p class="register-subtitle mb-1">Changes land on the register the moment you save.</p>
+        <p class="register-meta mb-0">RECORD #@Model.Id</p>
+    </div>
+
+    <div class="register-panel register-form">
         <form asp-action="Update" method="post">
             <input type="hidden" asp-for="Id">
 
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="register-errors" role="alert"></div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Name" class="control-label"></label>
+            <div class="field">
+                <label asp-for="Name"></label>
                 <input asp-for="Name" type="text" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Code" class="control-label"></label>
+            <div class="field">
+                <label asp-for="Code"></label>
                 <input asp-for="Code" type="text" class="form-control" />
                 <span asp-validation-for="Code" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Location" class="control-label"></label>
+            <div class="field">
+                <label asp-for="Location"></label>
                 <input asp-for="Location" type="text" class="form-control" />
                 <span asp-validation-for="Location" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Established" class="control-label"></label>
+            <div class="field">
+                <label asp-for="Established"></label>
                 <input asp-for="Established" type="date" class="form-control" />
                 <span asp-validation-for="Established" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="ParentDepartmentId" class="control-label">Reports to</label>
+            <div class="field">
+                <label asp-for="ParentDepartmentId">Reports to</label>
                 <select asp-for="ParentDepartmentId" asp-items="Model.ParentOptions" class="form-select">
-                    <option value="">No parent — top level</option>
+                    <option value="">No parent (top level)</option>
                 </select>
-                <div class="form-text">Leave blank for a top-level department. A department cannot report to itself or to one of its own sub-departments.</div>
+                <p class="form-text mb-0">Leave blank for a top-level department. A department cannot report to itself or to one of its own sub-departments.</p>
                 <span asp-validation-for="ParentDepartmentId" class="text-danger"></span>
             </div>
 
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">Update Department</button>
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="submit" class="btn btn-register">Save changes</button>
+                <a asp-action="Index" class="btn btn-stamp">Back to register</a>
             </div>
         </form>
     </div>

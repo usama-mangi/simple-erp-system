@@ -1,51 +1,82 @@
 @model EmployeeDeleteViewModel;
 @{
-    ViewData["Title"] = "Delete Employee";
+    ViewData["Title"] = $"Delete employee - {Model.DisplayName}";
 }
 
-<h2>Delete Employee</h2>
+@section Styles {
+    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
+}
 
-<h4 class="text-danger">Are you sure you want to delete @Model.DisplayName?</h4>
+<div class="register-surface">
+    <a class="register-back" asp-controller="Employee" asp-action="Index">Back to register</a>
 
-@if (Model.HasDependencies)
-{
-    <div class="alert alert-warning" role="alert">
-        <strong>The employee has dependent records.</strong> Employment history and management
-        assignments point to this employee. Deleting them in the same action is permanent and
-        cannot be reversed.
+    <div class="register-header mb-3">
+        <h1 class="register-title">Delete employee</h1>
+        <p class="register-subtitle mb-1">@Model.DisplayName is removed from the register. A soft delete keeps the row for audit; nothing else is touched.</p>
+        <p class="register-meta mb-0">RECORD #@Model.Id</p>
     </div>
-}
 
-<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
-    <input type="hidden" asp-for="Id" />
-    <input type="hidden" asp-for="DisplayName" />
+    <div class="register-panel mb-3">
+        <dl class="record-sheet">
+            <dt>Name</dt>
+            <dd>@Model.DisplayName</dd>
 
-    <button type="submit" class="btn btn-danger" id="softDeleteButton">Delete</button>
-    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-</form>
+            <dt>Dependent records</dt>
+            <dd>
+                @if (Model.HasDependencies)
+                {
+                    <span>Employment history, management assignments and leave history</span>
+                }
+                else
+                {
+                    <span>None</span>
+                }
+            </dd>
+        </dl>
+    </div>
 
-@if (Model.HasDependencies)
-{
-    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" id="hardDeleteForm" class="mt-3 border border-danger rounded p-3">
+    @if (Model.HasDependencies)
+    {
+        <div class="alert register-warn mb-3" role="alert">
+            <span class="warn-word">Dependents</span>
+            This employee has employment history and management assignments pointing to
+            them. A hard delete removes those records too, permanently. The soft delete
+            below leaves them intact.
+        </div>
+    }
+
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post"
+          onsubmit="return confirm('Remove this employee from the register? The record is kept for audit.');">
         <input type="hidden" asp-for="Id" />
         <input type="hidden" asp-for="DisplayName" />
-        <input type="hidden" asp-for="HasDependencies" value="true" />
 
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="confirmCheckbox"
-                   aria-describedby="hardDeleteHelp" />
-            <label class="form-check-label text-danger" for="confirmCheckbox">
-                I understand this <strong>permanently removes</strong> @Model.DisplayName
-                and every dependent record.
-            </label>
+        <div class="d-flex gap-2 flex-wrap">
+            <button type="submit" class="btn btn-stamp btn-stamp--reject" id="softDeleteButton">Remove from register</button>
+            <a asp-action="Index" class="btn btn-stamp">Keep the record</a>
         </div>
-        <p id="hardDeleteHelp" class="form-text">Employment records, management assignments and leave history will be deleted too.</p>
-
-        <button type="submit" class="btn btn-outline-danger" id="hardDeleteButton" disabled>
-            Delete With Dependencies
-        </button>
     </form>
-}
+
+    @if (Model.HasDependencies)
+    {
+        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" id="hardDeleteForm" class="register-panel mt-4">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="DisplayName" />
+            <input type="hidden" asp-for="HasDependencies" value="true" />
+
+            <div class="check-row">
+                <input type="checkbox" id="confirmCheckbox" aria-describedby="hardDeleteHelp" />
+                <label for="confirmCheckbox">
+                    I understand this permanently removes <strong>@Model.DisplayName</strong> and every dependent record.
+                </label>
+            </div>
+            <p id="hardDeleteHelp" class="form-text mb-3">Employment records, management assignments and leave history will be deleted too.</p>
+
+            <button type="submit" class="btn btn-stamp btn-stamp--reject" id="hardDeleteButton" disabled>
+                Delete with dependencies
+            </button>
+        </form>
+    }
+</div>
 
 @section Scripts {
     <script>
@@ -61,7 +92,7 @@
             });
 
             form.addEventListener('submit', function (event) {
-                if (!window.confirm('This permanently deletes @Model.DisplayName and all dependent records. Continue?')) {
+                if (!window.confirm('This permanently deletes this employee and all dependent records. Continue?')) {
                     event.preventDefault();
                 }
             });

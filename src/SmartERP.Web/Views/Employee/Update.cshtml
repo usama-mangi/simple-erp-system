@@ -3,7 +3,7 @@
 
 @model EmployeeUpdateViewModel;
 @{
-    ViewData["Title"] = "Update Employee";
+    ViewData["Title"] = $"Update employee - {Model.FirstName} {Model.LastName}";
     var genders = (IEnumerable<SelectListItem>)ViewData["Genders"]!;
     var departments = (IEnumerable<SelectListItem>)ViewData["Departments"]!;
     var employmentTypes = (IEnumerable<SelectListItem>)ViewData["EmploymentTypes"]!;
@@ -11,102 +11,114 @@
     var positions = (IEnumerable<SelectListItem>)ViewData["Positions"]!;
 }
 
-<h2>Update Employee</h2>
+@section Styles {
+    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
+}
 
-<div class="row">
-    <div class="col-md-4">
+<div class="register-surface">
+    <a class="register-back" asp-controller="Employee" asp-action="Index">Back to register</a>
+
+    <div class="register-header mb-3">
+        <h1 class="register-title">Update employee</h1>
+        <p class="register-subtitle mb-1">Changes land on the register the moment you save.</p>
+        <p class="register-meta mb-0">RECORD #@Model.Id</p>
+    </div>
+
+    <div class="register-panel register-form">
         <form asp-action="Update" method="post">
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="HasEmploymentDetails" />
 
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="register-errors" role="alert"></div>
 
-            <div class="form-group mb-3">
-                <label asp-for="FirstName" class="control-label"></label>
+            <div class="field">
+                <label asp-for="FirstName"></label>
                 <input asp-for="FirstName" type="text" class="form-control" />
                 <span asp-validation-for="FirstName" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="LastName" class="control-label"></label>
+            <div class="field">
+                <label asp-for="LastName"></label>
                 <input asp-for="LastName" type="text" class="form-control" />
                 <span asp-validation-for="LastName" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Email" class="control-label"></label>
+            <div class="field">
+                <label asp-for="Email"></label>
                 <input asp-for="Email" type="text" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Phone" class="control-label"></label>
+            <div class="field">
+                <label asp-for="Phone"></label>
                 <input asp-for="Phone" type="text" class="form-control" />
                 <span asp-validation-for="Phone" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="DateOfBirth" class="control-label"></label>
+            <div class="field">
+                <label asp-for="DateOfBirth"></label>
                 <input asp-for="DateOfBirth" type="date" class="form-control" />
                 <span asp-validation-for="DateOfBirth" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="GenderId" class="control-label"></label>
+            <div class="field">
+                <label asp-for="GenderId"></label>
                 <select asp-for="GenderId" asp-items="genders" class="form-select"></select>
                 <span asp-validation-for="GenderId" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Address" class="control-label"></label>
+            <div class="field">
+                <label asp-for="Address"></label>
                 <input asp-for="Address" type="text" class="form-control" />
                 <span asp-validation-for="Address" class="text-danger"></span>
             </div>
 
             @if (Model.HasEmploymentDetails)
             {
-                <h5 class="mt-2">Employment Details</h5>
+                <fieldset>
+                    <legend>Current assignment</legend>
 
-                <div class="form-group mb-3">
-                    <label asp-for="PositionId" class="control-label"></label>
-                    <select asp-for="PositionId" asp-items="positions" class="form-select"></select>
-                    <span asp-validation-for="PositionId" class="text-danger"></span>
-                </div>
+                    <div class="field">
+                        <label asp-for="PositionId"></label>
+                        <select asp-for="PositionId" asp-items="positions" class="form-select"></select>
+                        <span asp-validation-for="PositionId" class="text-danger"></span>
+                    </div>
 
-                <div class="form-group mb-3">
-                    <label asp-for="Salary" class="control-label"></label>
-                    <input asp-for="Salary" type="number" step="100" min="0" class="form-control" />
-                    <span asp-validation-for="Salary" class="text-danger"></span>
-                </div>
+                    <div class="field">
+                        <label asp-for="Salary"></label>
+                        <input asp-for="Salary" type="number" step="100" min="0" class="form-control" />
+                        <span asp-validation-for="Salary" class="text-danger"></span>
+                    </div>
 
-                <div class="form-group mb-3">
-                    <label asp-for="StartDate" class="control-label"></label>
-                    <input asp-for="StartDate" type="date" class="form-control" />
-                    <span asp-validation-for="StartDate" class="text-danger"></span>
-                </div>
+                    <div class="field">
+                        <label asp-for="StartDate"></label>
+                        <input asp-for="StartDate" type="date" class="form-control" />
+                        <span asp-validation-for="StartDate" class="text-danger"></span>
+                    </div>
 
-                <div class="form-group mb-3">
-                    <label asp-for="DepartmentId" class="control-label"></label>
-                    <select asp-for="DepartmentId" asp-items="departments" class="form-select"></select>
-                    <span asp-validation-for="DepartmentId" class="text-danger"></span>
-                </div>
+                    <div class="field">
+                        <label asp-for="DepartmentId"></label>
+                        <select asp-for="DepartmentId" asp-items="departments" class="form-select"></select>
+                        <span asp-validation-for="DepartmentId" class="text-danger"></span>
+                    </div>
 
-                <div class="form-group mb-3">
-                    <label asp-for="EmploymentTypeId" class="control-label"></label>
-                    <select asp-for="EmploymentTypeId" asp-items="employmentTypes" class="form-select"></select>
-                    <span asp-validation-for="EmploymentTypeId" class="text-danger"></span>
-                </div>
+                    <div class="field">
+                        <label asp-for="EmploymentTypeId"></label>
+                        <select asp-for="EmploymentTypeId" asp-items="employmentTypes" class="form-select"></select>
+                        <span asp-validation-for="EmploymentTypeId" class="text-danger"></span>
+                    </div>
 
-                <div class="form-group mb-3">
-                    <label asp-for="EmploymentStatusId" class="control-label"></label>
-                    <select asp-for="EmploymentStatusId" asp-items="employmentStatuses" class="form-select"></select>
-                    <span asp-validation-for="EmploymentStatusId" class="text-danger"></span>
-                </div>
+                    <div class="field">
+                        <label asp-for="EmploymentStatusId"></label>
+                        <select asp-for="EmploymentStatusId" asp-items="employmentStatuses" class="form-select"></select>
+                        <span asp-validation-for="EmploymentStatusId" class="text-danger"></span>
+                    </div>
+                </fieldset>
             }
 
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">Update Employee</button>
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="submit" class="btn btn-register">Save changes</button>
+                <a asp-action="Index" class="btn btn-stamp">Back to register</a>
             </div>
         </form>
     </div>

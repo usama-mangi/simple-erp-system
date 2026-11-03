@@ -130,11 +130,38 @@
       "status": "to-do",
       "dependencies": [],
       "notes": "Umbrella to-do, scope decided when Option A lands: requisitions and candidates, review_cycles and reviews (employee-to-employee FK), documents with expiry watchlist. Deferred until after Option A."
+    },
+    {
+      "id": "TASK-17",
+      "title": "UI remediation: Employee + Department area onto the register system",
+      "status": "closed",
+      "dependencies": [],
+      "notes": "design-intent REMEDIATE run: 15 views + register.css + design.yaml. Diagnosed: Bootstrap components, raw colours, missing empty states, heading-order and label a11y bugs."
     }
   ],
   "log": {
-    "last_updated": "2026-11-02T06:55:29.315576+00:00",
+    "last_updated": "2026-11-03T05:57:52.321728+00:00",
     "recent_changes": [
+      {
+        "action": "update",
+        "task": "TASK-17",
+        "old_status": "active",
+        "new_status": "closed",
+        "at": "2026-11-03T05:57:52.321706+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-17",
+        "old_status": "to-do",
+        "new_status": "active",
+        "at": "2026-11-02T12:53:04.446731+00:00"
+      },
+      {
+        "action": "add",
+        "task": "TASK-17",
+        "status": "to-do",
+        "at": "2026-11-02T12:51:02.761402+00:00"
+      },
       {
         "action": "update",
         "task": "TASK-15",
@@ -169,27 +196,6 @@
         "old_status": "active",
         "new_status": "closed",
         "at": "2026-11-02T05:41:27.913039+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-13",
-        "old_status": "to-do",
-        "new_status": "active",
-        "at": "2026-11-02T05:25:27.650141+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-12",
-        "old_status": "active",
-        "new_status": "closed",
-        "at": "2026-11-02T05:17:00.174686+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-09",
-        "old_status": "testing",
-        "new_status": "closed",
-        "at": "2026-10-31T10:48:00.359498+00:00"
       }
     ]
   }

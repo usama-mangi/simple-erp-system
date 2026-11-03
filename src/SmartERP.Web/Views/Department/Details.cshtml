@@ -3,148 +3,139 @@
 @model DepartmentDetailsViewModel;
 
 @{
-    ViewData["Title"] = $"Department - {Model.Department.Name}";
+    ViewData["Title"] = $"Department register - {Model.Department.Name}";
+    var updatedMeta = Model.Department.UpdatedAt == default
+        ? "NOT UPDATED YET"
+        : $"UPDATED {Model.Department.UpdatedAt:yyyy-MM-dd}";
 }
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <strong>Success!</strong> @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+@section Styles {
+    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
+}
+
+<div class="register-surface">
+    <a class="register-back" asp-controller="Department" asp-action="Index">Back to register</a>
+
+    <div class="register-header d-flex justify-content-between align-items-end flex-wrap gap-3 mb-3">
+        <div>
+            <h1 class="register-title">@Model.Department.Name</h1>
+            <p class="register-meta mb-0">RECORD #@Model.Department.Id &middot; @updatedMeta</p>
+        </div>
     </div>
-}
 
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <strong>Error!</strong> @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert decision-seal mb-3" role="status">
+            <span class="seal-word">Recorded</span>
+            @TempData["SuccessMessage"]
+        </div>
+    }
 
-<h2>Department Details</h2>
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-<div>
-    <dl>
-        <dt>Department Code</dt>
-        <dd>@Model.Department.Code</dd>
+    <div class="register-panel">
+        <dl class="record-sheet">
+            <dt>Department code</dt>
+            <dd>@Model.Department.Code</dd>
 
-        <dt>Name</dt>
-        <dd>@Model.Department.Name</dd>
+            <dt>Location</dt>
+            <dd>@Model.Department.Location</dd>
 
-        <dt>Location</dt>
-        <dd>@Model.Department.Location</dd>
+            <dt>Established</dt>
+            <dd><span class="register-dates">@Model.Department.Established.ToString("yyyy-MM-dd")</span></dd>
 
-        <dt>Established</dt>
-        <dd>@Model.Department.Established.ToString("dd MMM yyyy")</dd>
-
-        <dt>Reports to</dt>
-        <dd>
-            @if (Model.Department.ParentDepartmentId is { } parentId)
-            {
-                <a asp-controller="Department" asp-action="Details" asp-route-id="@parentId">
-                    @Model.Department.ParentName
-                </a>
-            }
-            else
-            {
-                <span>Top-level department</span>
-            }
-        </dd>
-
-        <dt>Open headcount</dt>
-        <dd>@Model.DirectHeadcount</dd>
-
-        <dt>Including sub-departments</dt>
-        <dd>@Model.RollupHeadcount</dd>
-
-        <dt>Last Updated</dt>
-        <dd>
-            @if (Model.Department.UpdatedAt == default)
-            {
-                <span>Never Updated</span>
-            }
-            else
-            {
-                <span>@Model.Department.UpdatedAt.ToString("dd MMM yyyy")</span>
-            }
-        </dd>
-    </dl>
-</div>
-
-<div>
-    <a asp-controller="Department" asp-action="Update" asp-route-id="@Model.Department.Id" class="btn btn-warning">Update</a>
-    <a asp-controller="Department" asp-action="Delete" asp-route-id="@Model.Department.Id" class="btn btn-danger">Delete</a>
-    <a asp-controller="Department" asp-action="Index" class="btn btn-secondary">Back to List</a>
-</div>
-
-<h3 class="mt-4">Departments reporting here</h3>
-
-@if (!Model.Children.Any())
-{
-    <p class="text-muted">No department reports here.</p>
-}
-else
-{
-    <div class="table-responsive">
-        <table class="table table-bordered table-sm align-middle">
-            <caption class="visually-hidden">Departments that report to @Model.Department.Name.</caption>
-            <thead class="table-dark">
-                <tr>
-                    <th scope="col">Code</th>
-                    <th scope="col">Department</th>
-                    <th scope="col">Open headcount</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var child in Model.Children)
+            <dt>Reports to</dt>
+            <dd>
+                @if (Model.Department.ParentDepartmentId is { } parentId)
                 {
-                    <tr>
-                        <th scope="row">@child.Code</th>
-                        <td>
-                            <a asp-controller="Department" asp-action="Details" asp-route-id="@child.Id">
-                                @child.Name
-                            </a>
-                        </td>
-                        <td>@child.DirectHeadcount</td>
-                    </tr>
+                    <a asp-controller="Department" asp-action="Details" asp-route-id="@parentId"
+                       class="register-link">@Model.Department.ParentName</a>
                 }
-            </tbody>
-        </table>
+                else
+                {
+                    <span>Top-level department</span>
+                }
+            </dd>
+
+            <dt>Open headcount</dt>
+            <dd>@Model.DirectHeadcount</dd>
+
+            <dt>Including sub-departments</dt>
+            <dd>@Model.RollupHeadcount</dd>
+        </dl>
     </div>
-}
 
-<h3 class="mt-4">Management</h3>
+    <div class="d-flex gap-2 flex-wrap mt-3">
+        <a asp-controller="Department" asp-action="Update" asp-route-id="@Model.Department.Id" class="btn btn-register">Update</a>
+        <a asp-controller="Department" asp-action="Delete" asp-route-id="@Model.Department.Id" class="btn btn-stamp btn-stamp--reject">Delete</a>
+    </div>
 
-<div class="card mb-3">
-    <div class="card-body">
-        <h5 class="card-title">Assign Manager</h5>
+    <h2>Departments reporting here</h2>
 
+    @if (!Model.Children.Any())
+    {
+        <p class="register-empty">No department reports here.</p>
+    }
+    else
+    {
+        <div class="register-panel register-panel--scroll">
+            <div class="table-responsive">
+                <table class="register-table">
+                    <caption class="visually-hidden">Departments that report to @Model.Department.Name.</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Code</th>
+                            <th scope="col">Department</th>
+                            <th scope="col">Open headcount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var child in Model.Children)
+                        {
+                            <tr>
+                                <th scope="row">@child.Code</th>
+                                <td>
+                                    <a asp-controller="Department" asp-action="Details" asp-route-id="@child.Id"
+                                       class="register-link">@child.Name</a>
+                                </td>
+                                <td>@child.DirectHeadcount</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <h2>Management</h2>
+
+    <div class="register-panel">
         @if (!Model.ManagerOptions.Any())
         {
-            <p class="text-muted mb-0">No employees with an open assignment are available to manage this department yet.</p>
+            <p class="register-empty">No employees with an open assignment are available to manage this department yet.</p>
         }
         else
         {
             <form asp-controller="DepartmentManagers" asp-action="Assign" method="post"
-                  class="d-flex flex-wrap align-items-center gap-2"
-                  onsubmit="return confirm('This ends the current manager assignment (if any) and starts the new one today. Continue?');">
-                <select name="ManagerId" required asp-items="Model.ManagerOptions"
-                        class="form-select" style="width: auto;">
+                  class="register-filter"
+                  onsubmit="return confirm('This ends the current manager assignment, if any, and starts the new one today. Continue?');">
+                <label for="manager-select">Manager</label>
+                <select id="manager-select" name="ManagerId" required asp-items="Model.ManagerOptions"
+                        class="form-select">
                     <option value="">Select manager</option>
                 </select>
-                <button type="submit" class="btn btn-primary">Assign</button>
+                <button type="submit" class="btn btn-register">Assign</button>
                 <input type="hidden" name="DepartmentId" value="@Model.Department.Id" />
             </form>
         }
     </div>
-</div>
 
-<partial name="_DepartmentManagerHistory"
-         model="new DepartmentManagerIndexViewModel { Department = Model.Department, Managers = Model.Managers }" />
-
-<div class="mt-3">
-    <a asp-controller="DepartmentManagers" asp-action="Index" asp-route-departmentId="@Model.Department.Id"
-       class="btn btn-outline-secondary">Full Manage Page</a>
-    <a asp-controller="Department" asp-action="Index" class="btn btn-secondary">Back to Departments</a>
+    <partial name="_DepartmentManagerHistory"
+             model="new DepartmentManagerIndexViewModel { Department = Model.Department, Managers = Model.Managers }" />
 </div>

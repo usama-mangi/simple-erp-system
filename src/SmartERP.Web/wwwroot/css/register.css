@@ -1,8 +1,8 @@
-/* Leave register surface for TASK-12.
-   Direction: a bound leave register, ruled ink lines on warm paper with
-   rubber-stamped decisions (design.yaml intent.style). Loaded only by the
-   leave screens and the dashboard absence strip, so the rest of the app is
-   untouched. Tokens first, then treatment, then motion. */
+/* Leave register surface for TASK-12, extended by TASK-17 to the employee
+   and department area.
+   Direction: a bound register, ruled ink lines on warm paper with
+   rubber-stamped decisions (design.yaml intent.style). Tokens first, then
+   treatment, then motion. */
 
 /* Cross-document shared elements: the register header carries between the
    leave screens, and the active status tab morphs so the filter rule slides
@@ -65,6 +65,53 @@
   color: var(--ink-500);
 }
 
+/* Breadcrumb back link: quiet navigation above the title, never a button,
+   so the record's action row keeps exactly two CTAs. 44px tall so it is a
+   legal touch target. */
+.register-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--mono-family);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  text-decoration: none;
+}
+
+.register-back:hover,
+.register-back:focus {
+  color: var(--ink-900);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* In-copy links (row names, parent departments) take the token colour so no
+   Bootstrap #0d6efd survives on a register surface. */
+.register-link {
+  color: var(--blue-700);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.register-link:hover,
+.register-link:focus {
+  color: var(--blue-600);
+}
+
+/* Section headings inside a register surface: engraved serif, hairline rule,
+   one tier under the page title. Headings run h1 to h2 only. */
+.register-surface h2 {
+  font-family: var(--heading-family);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin: 32px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule-200);
+}
+
 /* ---------------------------------------------------------- panel */
 
 .register-panel {
@@ -85,6 +132,68 @@
   font-family: var(--heading-family);
   font-size: 20px;
   color: var(--ink-700);
+}
+
+/* Scrollable register: replaces the inline max-height styles that were
+   scattered across six views, and keeps the column labels on screen while
+   the rows move under them. Only applies inside the scroll modifier so a
+   short table never sticks to the viewport on page scroll. */
+.register-panel--scroll {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.register-panel--scroll .register-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--paper-0);
+}
+
+/* Record sheet: the label/value pair block on detail and confirm pages.
+   Micro-labels left, tabular values right, one hairline per row. */
+.record-sheet {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) 1fr;
+  margin: 0;
+}
+
+.record-sheet dt {
+  padding: 12px 16px 12px 0;
+  border-bottom: 1px solid var(--rule-200);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+.record-sheet dd {
+  margin: 0;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule-200);
+  font-size: 15px;
+  color: var(--ink-900);
+  font-variant-numeric: tabular-nums;
+}
+
+.record-sheet dd .register-dates {
+  font-size: 13px;
+}
+
+@media (max-width: 576px) {
+  .record-sheet {
+    grid-template-columns: 1fr;
+  }
+
+  .record-sheet dt {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .record-sheet dd {
+    padding-top: 4px;
+  }
 }
 
 /* ---------------------------------------------------------- status tabs */
@@ -191,6 +300,25 @@
   align-items: center;
 }
 
+/* Controls that live inside a table row (the close-date forms on the
+   employment and manager histories) keep the 44px floor the buttons have. */
+.register-table .form-control,
+.register-table .form-select {
+  min-height: 44px;
+  border: 1px solid var(--ink-500);
+  border-radius: 4px;
+  background: var(--paper-0);
+  color: var(--ink-900);
+}
+
+.register-table .form-control:focus,
+.register-table .form-select:focus {
+  border-color: var(--blue-700);
+  outline: 2px solid var(--blue-700);
+  outline-offset: 1px;
+  box-shadow: none;
+}
+
 /* ---------------------------------------------------------- stamps */
 
 .stamp {
@@ -210,6 +338,9 @@
 .stamp--pending { color: var(--ochre-700); }
 .stamp--rejected { color: var(--oxblood-700); }
 .stamp--cancelled { color: var(--slate-500); }
+/* An open row in an assignment or manager history: the row is live, not
+   waiting on a decision, so it takes the feedback-success ink with its word. */
+.stamp--current { color: var(--moss-700); }
 
 /* ---------------------------------------------------------- buttons */
 
@@ -255,6 +386,12 @@
 .btn-stamp--reject:hover { color: var(--oxblood-700); background: var(--paper-1); }
 .btn-stamp--cancel { color: var(--slate-500); border-color: var(--slate-500); }
 .btn-stamp--cancel:hover { color: var(--ink-900); }
+
+.btn-stamp:disabled,
+.btn-register:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 
 /* ---------------------------------------------------------- fields */
 
@@ -305,6 +442,75 @@
   min-width: 160px;
 }
 
+/* Form groups use fieldset and legend so the grouping is real, not visual.
+   The legend sits where the section heading would. */
+.register-form fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.register-form legend {
+  font-family: var(--heading-family);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin: 24px 0 12px;
+  padding: 0 0 6px;
+  width: 100%;
+  border-bottom: 1px solid var(--rule-200);
+}
+
+.register-form legend:first-of-type {
+  margin-top: 0;
+}
+
+/* Checkbox row: native input, the label carries the 44px target so the
+   click area is legal. Token accent so the check is not Bootstrap blue. */
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-bottom: 16px;
+}
+
+.check-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex: 0 0 auto;
+  accent-color: var(--blue-700);
+}
+
+.check-row label {
+  margin: 0;
+  cursor: pointer;
+  color: var(--ink-900);
+}
+
+/* Validation summary: oxblood on paper, hidden until it has something to
+   say. The per-field messages keep their own rule under .field. */
+.register-errors {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border: 2px solid var(--oxblood-700);
+  border-radius: 4px;
+  background: var(--paper-1);
+  color: var(--oxblood-700);
+  font-size: 14px;
+}
+
+.register-errors:empty,
+.validation-summary-valid {
+  display: none;
+}
+
+.register-errors ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
 /* ---------------------------------------------------------- balances */
 
 .balance-line {
@@ -345,6 +551,31 @@
   border: 2px solid var(--moss-700);
   border-radius: 4px;
   color: var(--moss-700);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Caution notice: quotes what will happen in the officer's own numbers and
+   words, on the pending ochre. The heading carries the meaning, so the
+   colour is never the only signal. */
+.alert.register-warn {
+  position: relative;
+  background: var(--paper-0);
+  border: 2px solid var(--ochre-700);
+  border-radius: 4px;
+  color: var(--ink-900);
+  max-width: 640px;
+}
+
+.alert.register-warn .warn-word {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 2px 8px;
+  border: 2px solid var(--ochre-700);
+  border-radius: 4px;
+  color: var(--ochre-700);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -454,13 +685,15 @@
 
 .register-header,
 .status-tabs,
-.register-filter {
+.register-filter,
+.alert.register-warn {
   animation: register-panel-in 220ms var(--ease) both;
 }
 
 .register-header { animation-delay: 40ms; }
 .status-tabs { animation-delay: 90ms; }
 .register-filter { animation-delay: 130ms; }
+.alert.register-warn { animation-delay: 170ms; }
 
 .alert.decision-seal {
   animation: seal-press 320ms var(--ease-emph) both;
@@ -474,6 +707,7 @@
   .register-header,
   .status-tabs,
   .register-filter,
+  .alert.register-warn,
   .alert.decision-seal {
     animation: register-fade 120ms linear both !important;
     animation-delay: 0ms !important;
@@ -502,4 +736,11 @@
 .btn-stamp:focus-visible {
   outline: 2px solid var(--blue-700);
   outline-offset: 2px;
+}
+
+/* site.css rings every .btn with a raw #258cfb glow; on a register surface
+   the same two-ring pattern is redrawn from tokens so only ink blue shows. */
+.register-surface .btn:focus,
+.register-surface .btn:active:focus {
+  box-shadow: 0 0 0 0.1rem var(--paper-0), 0 0 0 0.25rem var(--blue-700);
 }

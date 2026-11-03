@@ -3,55 +3,70 @@
 @model DepartmentHierarchyViewModel
 
 @{
-    ViewData["Title"] = "Reporting Structure";
+    ViewData["Title"] = "Reporting structure";
 }
 
-<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-    <h2>Reporting structure</h2>
-    <a asp-controller="Department" asp-action="Index" class="btn btn-secondary">Back to Departments</a>
-</div>
-
-<p class="text-muted">Every department, what it reports to, and the open headcount under it.</p>
-
-@if (!Model.Nodes.Any())
-{
-    <p>No departments are set up yet.</p>
-    <a asp-controller="Department" asp-action="Create" class="btn btn-primary">Create Department</a>
+@section Styles {
+    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
 }
-else
-{
-    <div class="table-responsive">
-        <table class="table table-bordered align-middle">
-            <caption class="visually-hidden">
-                Departments in reporting order, with the department each one reports to and its open headcount.
-            </caption>
-            <thead class="table-dark">
-                <tr>
-                    <th scope="col">Department</th>
-                    <th scope="col">Code</th>
-                    <th scope="col">Reports to</th>
-                    <th scope="col">Open headcount</th>
-                    <th scope="col">Including sub-departments</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var node in Model.Nodes)
-                {
-                    <tr>
-                        <th scope="row" class="fw-normal">
-                            <span class="dept-tree-indent" style="--tree-depth:@node.Depth">
-                                <a asp-controller="Department" asp-action="Details" asp-route-id="@node.Id">
-                                    @node.Name
-                                </a>
-                            </span>
-                        </th>
-                        <td>@node.Code</td>
-                        <td>@(node.ParentName ?? "Top level")</td>
-                        <td>@node.DirectHeadcount</td>
-                        <td>@node.RollupHeadcount</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+
+<div class="register-surface">
+    <a class="register-back" asp-controller="Department" asp-action="Index">Back to register</a>
+
+    <div class="register-header mb-3">
+        <h1 class="register-title">Reporting structure</h1>
+        <p class="register-subtitle mb-1">Every department, what it reports to, and the open headcount under it.</p>
+        <p class="register-meta mb-0">Read @DateTime.Today.ToString("yyyy-MM-dd")</p>
     </div>
-}
+
+    @if (!Model.Nodes.Any())
+    {
+        <div class="register-panel">
+            <p class="register-empty">No departments on the register yet.
+                <a asp-controller="Department" asp-action="Create" class="register-link">Create the first one</a>
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-end mb-3">
+            <a asp-controller="Department" asp-action="Create" class="btn btn-register">Create department</a>
+        </div>
+
+        <div class="register-panel register-panel--scroll">
+            <div class="table-responsive">
+                <table class="register-table">
+                    <caption class="visually-hidden">
+                        Departments in reporting order, with the department each one reports to and its open headcount.
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Department</th>
+                            <th scope="col">Code</th>
+                            <th scope="col">Reports to</th>
+                            <th scope="col">Open headcount</th>
+                            <th scope="col">Including sub-departments</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var node in Model.Nodes)
+                        {
+                            <tr>
+                                <th scope="row" class="fw-normal">
+                                    <span class="dept-tree-indent" style="--tree-depth:@node.Depth">
+                                        <a asp-controller="Department" asp-action="Details" asp-route-id="@node.Id"
+                                           class="register-link">@node.Name</a>
+                                    </span>
+                                </th>
+                                <td>@node.Code</td>
+                                <td>@(node.ParentName ?? "Top level")</td>
+                                <td>@node.DirectHeadcount</td>
+                                <td>@node.RollupHeadcount</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

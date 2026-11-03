@@ -9,114 +9,116 @@
 }
 
 @{
-    ViewData["Title"] = $"Employee - {Model.Employee.FirstName} {Model.Employee.LastName}";
+    ViewData["Title"] = $"Employee register - {Model.Employee.FirstName} {Model.Employee.LastName}";
     var genderTitles = ViewData["GenderTitles"] as Dictionary<double, string>;
-    var departmentTitles = ViewData["DepartmentTitles"] as Dictionary<double, string>;
-    var employmentTypeTitles = ViewData["EmploymentTypeTitles"] as Dictionary<double, string>;
-    var employmentStatusTitles = ViewData["EmploymentStatusTitles"] as Dictionary<double, string>;
+    var updatedMeta = Model.Employee.UpdatedAt == default
+        ? "NOT UPDATED YET"
+        : $"UPDATED {Model.Employee.UpdatedAt:yyyy-MM-dd}";
 }
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <strong>Success!</strong> @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+@section Styles {
+    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
+}
+
+<div class="register-surface">
+    <a class="register-back" asp-controller="Employee" asp-action="Index">Back to register</a>
+
+    <div class="register-header d-flex justify-content-between align-items-end flex-wrap gap-3 mb-3">
+        <div>
+            <h1 class="register-title">@Model.Employee.FirstName @Model.Employee.LastName</h1>
+            <p class="register-meta mb-0">RECORD #@Model.Employee.Id &middot; @updatedMeta</p>
+        </div>
     </div>
-}
 
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <strong>Error!</strong> @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert decision-seal mb-3" role="status">
+            <span class="seal-word">Recorded</span>
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="register-panel">
+        <dl class="record-sheet">
+            <dt>Employee ID</dt>
+            <dd>@Model.Employee.Id</dd>
+
+            <dt>Email</dt>
+            <dd>@Model.Employee.Email</dd>
+
+            <dt>Phone</dt>
+            <dd>@Model.Employee.Phone</dd>
+
+            <dt>Date of birth</dt>
+            <dd><span class="register-dates">@Model.Employee.DateOfBirth.ToString("yyyy-MM-dd")</span></dd>
+
+            <dt>Gender</dt>
+            <dd>@Title(genderTitles, Model.Employee.GenderId)</dd>
+
+            <dt>Address</dt>
+            <dd>@Model.Employee.Address</dd>
+        </dl>
     </div>
-}
 
-<h2>Employee Details</h2>
+    <div class="d-flex gap-2 flex-wrap mt-3">
+        <a asp-controller="Employee" asp-action="Update" asp-route-id="@Model.Employee.Id" class="btn btn-register">Update</a>
+        <a asp-controller="Employee" asp-action="Delete" asp-route-id="@Model.Employee.Id" class="btn btn-stamp btn-stamp--reject">Delete</a>
+    </div>
 
-<div>
-    <dl>
-        <dt>Employee ID</dt>
-        <dd>@Model.Employee.Id</dd>
+    <h2>Employment history</h2>
 
-        <dt>First Name</dt>
-        <dd>@Model.Employee.FirstName</dd>
+    @{
+        // The partial owns the table plus the "Add job" / "change department" zone.
+        ViewData["ShowActions"] = true;
+    }
+    <partial name="_EmploymentHistory" model="Model.History" />
 
-        <dt>Last Name</dt>
-        <dd>@Model.Employee.LastName</dd>
+    <h2>Status history</h2>
 
-        <dt>Email</dt>
-        <dd>@Model.Employee.Email</dd>
+    <div class="register-panel register-panel--scroll">
+        @if (!Model.StatusEvents.Any())
+        {
+            <p class="register-empty">No status changes recorded yet.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="register-table">
+                    <caption class="visually-hidden">Status changes for this employee, oldest first.</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">When</th>
+                            <th scope="col">From</th>
+                            <th scope="col">To</th>
+                            <th scope="col">Note</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ev in Model.StatusEvents)
+                        {
+                            <tr>
+                                <td class="register-dates">@ev.ChangedAt.ToString("yyyy-MM-dd")</td>
+                                <td>@(ev.FromStatusTitle ?? "First status")</td>
+                                <td>@ev.ToStatusTitle</td>
+                                <td>@(string.IsNullOrWhiteSpace(ev.Note) ? "—" : ev.Note)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
 
-        <dt>Phone</dt>
-        <dd>@Model.Employee.Phone</dd>
-
-        <dt>Date of Birth</dt>
-        <dd>@Model.Employee.DateOfBirth.ToShortDateString()</dd>
-
-        <dt>Gender</dt>
-        <dd>@Title(genderTitles, Model.Employee.GenderId)</dd>
-
-        <dt>Address</dt>
-        <dd>@Model.Employee.Address</dd>
-
-        <dt>Last Updated</dt>
-        <dd>
-            @if (Model.Employee.UpdatedAt == default)
-            {
-                <span>Never Updated</span>
-            }
-            else
-            {
-                <span>@Model.Employee.UpdatedAt.ToString("dd MMM yyyy")</span>
-            }
-        </dd>
-    </dl>
-</div>
-
-<div>
-    <a asp-controller="Employee" asp-action="Update" asp-route-id="@Model.Employee.Id" class="btn btn-warning">Update</a>
-    <a asp-controller="Leave" asp-action="Index" asp-route-employeeId="@Model.Employee.Id" class="btn btn-outline-primary">Leave requests</a>
-    <a asp-controller="Employee" asp-action="Delete" asp-route-id="@Model.Employee.Id" class="btn btn-danger">Delete</a>
-    <a asp-controller="Employee" asp-action="Index" class="btn btn-secondary">Back to List</a>
-</div>
-
-<h3 class="mt-4">Employment History</h3>
-
-@{
-    // The partial owns the table plus the "Add job" / "change department" zone.
-    ViewData["ShowActions"] = true;
-}
-<partial name="_EmploymentHistory" model="Model.History" />
-
-<h3 class="mt-4">Status history</h3>
-<div class="table-responsive">
-    <table class="table table-bordered table-hover">
-        <thead>
-            <tr>
-                <th scope="col">When</th>
-                <th scope="col">From</th>
-                <th scope="col">To</th>
-                <th scope="col">Note</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (!Model.StatusEvents.Any())
-            {
-                <tr><td colspan="4" class="text-center">No status changes recorded yet.</td></tr>
-            }
-            else
-            {
-                @foreach (var ev in Model.StatusEvents)
-                {
-                    <tr>
-                        <td>@ev.ChangedAt.ToString("yyyy-MM-dd")</td>
-                        <td>@(ev.FromStatusTitle ?? "First status")</td>
-                        <td>@ev.ToStatusTitle</td>
-                        <td>@(string.IsNullOrWhiteSpace(ev.Note) ? "—" : ev.Note)</td>
-                    </tr>
-                }
-            }
-        </tbody>
-    </table>
+    <p class="mt-3 mb-0">
+        <a asp-controller="Leave" asp-action="Index" asp-route-employeeId="@Model.Employee.Id"
+           class="register-link">Leave requests for this employee</a>
+    </p>
 </div>

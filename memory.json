@@ -90,6 +90,16 @@
       "text": "Auth: cookie-based (AddAuthentication/AddCookie), LoginPath /Auth/Login. ICurrentUser (scoped) reads ClaimsPrincipal; HttpContextCurrentUser provides uid/eid/role/name. IConnectionContext (singleton) holds AsyncLocal client identifier; OracleDbConnection sets DBMS_SESSION.SET_IDENTIFIER on open so audit triggers record the signed-in username. PasswordService uses static Rfc2898DeriveBytes.Pbkdf2 (100k, SHA-256, 16-byte salt, 32-byte hash), stored base64(salt):base64(hash), verified with FixedTimeEquals. app_users is 1:1 with employees (unique FK), role check in Admin/HR/Viewer. audit_log written by AFTER triggers on employees, departments, employment_details, department_managers, leave_requests, leave_balances, app_users: table_name, pk_value, action, changed_by (NVL client identifier, 'anonymous' fallback), changed_at. Default seeded admin: username ali.khan, password ChangeMe123! (hash seeded in 04_seed.sql). Destructive actions require Admin role.",
       "cat": "architecture",
       "updated": "2026-11-02T06:55:33.725936+00:00"
+    },
+    "js-confirm-static": {
+      "text": "Razor: never interpolate @Model values into JS strings inside HTML attributes or <script> blocks (stored XSS / string breakout; HTML attribute entity-decoding re-arms quotes before JS parses, and <script> is raw text). Confirmation dialogs stay static strings; names stay on screen, not in confirm(). Found and fixed in TASK-17 review (Employee/Delete).",
+      "cat": "lesson",
+      "updated": "2026-11-03T05:58:00.317622+00:00"
+    },
+    "register-css-system": {
+      "text": "register.css is the single system stylesheet (leave.css renamed in TASK-17). Panels: .register-panel for entrance + .register-panel--scroll owns max-height/overflow and sticky thead (replaces all inline max-height styles). .check-row gives native checkboxes a 44px label target (accent-color blue-700); label and input both bind asp-for so ids always pair. .register-back breadcrumb replaces back buttons on record pages; record rows link the name (Fitts/Hick), drop Details buttons. Dashboard was out of scope and still has inline max-height styles.",
+      "cat": "pattern",
+      "updated": "2026-11-03T05:58:00.458882+00:00"
     }
   }
 }

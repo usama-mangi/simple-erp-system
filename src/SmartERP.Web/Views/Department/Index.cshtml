@@ -2,77 +2,92 @@
 
 @model IEnumerable<Department>;
 
-<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-    <h2>Department Registry</h2>
-    <div>
-        <a asp-controller="Department" asp-action="Hierarchy" class="btn btn-outline-secondary">
-            Reporting structure
-        </a>
-        <a asp-controller="Department" asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus"></i>
-            Create Department
-        </a>
-    </div>
-</div>
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <strong>Success!</strong> @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+@{
+    ViewData["Title"] = "Department register";
 }
 
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <strong>Error!</strong> @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
 }
 
-<div class="table-responsive">
-    <table class="table table-bordered table-hovered align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th scope="col">Code</th>
-                <th scope="col">Name</th>
-                <th scope="col">Reports to</th>
-                <th scope="col">Location</th>
-                <th scope="col">Established</th>
-                <th scope="col">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var dept in Model)
-            {
-                <tr>
-                    <th scope="col">@dept.Code</th>
-                    <td>@dept.Name</td>
-                    <td>@(dept.ParentName ?? "Top level")</td>
-                    <td>@dept.Location</td>
-                    <td>@dept.Established.ToString("dd-mm-yyyy")</td>
-                    <td class="justify-space-between">
-                        <a asp-controller="Department" asp-action="Details" asp-route-id="@dept.Id">
-                            <i class="bi bi-layout-text-window"></i>
-                        </a>
-                        <a asp-controller="DepartmentManagers" asp-action="Index" asp-route-departmentId="@dept.Id">
-                            <i class="bi bi-people"></i>
-                        </a>
-                        <a asp-controller="Department" asp-action="Update" asp-route-id="@dept.Id">
-                            <i class="bi bi-pen"></i>
-                        </a>
-                        <form asp-controller="Department" asp-action="Delete" asp-route-id="@dept.Id" method="post"
-                              style="display: inline;" onsubmit="return confirm(" Are you sure you want to delete
-                              department?")">
-                            <button asp-controller="Department" asp-action="Delete" asp-route-id="@dept.Id"
-                                    class="btn bg-transparent border-none text-primary">
-                                <i class="bi bi-trash3"></i>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+<div class="register-surface">
+    <div class="register-header d-flex justify-content-between align-items-end flex-wrap gap-3 mb-3">
+        <div>
+            <h1 class="register-title">Department register</h1>
+            <p class="register-subtitle mb-1">Every department, what reports into it, and where it is based.</p>
+            <p class="register-meta mb-0">Read @DateTime.Today.ToString("yyyy-MM-dd")</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-controller="Department" asp-action="Hierarchy" class="btn btn-stamp">Reporting structure</a>
+            <a asp-controller="Department" asp-action="Create" class="btn btn-register">Create department</a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert decision-seal mb-3" role="status">
+            <span class="seal-word">Recorded</span>
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="register-panel register-panel--scroll">
+        @if (!Model.Any())
+        {
+            <p class="register-empty">No departments on the register yet.
+                <a asp-controller="Department" asp-action="Create" class="register-link">Create the first one</a>
+            </p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="register-table">
+                    <caption class="visually-hidden">Every department on the register, with code, reporting line, location and start year.</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Code</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Reports to</th>
+                            <th scope="col">Location</th>
+                            <th scope="col">Established</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var dept in Model)
+                        {
+                            <tr>
+                                <th scope="row">@dept.Code</th>
+                                <td>
+                                    <a asp-controller="Department" asp-action="Details" asp-route-id="@dept.Id"
+                                       class="register-link">@dept.Name</a>
+                                </td>
+                                <td>@(dept.ParentName ?? "Top level")</td>
+                                <td>@dept.Location</td>
+                                <td class="register-dates">@dept.Established.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    <div class="register-actions">
+                                        <a asp-controller="DepartmentManagers" asp-action="Index" asp-route-departmentId="@dept.Id" class="btn btn-stamp">Managers</a>
+                                        <a asp-controller="Department" asp-action="Update" asp-route-id="@dept.Id" class="btn btn-stamp">Update</a>
+                                        <form asp-controller="Department" asp-action="Delete" asp-route-id="@dept.Id" method="post" class="d-inline"
+                                              onsubmit="return confirm('Remove this department from the register?')">
+                                            <button type="submit" class="btn btn-stamp btn-stamp--reject">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
 </div>
