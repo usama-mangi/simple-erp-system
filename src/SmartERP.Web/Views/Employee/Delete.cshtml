@@ -25,7 +25,7 @@
             <dd>
                 @if (Model.HasDependencies)
                 {
-                    <span>Employment history, management assignments and leave history</span>
+                    <span>Employment history, management assignments, leave history and documents</span>
                 }
                 else
                 {
@@ -39,9 +39,9 @@
     {
         <div class="alert register-warn mb-3" role="alert">
             <span class="warn-word">Dependents</span>
-            This employee has employment history and management assignments pointing to
-            them. A hard delete removes those records too, permanently. The soft delete
-            below leaves them intact.
+            This employee has employment history, management assignments, leave history
+            or documents pointing to them. A hard delete removes those records too,
+            permanently. The soft delete below leaves them intact.
         </div>
     }
 
@@ -69,7 +69,7 @@
                     I understand this permanently removes <strong>@Model.DisplayName</strong> and every dependent record.
                 </label>
             </div>
-            <p id="hardDeleteHelp" class="form-text mb-3">Employment records, management assignments and leave history will be deleted too.</p>
+            <p id="hardDeleteHelp" class="form-text mb-3">Employment records, management assignments, leave history and documents will be deleted too.</p>
 
             <button type="submit" class="btn btn-stamp btn-stamp--reject" id="hardDeleteButton" disabled>
                 Delete with dependencies

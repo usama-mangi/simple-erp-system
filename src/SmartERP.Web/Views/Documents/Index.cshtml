@@ -1,0 +1,111 @@
+@using SmartERP.Data.Models
+@using SmartERP.Web.Models
+
+@model DocumentsIndexViewModel;
+
+@functions {
+    private static string DaysLeft(Document d)
+        => d.ExpiresAt is { } e ? (e.Date - DateTime.Today).Days.ToString() : "—";
+
+    private static (string Css, string Word) StampFor(Document d)
+    {
+        if (d.ExpiresAt is not { } e) return ("stamp--current", "Valid");
+        var days = (e.Date - DateTime.Today).Days;
+        if (days < 0) return ("stamp--rejected", "Expired");
+        if (days <= 30) return ("stamp--pending", "Due soon");
+        return ("stamp--current", "Valid");
+    }
+}
+
+@{
+    ViewData["Title"] = $"Documents - {Model.EmployeeName}";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
+}
+
+<div class="register-surface">
+    <a class="register-back" asp-controller="Employee" asp-action="Details" asp-route-id="@Model.EmployeeId">Back to employee</a>
+
+    <div class="register-header d-flex justify-content-between align-items-end flex-wrap gap-3 mb-3">
+        <div>
+            <h1 class="register-title">Documents</h1>
+            <p class="register-subtitle mb-1">Every document for @Model.EmployeeName, with expiry dates where they apply.</p>
+            <p class="register-meta mb-0">EMPLOYEE #@Model.EmployeeId</p>
+        </div>
+        <div>
+            <a asp-controller="Documents" asp-action="Create" asp-route-employeeId="@Model.EmployeeId"
+               class="btn btn-register">Add document</a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert decision-seal mb-3" role="status">
+            <span class="seal-word">Recorded</span>
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="register-panel register-panel--scroll">
+        @if (!Model.Documents.Any())
+        {
+            <p class="register-empty">No documents on the record yet.
+                <a asp-controller="Documents" asp-action="Create" asp-route-employeeId="@Model.EmployeeId" class="register-link">Add the first one</a>
+            </p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="register-table">
+                    <caption class="visually-hidden">Documents for @Model.EmployeeName, soonest expiry first.</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Document</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Issued</th>
+                            <th scope="col">Expires</th>
+                            <th scope="col" class="text-end">Days left</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var doc in Model.Documents)
+                        {
+                            var stamp = StampFor(doc);
+                            <tr>
+                                <td>@doc.Title</td>
+                                <td>@doc.TypeTitle</td>
+                                <td class="register-dates">@(doc.IssuedOn?.ToString("yyyy-MM-dd") ?? "—")</td>
+                                <td class="register-dates">@(doc.ExpiresAt?.ToString("yyyy-MM-dd") ?? "—")</td>
+                                <td class="text-end register-days">@DaysLeft(doc)</td>
+                                <td><span class="stamp @stamp.Css">@stamp.Word</span></td>
+                                <td>
+                                    <div class="register-actions">
+                                        <a asp-controller="Documents" asp-action="Edit" asp-route-id="@doc.Id" class="btn btn-stamp">Edit</a>
+                                        <form asp-controller="Documents" asp-action="Delete" asp-route-id="@doc.Id" method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Remove this document from the register?');">
+                                            <input type="hidden" name="employeeId" value="@Model.EmployeeId" />
+                                            <button type="submit" class="btn btn-stamp btn-stamp--reject">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,73 @@
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@model DocumentViewModel;
+@{
+    ViewData["Title"] = $"Edit document - {Model.Title}";
+    var types = (IEnumerable<SelectListItem>)ViewData["DocumentTypes"]!;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
+}
+
+<div class="register-surface">
+    <a class="register-back" asp-controller="Documents" asp-action="Index" asp-route-employeeId="@Model.EmployeeId">Back to documents</a>
+
+    <div class="register-header mb-3">
+        <h1 class="register-title">Edit document</h1>
+        <p class="register-subtitle mb-1">Updates land on the register the moment you save.</p>
+        <p class="register-meta mb-0">RECORD #@Model.Id</p>
+    </div>
+
+    <div class="register-panel register-form">
+        <form asp-controller="Documents" asp-action="Edit" method="post">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="EmployeeId" />
+
+            <div asp-validation-summary="ModelOnly" class="register-errors" role="alert"></div>
+
+            <div class="field">
+                <label asp-for="TypeId">Type</label>
+                <select asp-for="TypeId" asp-items="types" class="form-select">
+                    <option value="">Select type</option>
+                </select>
+                <span asp-validation-for="TypeId" class="text-danger"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="Title"></label>
+                <input asp-for="Title" type="text" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="IssuedOn"></label>
+                <input asp-for="IssuedOn" type="date" class="form-control" />
+                <span asp-validation-for="IssuedOn" class="text-danger"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="ExpiresAt"></label>
+                <input asp-for="ExpiresAt" type="date" class="form-control" />
+                <span asp-validation-for="ExpiresAt" class="text-danger"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="Note"></label>
+                <input asp-for="Note" type="text" class="form-control" />
+                <span asp-validation-for="Note" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="submit" class="btn btn-register">Save changes</button>
+                <a asp-action="Index" asp-route-employeeId="@Model.EmployeeId" class="btn btn-stamp">Back to documents</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

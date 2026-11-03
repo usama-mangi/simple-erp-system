@@ -212,6 +212,27 @@ screens:
     uses_components: [RegisterPanel]
     slop_scan: clean
     hci_scan: pass
+  DocumentsIndex:
+    dominant_action: read
+    dominant_message: Every document for one person, expiring soonest first
+    ctas: 1
+    uses_components: [RegisterPanel]
+    slop_scan: clean
+    hci_scan: pass
+  DocumentsCreate:
+    dominant_action: submit
+    dominant_message: One document's metadata, typed and dated
+    ctas: 2
+    uses_components: [RegisterPanel, LedgerField]
+    slop_scan: clean
+    hci_scan: pass
+  DocumentsEdit:
+    dominant_action: submit
+    dominant_message: Corrections to one document's metadata, saved in place
+    ctas: 2
+    uses_components: [RegisterPanel, LedgerField]
+    slop_scan: clean
+    hci_scan: pass
   EmployeeIndex:
     dominant_action: read
     dominant_message: Everyone on the books, with current contact details
@@ -307,6 +328,7 @@ screens:
 log:
   last_updated: "2026-11-03"
   recent_changes:
+    - "TASK-18 added the document vault: three screens above reusing RegisterPanel and LedgerField; the expiry watchlist joins the dashboard's action-lists without a new component."
     - "TASK-17 remediated the employee and department area onto the register system; every screen sets a title, lists have empty states with a Create path, record pages use a breadcrumb and the RecordSheet, feedback matches decision-seal, and all 13 screens plus the RecordSheet component are recorded above."
     - "TASK-17 added stamp.current (moss ink, open assignment or manager row) and the text.link token; no existing token was changed."
     - "TASK-13 added the reporting-structure screen, reusing RegisterPanel and the existing tokens; indentation is decorative and the Reports to column carries the relationship."
