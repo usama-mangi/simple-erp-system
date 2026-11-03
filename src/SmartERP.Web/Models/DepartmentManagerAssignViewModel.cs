@@ -8,8 +8,8 @@ namespace SmartERP.Web.Models;
 public class DepartmentManagerAssignViewModel
 {
     [Required(ErrorMessage = "Invalid department provided.")]
-    public double DepartmentId { get; set; }
+    public decimal DepartmentId { get; set; }
 
     [Range(1, double.MaxValue, ErrorMessage = "Please choose a manager.")]
-    public double ManagerId { get; set; }
+    public decimal ManagerId { get; set; }
 }

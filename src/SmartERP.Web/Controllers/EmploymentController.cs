@@ -20,7 +20,7 @@ public class EmploymentController(
 {
 
     [HttpGet]
-    public async Task<IActionResult> Index(double employeeId)
+    public async Task<IActionResult> Index(decimal employeeId)
     {
         try
         {
@@ -46,7 +46,7 @@ public class EmploymentController(
     }
 
     [HttpGet]
-    public async Task<IActionResult> Create(double employeeId)
+    public async Task<IActionResult> Create(decimal employeeId)
     {
         try
         {

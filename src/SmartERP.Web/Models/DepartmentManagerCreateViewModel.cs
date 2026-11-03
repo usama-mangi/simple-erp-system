@@ -6,11 +6,11 @@ namespace SmartERP.Web.Models;
 public class DepartmentManagerCreateViewModel : IValidatableObject
 {
     [Required(ErrorMessage = "Invalid department provided.")]
-    public double DepartmentId { get; set; }
+    public decimal DepartmentId { get; set; }
 
     [Display(Name = "Manager")]
     [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a manager.")]
-    public double ManagerId { get; set; }
+    public decimal ManagerId { get; set; }
 
     [Display(Name = "Start date")]
     [Required(ErrorMessage = "Please provide the start date.")]

@@ -6,10 +6,10 @@ namespace SmartERP.Web.Models;
 public class EmploymentDetailCreateViewModel : IValidatableObject
 {
     [Required(ErrorMessage = "Invalid employee provided.")]
-    public double EmployeeId { get; set; }
+    public decimal EmployeeId { get; set; }
 
     [Display(Name = "Position")]
-    public double PositionId { get; set; }
+    public decimal PositionId { get; set; }
 
     [Display(Name = "Salary")]
     [Range(0, (double)decimal.MaxValue, ErrorMessage = "Salary cannot be negative.")]
@@ -32,15 +32,15 @@ public class EmploymentDetailCreateViewModel : IValidatableObject
 
     [Display(Name = "Department")]
     [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a department.")]
-    public double DepartmentId { get; set; }
+    public decimal DepartmentId { get; set; }
 
     [Display(Name = "Employment type")]
     [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a valid employment type.")]
-    public double EmploymentTypeId { get; set; }
+    public decimal EmploymentTypeId { get; set; }
 
     [Display(Name = "Employment status")]
     [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a valid employment status.")]
-    public double EmploymentStatusId { get; set; }
+    public decimal EmploymentStatusId { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

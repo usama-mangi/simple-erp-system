@@ -8,7 +8,7 @@ namespace SmartERP.Web.Models;
 public class DepartmentManagerCloseViewModel
 {
     [Required(ErrorMessage = "Invalid department provided.")]
-    public double DepartmentId { get; set; }
+    public decimal DepartmentId { get; set; }
 
     [Required(ErrorMessage = "Please provide the end date.")]
     [DateRangeInPast(null, ErrorMessage = "End date must be today or a past date.")]

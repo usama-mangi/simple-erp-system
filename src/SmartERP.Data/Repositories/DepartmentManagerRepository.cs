@@ -34,7 +34,7 @@ public class DepartmentManagerRepository(
             LEFT JOIN
                 departments d ON dm.department_id = d.id";
 
-    public async Task<DepartmentManager?> GetCurrentByDepartmentAsync(double departmentId)
+    public async Task<DepartmentManager?> GetCurrentByDepartmentAsync(decimal departmentId)
     {
         // uq_dept_current_manager guarantees at most one OPEN row per manager;
         // a department may legally show none, so a miss returns null.
@@ -71,7 +71,7 @@ public class DepartmentManagerRepository(
         }
     }
 
-    public async Task<IEnumerable<DepartmentManager>> GetHistoryAsync(double departmentId)
+    public async Task<IEnumerable<DepartmentManager>> GetHistoryAsync(decimal departmentId)
     {
         // Order: open row first, then history from most recent to oldest.
         string query = $@"
@@ -112,7 +112,7 @@ public class DepartmentManagerRepository(
         }
     }
 
-    public async Task<DepartmentManager?> GetByIdAsync(double id)
+    public async Task<DepartmentManager?> GetByIdAsync(decimal id)
     {
         string query = $@"
             SELECT {SelectColumns} {FromClause}
@@ -177,8 +177,8 @@ public class DepartmentManagerRepository(
                 command.Transaction = (OracleTransaction)transaction;
 
                 // Positional IN parameters (BindByName has no meaning for procs).
-                command.Parameters.Add(new OracleParameter("p_department_id", OracleDbType.Double) { Value = assignment.DepartmentId });
-                command.Parameters.Add(new OracleParameter("p_employee_id", OracleDbType.Double) { Value = assignment.ManagerId });
+                command.Parameters.Add(new OracleParameter("p_department_id", OracleDbType.Decimal) { Value = assignment.DepartmentId });
+                command.Parameters.Add(new OracleParameter("p_employee_id", OracleDbType.Decimal) { Value = assignment.ManagerId });
                 command.Parameters.Add(new OracleParameter("p_start_date", OracleDbType.Date) { Value = assignment.StartDate });
 
                 await command.ExecuteNonQueryAsync();
@@ -230,15 +230,15 @@ public class DepartmentManagerRepository(
                 {
                     closeCommand.Transaction = (OracleTransaction)transaction;
                     closeCommand.Parameters.Add(":EndDate", OracleDbType.Date, assignment.EndDate!.Value, ParameterDirection.Input);
-                    closeCommand.Parameters.Add(":DepartmentId", OracleDbType.Double, assignment.DepartmentId, ParameterDirection.Input);
+                    closeCommand.Parameters.Add(":DepartmentId", OracleDbType.Decimal, assignment.DepartmentId, ParameterDirection.Input);
                     await closeCommand.ExecuteNonQueryAsync();
                 }
 
                 using (var insertCommand = new OracleCommand(insertQuery, (OracleConnection)connection))
                 {
                     insertCommand.Transaction = (OracleTransaction)transaction;
-                    insertCommand.Parameters.Add(":DepartmentId", OracleDbType.Double, assignment.DepartmentId, ParameterDirection.Input);
-                    insertCommand.Parameters.Add(":ManagerId", OracleDbType.Double, assignment.ManagerId, ParameterDirection.Input);
+                    insertCommand.Parameters.Add(":DepartmentId", OracleDbType.Decimal, assignment.DepartmentId, ParameterDirection.Input);
+                    insertCommand.Parameters.Add(":ManagerId", OracleDbType.Decimal, assignment.ManagerId, ParameterDirection.Input);
                     insertCommand.Parameters.Add(":StartDate", OracleDbType.Date, assignment.StartDate, ParameterDirection.Input);
                     insertCommand.Parameters.Add(":EndDate", OracleDbType.Date, assignment.EndDate!.Value, ParameterDirection.Input);
                     await insertCommand.ExecuteNonQueryAsync();
@@ -266,7 +266,7 @@ public class DepartmentManagerRepository(
         }
     }
 
-    public async Task EndCurrentAsync(double departmentId, DateOnly endDate)
+    public async Task EndCurrentAsync(decimal departmentId, DateOnly endDate)
     {
         // Department-scoped close: only the open row is touched; closed history
         // stays immutable and repeated closes fail loudly instead of silently
@@ -289,7 +289,7 @@ public class DepartmentManagerRepository(
             };
 
             command.Parameters.Add(":EndDate", OracleDbType.Date, endDate.ToDateTime(TimeOnly.MinValue), ParameterDirection.Input);
-            command.Parameters.Add(":DepartmentId", OracleDbType.Double, departmentId, ParameterDirection.Input);
+            command.Parameters.Add(":DepartmentId", OracleDbType.Decimal, departmentId, ParameterDirection.Input);
 
             var affected = await command.ExecuteNonQueryAsync();
 
@@ -316,12 +316,12 @@ public class DepartmentManagerRepository(
 
         return new DepartmentManager
         {
-            Id = reader.GetDouble(reader.GetOrdinal("id")),
-            DepartmentId = reader.GetDouble(reader.GetOrdinal("department_id")),
+            Id = reader.GetDecimal(reader.GetOrdinal("id")),
+            DepartmentId = reader.GetDecimal(reader.GetOrdinal("department_id")),
             DepartmentName = reader.IsDBNull(reader.GetOrdinal("department_name"))
                 ? string.Empty
                 : reader.GetString(reader.GetOrdinal("department_name")),
-            ManagerId = reader.GetDouble(reader.GetOrdinal("manager_id")),
+            ManagerId = reader.GetDecimal(reader.GetOrdinal("manager_id")),
             ManagerName = reader.IsDBNull(reader.GetOrdinal("manager_name"))
                 ? string.Empty
                 : reader.GetString(reader.GetOrdinal("manager_name")),

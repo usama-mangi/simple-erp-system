@@ -4,14 +4,14 @@
 @model EmploymentIndexViewModel;
 
 @functions {
-    private static string Title(Dictionary<double, string>? titles, double id)
+    private static string Title(Dictionary<decimal, string>? titles, decimal id)
         => titles is not null && titles.TryGetValue(id, out var title) ? title : "Unknown";
 }
 
 @{
-    var departmentTitles = ViewData["DepartmentTitles"] as Dictionary<double, string>;
-    var employmentTypeTitles = ViewData["EmploymentTypeTitles"] as Dictionary<double, string>;
-    var employmentStatusTitles = ViewData["EmploymentStatusTitles"] as Dictionary<double, string>;
+    var departmentTitles = ViewData["DepartmentTitles"] as Dictionary<decimal, string>;
+    var employmentTypeTitles = ViewData["EmploymentTypeTitles"] as Dictionary<decimal, string>;
+    var employmentStatusTitles = ViewData["EmploymentStatusTitles"] as Dictionary<decimal, string>;
 
     // Only the employee details page sets this: it owns the "Add job" and
     // "change department" composition. Plain history pages keep their own

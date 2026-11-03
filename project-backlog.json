@@ -41,7 +41,7 @@
     {
       "id": "TASK-05",
       "title": "Refactor ids from double to decimal across models, repos and controllers",
-      "status": "to-do",
+      "status": "closed",
       "dependencies": [
         "[\"TASK-01\"]"
       ],
@@ -140,8 +140,22 @@
     }
   ],
   "log": {
-    "last_updated": "2026-11-03T05:57:52.321728+00:00",
+    "last_updated": "2026-11-03T06:25:13.292480+00:00",
     "recent_changes": [
+      {
+        "action": "update",
+        "task": "TASK-05",
+        "old_status": "active",
+        "new_status": "closed",
+        "at": "2026-11-03T06:25:13.292462+00:00"
+      },
+      {
+        "action": "update",
+        "task": "TASK-05",
+        "old_status": "to-do",
+        "new_status": "active",
+        "at": "2026-11-03T06:06:03.824262+00:00"
+      },
       {
         "action": "update",
         "task": "TASK-17",
@@ -182,20 +196,6 @@
         "old_status": "active",
         "new_status": "closed",
         "at": "2026-11-02T06:21:42.980542+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-14",
-        "old_status": "to-do",
-        "new_status": "active",
-        "at": "2026-11-02T05:54:55.209727+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-13",
-        "old_status": "active",
-        "new_status": "closed",
-        "at": "2026-11-02T05:41:27.913039+00:00"
       }
     ]
   }

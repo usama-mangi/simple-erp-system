@@ -3,13 +3,13 @@
 @model IEnumerable<Employee>;
 
 @functions {
-    private static string Title(Dictionary<double, string>? titles, double id)
+    private static string Title(Dictionary<decimal, string>? titles, decimal id)
         => titles is not null && titles.TryGetValue(id, out var title) ? title : "Unknown";
 }
 
 @{
     ViewData["Title"] = "Employee register";
-    var genderTitles = ViewData["GenderTitles"] as Dictionary<double, string>;
+    var genderTitles = ViewData["GenderTitles"] as Dictionary<decimal, string>;
 }
 
 @section Styles {

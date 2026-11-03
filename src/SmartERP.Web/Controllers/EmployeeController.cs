@@ -35,7 +35,7 @@ public class EmployeeController(
     }
 
     [HttpGet]
-    public async Task<IActionResult> Details(double id)
+    public async Task<IActionResult> Details(decimal id)
     {
         try
         {
@@ -150,7 +150,7 @@ public class EmployeeController(
     }
 
     [HttpGet]
-    public async Task<IActionResult> Update(double id)
+    public async Task<IActionResult> Update(decimal id)
     {
         try
         {
@@ -218,7 +218,7 @@ public class EmployeeController(
     }
 
     [HttpGet]
-    public async Task<IActionResult> Delete(double id)
+    public async Task<IActionResult> Delete(decimal id)
     {
         try
         {
@@ -354,6 +354,6 @@ public class EmployeeController(
         ViewData["DepartmentTitles"] = departments.ToDictionary(d => d.Id, d => d.Name);
     }
 
-    private static string Title(Dictionary<double, string>? titles, double id)
+    private static string Title(Dictionary<decimal, string>? titles, decimal id)
         => titles is not null && titles.TryGetValue(id, out var title) ? title : "Unknown";
 }

@@ -14,9 +14,9 @@ internal static class StatusEventWriter
     public static async Task InsertAsync(
         OracleConnection connection,
         OracleTransaction transaction,
-        double employeeId,
-        double? fromStatusId,
-        double toStatusId,
+        decimal employeeId,
+        decimal? fromStatusId,
+        decimal toStatusId,
         DateTime changedAt,
         string? note)
     {
@@ -25,11 +25,11 @@ internal static class StatusEventWriter
             BindByName = true,
             Transaction = transaction
         };
-        command.Parameters.Add(":EmployeeId", OracleDbType.Double, employeeId, System.Data.ParameterDirection.Input);
-        command.Parameters.Add(":FromStatusId", OracleDbType.Double,
+        command.Parameters.Add(":EmployeeId", OracleDbType.Decimal, employeeId, System.Data.ParameterDirection.Input);
+        command.Parameters.Add(":FromStatusId", OracleDbType.Decimal,
             fromStatusId is { } v ? v : (object)DBNull.Value,
             System.Data.ParameterDirection.Input);
-        command.Parameters.Add(":ToStatusId", OracleDbType.Double, toStatusId, System.Data.ParameterDirection.Input);
+        command.Parameters.Add(":ToStatusId", OracleDbType.Decimal, toStatusId, System.Data.ParameterDirection.Input);
         command.Parameters.Add(":ChangedAt", OracleDbType.TimeStamp, changedAt, System.Data.ParameterDirection.Input);
         command.Parameters.Add(":Note", OracleDbType.Varchar2, (object?)note ?? DBNull.Value, System.Data.ParameterDirection.Input);
         await command.ExecuteNonQueryAsync();

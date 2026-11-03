@@ -19,7 +19,7 @@ public class LeaveController(
 ) : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> Index(double? employeeId, double? statusId)
+    public async Task<IActionResult> Index(decimal? employeeId, decimal? statusId)
     {
         try
         {
@@ -76,7 +76,7 @@ public class LeaveController(
     }
 
     [HttpGet]
-    public async Task<IActionResult> Create(double? employeeId)
+    public async Task<IActionResult> Create(decimal? employeeId)
     {
         try
         {
@@ -192,7 +192,7 @@ public class LeaveController(
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Approve(double id, double? employeeId, double? statusId)
+    public async Task<IActionResult> Approve(decimal id, decimal? employeeId, decimal? statusId)
     {
         try
         {
@@ -259,7 +259,7 @@ public class LeaveController(
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Reject(double id, double? employeeId, double? statusId)
+    public async Task<IActionResult> Reject(decimal id, decimal? employeeId, decimal? statusId)
     {
         try
         {
@@ -285,7 +285,7 @@ public class LeaveController(
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Cancel(double id, double? employeeId, double? statusId)
+    public async Task<IActionResult> Cancel(decimal id, decimal? employeeId, decimal? statusId)
     {
         try
         {
@@ -324,7 +324,7 @@ public class LeaveController(
     }
 
     [HttpGet]
-    public async Task<IActionResult> Balances(double employeeId, int? year)
+    public async Task<IActionResult> Balances(decimal employeeId, int? year)
     {
         try
         {
@@ -437,7 +437,7 @@ public class LeaveController(
 
     private static LeaveStatusIds ResolveStatuses(IEnumerable<LookupItem> statuses)
     {
-        double IdOf(string title)
+        decimal IdOf(string title)
             => statuses.FirstOrDefault(s => s.Title == title)?.Id
                ?? throw new InvalidOperationException($"leave_statuses has no '{title}' row.");
 

@@ -25,7 +25,7 @@ public class DepartmentCreateViewModel
     public DateTime Established { get; set; }
 
     // Null creates a top-level department.
-    public double? ParentDepartmentId { get; set; }
+    public decimal? ParentDepartmentId { get; set; }
 
     public IEnumerable<SelectListItem> ParentOptions { get; set; } = Enumerable.Empty<SelectListItem>();
 }

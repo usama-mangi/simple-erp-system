@@ -10,9 +10,9 @@ public class LeaveIndexViewModel
 {
     public IEnumerable<LeaveRequest> Requests { get; set; } = Enumerable.Empty<LeaveRequest>();
 
-    public double? EmployeeId { get; set; }
+    public decimal? EmployeeId { get; set; }
 
-    public double? StatusId { get; set; }
+    public decimal? StatusId { get; set; }
 
     public string EmployeeName { get; set; } = string.Empty;
 

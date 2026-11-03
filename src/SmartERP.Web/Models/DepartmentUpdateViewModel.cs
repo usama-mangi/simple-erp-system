@@ -7,7 +7,7 @@ namespace SmartERP.Web.Models;
 public class DepartmentUpdateViewModel
 {
     [Required(ErrorMessage = "Invalid Department Selected")]
-    public double Id { get; set; }
+    public decimal Id { get; set; }
 
     [Required(ErrorMessage = "Department name is required.")]
     [MinLength(2, ErrorMessage = "Department name must be 2 or more characters.")]
@@ -29,7 +29,7 @@ public class DepartmentUpdateViewModel
 
     // Null makes this a top-level department. The options never include the
     // department itself or anything below it.
-    public double? ParentDepartmentId { get; set; }
+    public decimal? ParentDepartmentId { get; set; }
 
     public IEnumerable<SelectListItem> ParentOptions { get; set; } = Enumerable.Empty<SelectListItem>();
 }

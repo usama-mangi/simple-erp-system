@@ -6,7 +6,7 @@ namespace SmartERP.Web.Models;
 public class EmployeeUpdateViewModel
 {
     [Required(ErrorMessage = "Invalid employee provided.")]
-    public double Id { get; set; }
+    public decimal Id { get; set; }
 
     [Required(ErrorMessage = "First name is required.")]
     [MinLength(3, ErrorMessage = "Minimum 3 characters required.")]
@@ -34,7 +34,7 @@ public class EmployeeUpdateViewModel
 
     [Required(ErrorMessage = "Please select a gender.")]
     [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a valid gender.")]
-    public double GenderId { get; set; }
+    public decimal GenderId { get; set; }
 
     [Required(ErrorMessage = "Please provide an address.")]
     [MaxLength(100, ErrorMessage = "Address must be 100 or less characters.")]
@@ -46,7 +46,7 @@ public class EmployeeUpdateViewModel
     public bool HasEmploymentDetails { get; set; }
 
     [Display(Name = "Position")]
-    public double PositionId { get; set; }
+    public decimal PositionId { get; set; }
 
     [Display(Name = "Salary")]
     [Range(0, (double)decimal.MaxValue, ErrorMessage = "Salary cannot be negative.")]
@@ -57,15 +57,15 @@ public class EmployeeUpdateViewModel
     public DateOnly StartDate { get; set; }
 
     [Display(Name = "Department")]
-    public double DepartmentId { get; set; }
+    public decimal DepartmentId { get; set; }
 
     [Display(Name = "Employment type")]
     [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a valid employment type.")]
-    public double EmploymentTypeId { get; set; }
+    public decimal EmploymentTypeId { get; set; }
 
     [Display(Name = "Employment status")]
     [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a valid employment status.")]
-    public double EmploymentStatusId { get; set; }
+    public decimal EmploymentStatusId { get; set; }
 
     // Detail blocks only validate when the employee actually has an open row;
     // without one the detail update statement has nothing to match.

@@ -7,11 +7,11 @@ namespace SmartERP.Web.Models;
 public class LeaveBalanceUpsertViewModel
 {
     [Required(ErrorMessage = "Invalid employee provided.")]
-    public double EmployeeId { get; set; }
+    public decimal EmployeeId { get; set; }
 
     [Display(Name = "Leave type")]
     [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a leave type.")]
-    public double LeaveTypeId { get; set; }
+    public decimal LeaveTypeId { get; set; }
 
     [Display(Name = "Year")]
     [Range(2000, 2100, ErrorMessage = "Please provide a valid year.")]

@@ -79,7 +79,7 @@ public class LookupRepository(
                 {
                     items.Add(new LookupItem
                     (
-                        Id: reader.GetDouble(reader.GetOrdinal("id")),
+                        Id: reader.GetDecimal(reader.GetOrdinal("id")),
                         Title: reader.GetString(reader.GetOrdinal("title"))
                     ));
                 }

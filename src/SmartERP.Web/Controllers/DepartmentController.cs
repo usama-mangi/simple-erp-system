@@ -34,7 +34,7 @@ public class DepartmentController(
     }
 
     [HttpGet]
-    public async Task<IActionResult> Details(double id)
+    public async Task<IActionResult> Details(decimal id)
     {
         try
         {
@@ -184,7 +184,7 @@ public class DepartmentController(
     }
 
     [HttpGet]
-    public async Task<IActionResult> Update(double id)
+    public async Task<IActionResult> Update(decimal id)
     {
         Department? department = await _context.GetByIdAsync(id);
 
@@ -245,7 +245,7 @@ public class DepartmentController(
         }
     }
 
-    private async Task<IEnumerable<SelectListItem>> GetParentOptionsAsync(double? excludeDepartmentId)
+    private async Task<IEnumerable<SelectListItem>> GetParentOptionsAsync(decimal? excludeDepartmentId)
     {
         var departments = await _context.GetParentCandidatesAsync(excludeDepartmentId);
 

@@ -5,10 +5,10 @@ namespace SmartERP.Data.Models;
 // RollupHeadcount counts the department plus every department below it.
 public class DepartmentNode
 {
-    public double Id { get; set; }
+    public decimal Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Code { get; set; } = string.Empty;
-    public double? ParentDepartmentId { get; set; }
+    public decimal? ParentDepartmentId { get; set; }
     public string? ParentName { get; set; }
     public int Depth { get; set; }
     public int DirectHeadcount { get; set; }

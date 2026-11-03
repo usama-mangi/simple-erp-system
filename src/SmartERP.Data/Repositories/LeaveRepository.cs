@@ -38,7 +38,7 @@ public class LeaveRepository(
         JOIN
             leave_statuses ls ON ls.id = lr.status_id";
 
-    public async Task<IEnumerable<LeaveRequest>> GetRequestsAsync(double? employeeId, double? statusId)
+    public async Task<IEnumerable<LeaveRequest>> GetRequestsAsync(decimal? employeeId, decimal? statusId)
     {
         // NVL(null-filter, column) = column is "no filter" without a second
         // query variant: a null argument leaves the comparison self-evidently
@@ -61,11 +61,11 @@ public class LeaveRepository(
             using (var command = new OracleCommand(query, (OracleConnection)connection))
             {
                 command.BindByName = true;
-                command.Parameters.Add(new OracleParameter(":EmployeeId", OracleDbType.Double)
+                command.Parameters.Add(new OracleParameter(":EmployeeId", OracleDbType.Decimal)
                 {
                     Value = employeeId is { } id ? id : DBNull.Value
                 });
-                command.Parameters.Add(new OracleParameter(":StatusId", OracleDbType.Double)
+                command.Parameters.Add(new OracleParameter(":StatusId", OracleDbType.Decimal)
                 {
                     Value = statusId is { } status ? status : DBNull.Value
                 });
@@ -90,7 +90,7 @@ public class LeaveRepository(
         }
     }
 
-    public async Task<LeaveRequest?> GetRequestByIdAsync(double id)
+    public async Task<LeaveRequest?> GetRequestByIdAsync(decimal id)
     {
         string query = $@"
             SELECT {SelectColumns} {FromClause}
@@ -103,7 +103,7 @@ public class LeaveRepository(
             using var command = new OracleCommand(query, (OracleConnection)connection);
 
             command.BindByName = true;
-            command.Parameters.Add(new OracleParameter(":Id", OracleDbType.Double) { Value = id });
+            command.Parameters.Add(new OracleParameter(":Id", OracleDbType.Decimal) { Value = id });
 
             using var reader = await command.ExecuteReaderAsync();
 
@@ -124,7 +124,7 @@ public class LeaveRepository(
         }
     }
 
-    public async Task<LeaveRequest?> GetOpenRequestAsync(double employeeId, LeaveStatusIds statuses)
+    public async Task<LeaveRequest?> GetOpenRequestAsync(decimal employeeId, LeaveStatusIds statuses)
     {
         // uq_lr_open_request makes this at most one row.
         string query = $@"
@@ -140,8 +140,8 @@ public class LeaveRepository(
             using var command = new OracleCommand(query, (OracleConnection)connection);
 
             command.BindByName = true;
-            command.Parameters.Add(new OracleParameter(":EmployeeId", OracleDbType.Double) { Value = employeeId });
-            command.Parameters.Add(new OracleParameter(":PendingStatusId", OracleDbType.Double) { Value = statuses.Pending });
+            command.Parameters.Add(new OracleParameter(":EmployeeId", OracleDbType.Decimal) { Value = employeeId });
+            command.Parameters.Add(new OracleParameter(":PendingStatusId", OracleDbType.Decimal) { Value = statuses.Pending });
 
             using var reader = await command.ExecuteReaderAsync();
 
@@ -162,7 +162,7 @@ public class LeaveRepository(
         }
     }
 
-    public async Task<IEnumerable<LeaveRequest>> GetActiveRequestsAsync(double employeeId, LeaveStatusIds statuses)
+    public async Task<IEnumerable<LeaveRequest>> GetActiveRequestsAsync(decimal employeeId, LeaveStatusIds statuses)
     {
         // The rows that still occupy the calendar: an open request blocks a
         // second one outright, an approved one blocks a range that overlaps it.
@@ -182,9 +182,9 @@ public class LeaveRepository(
             using (var command = new OracleCommand(query, (OracleConnection)connection))
             {
                 command.BindByName = true;
-                command.Parameters.Add(new OracleParameter(":EmployeeId", OracleDbType.Double) { Value = employeeId });
-                command.Parameters.Add(new OracleParameter(":PendingStatusId", OracleDbType.Double) { Value = statuses.Pending });
-                command.Parameters.Add(new OracleParameter(":ApprovedStatusId", OracleDbType.Double) { Value = statuses.Approved });
+                command.Parameters.Add(new OracleParameter(":EmployeeId", OracleDbType.Decimal) { Value = employeeId });
+                command.Parameters.Add(new OracleParameter(":PendingStatusId", OracleDbType.Decimal) { Value = statuses.Pending });
+                command.Parameters.Add(new OracleParameter(":ApprovedStatusId", OracleDbType.Decimal) { Value = statuses.Approved });
 
                 using var reader = await command.ExecuteReaderAsync();
 
@@ -281,9 +281,9 @@ public class LeaveRepository(
                 {
                     approveCommand.Transaction = (OracleTransaction)transaction;
                     approveCommand.BindByName = true;
-                    approveCommand.Parameters.Add(":ApprovedStatusId", OracleDbType.Double, statuses.Approved, ParameterDirection.Input);
-                    approveCommand.Parameters.Add(":Id", OracleDbType.Double, request.Id, ParameterDirection.Input);
-                    approveCommand.Parameters.Add(":PendingStatusId", OracleDbType.Double, statuses.Pending, ParameterDirection.Input);
+                    approveCommand.Parameters.Add(":ApprovedStatusId", OracleDbType.Decimal, statuses.Approved, ParameterDirection.Input);
+                    approveCommand.Parameters.Add(":Id", OracleDbType.Decimal, request.Id, ParameterDirection.Input);
+                    approveCommand.Parameters.Add(":PendingStatusId", OracleDbType.Decimal, statuses.Pending, ParameterDirection.Input);
 
                     var approved = await approveCommand.ExecuteNonQueryAsync();
 
@@ -299,8 +299,8 @@ public class LeaveRepository(
                     consumeCommand.Transaction = (OracleTransaction)transaction;
                     consumeCommand.BindByName = true;
                     consumeCommand.Parameters.Add(":Days", OracleDbType.Double, request.Days, ParameterDirection.Input);
-                    consumeCommand.Parameters.Add(":EmployeeId", OracleDbType.Double, request.EmployeeId, ParameterDirection.Input);
-                    consumeCommand.Parameters.Add(":LeaveTypeId", OracleDbType.Double, request.LeaveTypeId, ParameterDirection.Input);
+                    consumeCommand.Parameters.Add(":EmployeeId", OracleDbType.Decimal, request.EmployeeId, ParameterDirection.Input);
+                    consumeCommand.Parameters.Add(":LeaveTypeId", OracleDbType.Decimal, request.LeaveTypeId, ParameterDirection.Input);
                     consumeCommand.Parameters.Add(":Year", OracleDbType.Int32, request.StartDate.Year, ParameterDirection.Input);
 
                     var consumed = await consumeCommand.ExecuteNonQueryAsync();
@@ -336,7 +336,7 @@ public class LeaveRepository(
         }
     }
 
-    public async Task RejectAsync(double requestId, LeaveStatusIds statuses)
+    public async Task RejectAsync(decimal requestId, LeaveStatusIds statuses)
     {
         // Rejection is a single statement: nothing was ever consumed, so the
         // balance is not involved.
@@ -359,9 +359,9 @@ public class LeaveRepository(
                 BindByName = true
             };
 
-            command.Parameters.Add(":RejectedStatusId", OracleDbType.Double, statuses.Rejected, ParameterDirection.Input);
-            command.Parameters.Add(":Id", OracleDbType.Double, requestId, ParameterDirection.Input);
-            command.Parameters.Add(":PendingStatusId", OracleDbType.Double, statuses.Pending, ParameterDirection.Input);
+            command.Parameters.Add(":RejectedStatusId", OracleDbType.Decimal, statuses.Rejected, ParameterDirection.Input);
+            command.Parameters.Add(":Id", OracleDbType.Decimal, requestId, ParameterDirection.Input);
+            command.Parameters.Add(":PendingStatusId", OracleDbType.Decimal, statuses.Pending, ParameterDirection.Input);
 
             var rejected = await command.ExecuteNonQueryAsync();
 
@@ -425,10 +425,10 @@ public class LeaveRepository(
                 {
                     cancelCommand.Transaction = (OracleTransaction)transaction;
                     cancelCommand.BindByName = true;
-                    cancelCommand.Parameters.Add(":CancelledStatusId", OracleDbType.Double, statuses.Cancelled, ParameterDirection.Input);
-                    cancelCommand.Parameters.Add(":Id", OracleDbType.Double, request.Id, ParameterDirection.Input);
-                    cancelCommand.Parameters.Add(":PendingStatusId", OracleDbType.Double, statuses.Pending, ParameterDirection.Input);
-                    cancelCommand.Parameters.Add(":ApprovedStatusId", OracleDbType.Double, statuses.Approved, ParameterDirection.Input);
+                    cancelCommand.Parameters.Add(":CancelledStatusId", OracleDbType.Decimal, statuses.Cancelled, ParameterDirection.Input);
+                    cancelCommand.Parameters.Add(":Id", OracleDbType.Decimal, request.Id, ParameterDirection.Input);
+                    cancelCommand.Parameters.Add(":PendingStatusId", OracleDbType.Decimal, statuses.Pending, ParameterDirection.Input);
+                    cancelCommand.Parameters.Add(":ApprovedStatusId", OracleDbType.Decimal, statuses.Approved, ParameterDirection.Input);
 
                     var cancelled = await cancelCommand.ExecuteNonQueryAsync();
 
@@ -444,8 +444,8 @@ public class LeaveRepository(
                     refundCommand.Transaction = (OracleTransaction)transaction;
                     refundCommand.BindByName = true;
                     refundCommand.Parameters.Add(":Days", OracleDbType.Double, request.Days, ParameterDirection.Input);
-                    refundCommand.Parameters.Add(":EmployeeId", OracleDbType.Double, request.EmployeeId, ParameterDirection.Input);
-                    refundCommand.Parameters.Add(":LeaveTypeId", OracleDbType.Double, request.LeaveTypeId, ParameterDirection.Input);
+                    refundCommand.Parameters.Add(":EmployeeId", OracleDbType.Decimal, request.EmployeeId, ParameterDirection.Input);
+                    refundCommand.Parameters.Add(":LeaveTypeId", OracleDbType.Decimal, request.LeaveTypeId, ParameterDirection.Input);
                     refundCommand.Parameters.Add(":Year", OracleDbType.Int32, request.StartDate.Year, ParameterDirection.Input);
 
                     await refundCommand.ExecuteNonQueryAsync();
@@ -474,7 +474,7 @@ public class LeaveRepository(
         }
     }
 
-    public async Task<IEnumerable<LeaveBalance>> GetBalancesAsync(double employeeId, int year)
+    public async Task<IEnumerable<LeaveBalance>> GetBalancesAsync(decimal employeeId, int year)
     {
         string query = @"
             SELECT
@@ -502,7 +502,7 @@ public class LeaveRepository(
             using (var command = new OracleCommand(query, (OracleConnection)connection))
             {
                 command.BindByName = true;
-                command.Parameters.Add(new OracleParameter(":EmployeeId", OracleDbType.Double) { Value = employeeId });
+                command.Parameters.Add(new OracleParameter(":EmployeeId", OracleDbType.Decimal) { Value = employeeId });
                 command.Parameters.Add(new OracleParameter(":Year", OracleDbType.Int32) { Value = year });
 
                 using var reader = await command.ExecuteReaderAsync();
@@ -570,8 +570,8 @@ public class LeaveRepository(
                 BindByName = true
             };
 
-            command.Parameters.Add(":EmployeeId", OracleDbType.Double, balance.EmployeeId, ParameterDirection.Input);
-            command.Parameters.Add(":LeaveTypeId", OracleDbType.Double, balance.LeaveTypeId, ParameterDirection.Input);
+            command.Parameters.Add(":EmployeeId", OracleDbType.Decimal, balance.EmployeeId, ParameterDirection.Input);
+            command.Parameters.Add(":LeaveTypeId", OracleDbType.Decimal, balance.LeaveTypeId, ParameterDirection.Input);
             command.Parameters.Add(":Year", OracleDbType.Int32, balance.Year, ParameterDirection.Input);
             command.Parameters.Add(":EntitlementDays", OracleDbType.Double, balance.EntitlementDays, ParameterDirection.Input);
 
@@ -590,9 +590,9 @@ public class LeaveRepository(
 
     private static void AddParameters(OracleCommand command, LeaveRequest request)
     {
-        command.Parameters.Add(":EmployeeId", OracleDbType.Double, request.EmployeeId, ParameterDirection.Input);
-        command.Parameters.Add(":LeaveTypeId", OracleDbType.Double, request.LeaveTypeId, ParameterDirection.Input);
-        command.Parameters.Add(":StatusId", OracleDbType.Double, request.StatusId, ParameterDirection.Input);
+        command.Parameters.Add(":EmployeeId", OracleDbType.Decimal, request.EmployeeId, ParameterDirection.Input);
+        command.Parameters.Add(":LeaveTypeId", OracleDbType.Decimal, request.LeaveTypeId, ParameterDirection.Input);
+        command.Parameters.Add(":StatusId", OracleDbType.Decimal, request.StatusId, ParameterDirection.Input);
         command.Parameters.Add(":StartDate", OracleDbType.Date, request.StartDate, ParameterDirection.Input);
         command.Parameters.Add(":EndDate", OracleDbType.Date, request.EndDate, ParameterDirection.Input);
         command.Parameters.Add(
@@ -610,12 +610,12 @@ public class LeaveRepository(
 
         return new LeaveRequest
         {
-            Id = reader.GetDouble(reader.GetOrdinal("id")),
-            EmployeeId = reader.GetDouble(reader.GetOrdinal("employee_id")),
+            Id = reader.GetDecimal(reader.GetOrdinal("id")),
+            EmployeeId = reader.GetDecimal(reader.GetOrdinal("employee_id")),
             EmployeeName = reader.GetString(reader.GetOrdinal("employee_name")),
-            LeaveTypeId = reader.GetDouble(reader.GetOrdinal("leave_type_id")),
+            LeaveTypeId = reader.GetDecimal(reader.GetOrdinal("leave_type_id")),
             LeaveTypeTitle = reader.GetString(reader.GetOrdinal("leave_type_title")),
-            StatusId = reader.GetDouble(reader.GetOrdinal("status_id")),
+            StatusId = reader.GetDecimal(reader.GetOrdinal("status_id")),
             StatusTitle = reader.GetString(reader.GetOrdinal("status_title")),
             StartDate = reader.GetDateTime(reader.GetOrdinal("start_date")),
             EndDate = reader.GetDateTime(reader.GetOrdinal("end_date")),
@@ -634,10 +634,10 @@ public class LeaveRepository(
 
         return new LeaveBalance
         {
-            Id = reader.GetDouble(reader.GetOrdinal("id")),
-            EmployeeId = reader.GetDouble(reader.GetOrdinal("employee_id")),
+            Id = reader.GetDecimal(reader.GetOrdinal("id")),
+            EmployeeId = reader.GetDecimal(reader.GetOrdinal("employee_id")),
             EmployeeName = reader.GetString(reader.GetOrdinal("employee_name")),
-            LeaveTypeId = reader.GetDouble(reader.GetOrdinal("leave_type_id")),
+            LeaveTypeId = reader.GetDecimal(reader.GetOrdinal("leave_type_id")),
             LeaveTypeTitle = reader.GetString(reader.GetOrdinal("leave_type_title")),
             Year = Convert.ToInt32(reader.GetDouble(reader.GetOrdinal("year"))),
             EntitlementDays = reader.GetDouble(reader.GetOrdinal("entitlement_days")),

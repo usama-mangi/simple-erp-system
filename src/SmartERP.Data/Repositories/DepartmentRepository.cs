@@ -52,7 +52,7 @@ public class DepartmentRepository(IDbConnectionFactory _dbConnection, OracleExce
         }
     }
 
-    public async Task<Department?> GetByIdAsync(double id)
+    public async Task<Department?> GetByIdAsync(decimal id)
     {
         string query = $@"
             SELECT
@@ -70,7 +70,7 @@ public class DepartmentRepository(IDbConnectionFactory _dbConnection, OracleExce
             using var command = new OracleCommand(query, (OracleConnection)connection);
 
             command.BindByName = true;
-            command.Parameters.Add(new OracleParameter(":Id", OracleDbType.Double) { Value = id });
+            command.Parameters.Add(new OracleParameter(":Id", OracleDbType.Decimal) { Value = id });
 
             using var reader = await command.ExecuteReaderAsync();
             if (await reader.ReadAsync())
@@ -107,7 +107,7 @@ public class DepartmentRepository(IDbConnectionFactory _dbConnection, OracleExce
             command.Parameters.Add(":Code", OracleDbType.Varchar2, department.Code, ParameterDirection.Input);
             command.Parameters.Add(":Location", OracleDbType.Varchar2, department.Location, ParameterDirection.Input);
             command.Parameters.Add(":Established", OracleDbType.Date, department.Established, ParameterDirection.Input);
-            command.Parameters.Add(":ParentDepartmentId", OracleDbType.Double,
+            command.Parameters.Add(":ParentDepartmentId", OracleDbType.Decimal,
                 (object?)department.ParentDepartmentId ?? DBNull.Value, ParameterDirection.Input);
 
             await command.ExecuteNonQueryAsync();
@@ -146,12 +146,12 @@ public class DepartmentRepository(IDbConnectionFactory _dbConnection, OracleExce
             using var command = new OracleCommand(query, (OracleConnection)connection);
 
             command.BindByName = true;
-            command.Parameters.Add(":Id", OracleDbType.Double, department.Id, ParameterDirection.Input);
+            command.Parameters.Add(":Id", OracleDbType.Decimal, department.Id, ParameterDirection.Input);
             command.Parameters.Add(":Name", OracleDbType.Varchar2, department.Name, ParameterDirection.Input);
             command.Parameters.Add(":Code", OracleDbType.Varchar2, department.Code, ParameterDirection.Input);
             command.Parameters.Add(":Location", OracleDbType.Varchar2, department.Location, ParameterDirection.Input);
             command.Parameters.Add(":Established", OracleDbType.Date, department.Established, ParameterDirection.Input);
-            command.Parameters.Add(":ParentDepartmentId", OracleDbType.Double,
+            command.Parameters.Add(":ParentDepartmentId", OracleDbType.Decimal,
                 (object?)department.ParentDepartmentId ?? DBNull.Value, ParameterDirection.Input);
 
             await command.ExecuteNonQueryAsync();
@@ -170,7 +170,7 @@ public class DepartmentRepository(IDbConnectionFactory _dbConnection, OracleExce
         }
     }
 
-    public async Task<string?> DeleteAsync(double id)
+    public async Task<string?> DeleteAsync(decimal id)
     {
         string query = @"
             DELETE FROM
@@ -186,7 +186,7 @@ public class DepartmentRepository(IDbConnectionFactory _dbConnection, OracleExce
             using var command = new OracleCommand(query, (OracleConnection)connection);
 
             command.BindByName = true;
-            command.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
+            command.Parameters.Add(":Id", OracleDbType.Decimal, id, ParameterDirection.Input);
             var DeptName = command.Parameters.Add(":DeptName", OracleDbType.Varchar2, ParameterDirection.Output);
 
             await command.ExecuteNonQueryAsync();
@@ -327,7 +327,7 @@ public class DepartmentRepository(IDbConnectionFactory _dbConnection, OracleExce
         }
     }
 
-    public async Task<IEnumerable<Department>> GetParentCandidatesAsync(double? excludeDepartmentId)
+    public async Task<IEnumerable<Department>> GetParentCandidatesAsync(decimal? excludeDepartmentId)
     {
         // A null exclude id produces a one-row CTE holding NULL, which matches
         // no department, so every row survives the NOT EXISTS. With an id, the
@@ -370,7 +370,7 @@ public class DepartmentRepository(IDbConnectionFactory _dbConnection, OracleExce
             using var command = new OracleCommand(query, (OracleConnection)connection);
 
             command.BindByName = true;
-            command.Parameters.Add(":ExcludeDepartmentId", OracleDbType.Double,
+            command.Parameters.Add(":ExcludeDepartmentId", OracleDbType.Decimal,
                 (object?)excludeDepartmentId ?? DBNull.Value, ParameterDirection.Input);
 
             using var reader = await command.ExecuteReaderAsync();
@@ -391,7 +391,7 @@ public class DepartmentRepository(IDbConnectionFactory _dbConnection, OracleExce
         }
     }
 
-    public async Task<bool> WouldCreateCycleAsync(double departmentId, double parentDepartmentId)
+    public async Task<bool> WouldCreateCycleAsync(decimal departmentId, decimal parentDepartmentId)
     {
         // Walk up from the proposed parent. If the department being edited
         // appears in that ancestor chain, the new parent is itself a
@@ -417,8 +417,8 @@ public class DepartmentRepository(IDbConnectionFactory _dbConnection, OracleExce
             using var command = new OracleCommand(query, (OracleConnection)connection);
 
             command.BindByName = true;
-            command.Parameters.Add(":ParentDepartmentId", OracleDbType.Double, parentDepartmentId, ParameterDirection.Input);
-            command.Parameters.Add(":DepartmentId", OracleDbType.Double, departmentId, ParameterDirection.Input);
+            command.Parameters.Add(":ParentDepartmentId", OracleDbType.Decimal, parentDepartmentId, ParameterDirection.Input);
+            command.Parameters.Add(":DepartmentId", OracleDbType.Decimal, departmentId, ParameterDirection.Input);
 
             var count = await command.ExecuteScalarAsync();
 
@@ -441,12 +441,12 @@ public class DepartmentRepository(IDbConnectionFactory _dbConnection, OracleExce
 
         return new Department
         {
-            Id = reader.GetDouble(reader.GetOrdinal("id")),
+            Id = reader.GetDecimal(reader.GetOrdinal("id")),
             Name = reader.GetString(reader.GetOrdinal("name")),
             Code = reader.GetString(reader.GetOrdinal("code")),
             Established = reader.GetDateTime(reader.GetOrdinal("established")),
             Location = reader.GetString(reader.GetOrdinal("location")),
-            ParentDepartmentId = reader.IsDBNull(parentIdOrdinal) ? null : reader.GetDouble(parentIdOrdinal),
+            ParentDepartmentId = reader.IsDBNull(parentIdOrdinal) ? null : reader.GetDecimal(parentIdOrdinal),
             ParentName = reader.IsDBNull(parentNameOrdinal) ? null : reader.GetString(parentNameOrdinal),
             CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
 
@@ -461,10 +461,10 @@ public class DepartmentRepository(IDbConnectionFactory _dbConnection, OracleExce
 
         return new DepartmentNode
         {
-            Id = reader.GetDouble(reader.GetOrdinal("id")),
+            Id = reader.GetDecimal(reader.GetOrdinal("id")),
             Name = reader.GetString(reader.GetOrdinal("name")),
             Code = reader.GetString(reader.GetOrdinal("code")),
-            ParentDepartmentId = reader.IsDBNull(parentIdOrdinal) ? null : reader.GetDouble(parentIdOrdinal),
+            ParentDepartmentId = reader.IsDBNull(parentIdOrdinal) ? null : reader.GetDecimal(parentIdOrdinal),
             ParentName = reader.IsDBNull(parentNameOrdinal) ? null : reader.GetString(parentNameOrdinal),
             Depth = Convert.ToInt32(reader.GetDouble(reader.GetOrdinal("depth"))),
             DirectHeadcount = Convert.ToInt32(reader.GetDouble(reader.GetOrdinal("direct_headcount"))),

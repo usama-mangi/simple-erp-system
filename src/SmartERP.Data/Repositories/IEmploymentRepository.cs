@@ -4,12 +4,12 @@ namespace SmartERP.Data.Repositories;
 
 public interface IEmploymentRepository
 {
-    Task<IEnumerable<EmploymentDetail>> GetByEmployeeAsync(double employeeId);
-    Task<EmploymentDetail?> GetCurrentAsync(double employeeId);
-    Task<EmploymentDetail?> GetByIdAsync(double id);
+    Task<IEnumerable<EmploymentDetail>> GetByEmployeeAsync(decimal employeeId);
+    Task<EmploymentDetail?> GetCurrentAsync(decimal employeeId);
+    Task<EmploymentDetail?> GetByIdAsync(decimal id);
     Task CreateAsync(EmploymentDetail detail);
     Task CreateReplacingCurrentAsync(EmploymentDetail detail);
-    Task EndCurrentAsync(double employeeId, DateOnly endDate);
-    Task TransferCurrentDepartmentAsync(double employeeId, double departmentId);
-    Task<IEnumerable<StatusEvent>> GetStatusEventsAsync(double employeeId);
+    Task EndCurrentAsync(decimal employeeId, DateOnly endDate);
+    Task TransferCurrentDepartmentAsync(decimal employeeId, decimal departmentId);
+    Task<IEnumerable<StatusEvent>> GetStatusEventsAsync(decimal employeeId);
 }

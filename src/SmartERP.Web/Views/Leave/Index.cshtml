@@ -22,7 +22,7 @@
         emptyMessage = "No leave requests on the register yet.";
     }
 
-    string StampFor(double statusId)
+    string StampFor(decimal statusId)
     {
         if (statusId == Model.Statuses.Approved) return "stamp--approved";
         if (statusId == Model.Statuses.Pending) return "stamp--pending";

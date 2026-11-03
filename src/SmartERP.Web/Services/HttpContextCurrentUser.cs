@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Claims;
 using SmartERP.Data.Abstractions;
 
@@ -9,20 +10,20 @@ public class HttpContextCurrentUser(IHttpContextAccessor accessor) : ICurrentUse
     public bool IsAuthenticated => User?.Identity?.IsAuthenticated == true;
     public string? Username => User?.Identity?.Name;
     public string? Role => User?.FindFirstValue(ClaimTypes.Role);
-    public double? UserId
+    public decimal? UserId
     {
         get
         {
             var v = User?.FindFirstValue("uid");
-            return double.TryParse(v, out var d) ? d : null;
+            return decimal.TryParse(v, NumberStyles.Integer, CultureInfo.InvariantCulture, out var d) ? d : null;
         }
     }
-    public double? EmployeeId
+    public decimal? EmployeeId
     {
         get
         {
             var v = User?.FindFirstValue("eid");
-            return double.TryParse(v, out var d) ? d : null;
+            return decimal.TryParse(v, NumberStyles.Integer, CultureInfo.InvariantCulture, out var d) ? d : null;
         }
     }
 }

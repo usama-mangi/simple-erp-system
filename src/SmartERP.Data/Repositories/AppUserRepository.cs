@@ -28,14 +28,14 @@ public class AppUserRepository(IDbConnectionFactory db, OracleExceptionHandler h
         }
     }
 
-    public async Task<AppUser?> GetByIdAsync(double id)
+    public async Task<AppUser?> GetByIdAsync(decimal id)
     {
         const string q = @"SELECT id, employee_id, username, password_hash, role, is_active, created_at, updated_at FROM app_users WHERE id = :Id";
         try
         {
             using var c = await db.CreateOpenConnectionAsync();
             using var cmd = new OracleCommand(q, (OracleConnection)c) { BindByName = true };
-            cmd.Parameters.Add(":Id", OracleDbType.Double, id, System.Data.ParameterDirection.Input);
+            cmd.Parameters.Add(":Id", OracleDbType.Decimal, id, System.Data.ParameterDirection.Input);
             using var r = await cmd.ExecuteReaderAsync();
             if (await r.ReadAsync()) return Map(r);
             return null;
@@ -54,14 +54,14 @@ public class AppUserRepository(IDbConnectionFactory db, OracleExceptionHandler h
         {
             using var c = await db.CreateOpenConnectionAsync();
             using var cmd = new OracleCommand(q, (OracleConnection)c) { BindByName = true };
-            cmd.Parameters.Add(":E", OracleDbType.Double, user.EmployeeId, System.Data.ParameterDirection.Input);
+            cmd.Parameters.Add(":E", OracleDbType.Decimal, user.EmployeeId, System.Data.ParameterDirection.Input);
             cmd.Parameters.Add(":U", OracleDbType.Varchar2, user.Username, System.Data.ParameterDirection.Input);
             cmd.Parameters.Add(":P", OracleDbType.Varchar2, user.PasswordHash, System.Data.ParameterDirection.Input);
             cmd.Parameters.Add(":R", OracleDbType.Varchar2, user.Role, System.Data.ParameterDirection.Input);
             cmd.Parameters.Add(":A", OracleDbType.Int32, user.IsActive ? 1 : 0, System.Data.ParameterDirection.Input);
-            var outp = cmd.Parameters.Add(new OracleParameter(":NewId", OracleDbType.Double) { Direction = System.Data.ParameterDirection.Output });
+            var outp = cmd.Parameters.Add(new OracleParameter(":NewId", OracleDbType.Decimal) { Direction = System.Data.ParameterDirection.Output });
             await cmd.ExecuteNonQueryAsync();
-            if (outp.Value is OracleDecimal od && !od.IsNull) user.Id = (double)od;
+            if (outp.Value is OracleDecimal od && !od.IsNull) user.Id = od.Value;
         }
         catch (OracleException ex)
         {
@@ -75,8 +75,8 @@ public class AppUserRepository(IDbConnectionFactory db, OracleExceptionHandler h
         int upd = r.GetOrdinal("updated_at");
         return new AppUser
         {
-            Id = r.GetDouble(r.GetOrdinal("id")),
-            EmployeeId = r.GetDouble(r.GetOrdinal("employee_id")),
+            Id = r.GetDecimal(r.GetOrdinal("id")),
+            EmployeeId = r.GetDecimal(r.GetOrdinal("employee_id")),
             Username = r.GetString(r.GetOrdinal("username")),
             PasswordHash = r.GetString(r.GetOrdinal("password_hash")),
             Role = r.GetString(r.GetOrdinal("role")),

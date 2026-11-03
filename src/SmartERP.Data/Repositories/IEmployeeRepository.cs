@@ -5,11 +5,11 @@ namespace SmartERP.Data.Repositories;
 public interface IEmployeeRepository
 {
     Task<IEnumerable<Employee>> GetAllAsync();
-    Task<EmployeeWithDetails?> GetByIdAsync(double id);
+    Task<EmployeeWithDetails?> GetByIdAsync(decimal id);
     Task CreateAsync(Employee employee);
     Task CreateWithDetailsAsync(EmployeeWithDetails employee);
     Task UpdateAsync(EmployeeWithDetails employee);
-    Task<bool> HasDependenciesAsync(double id);
-    Task DeleteAsync(double id);
-    Task DeleteWithDetailsAsync(double id);
+    Task<bool> HasDependenciesAsync(decimal id);
+    Task DeleteAsync(decimal id);
+    Task DeleteWithDetailsAsync(decimal id);
 }

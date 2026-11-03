@@ -9,16 +9,16 @@ namespace SmartERP.Data.Repositories;
 public interface ILeaveRepository
 {
     // Filtered list; a null argument means "no filter on that column".
-    Task<IEnumerable<LeaveRequest>> GetRequestsAsync(double? employeeId, double? statusId);
+    Task<IEnumerable<LeaveRequest>> GetRequestsAsync(decimal? employeeId, decimal? statusId);
 
-    Task<LeaveRequest?> GetRequestByIdAsync(double id);
+    Task<LeaveRequest?> GetRequestByIdAsync(decimal id);
 
     // The single Pending row for an employee, or null when none is open.
-    Task<LeaveRequest?> GetOpenRequestAsync(double employeeId, LeaveStatusIds statuses);
+    Task<LeaveRequest?> GetOpenRequestAsync(decimal employeeId, LeaveStatusIds statuses);
 
     // Pending + Approved rows: the ones that still occupy the employee's
     // calendar and therefore block an overlapping new request.
-    Task<IEnumerable<LeaveRequest>> GetActiveRequestsAsync(double employeeId, LeaveStatusIds statuses);
+    Task<IEnumerable<LeaveRequest>> GetActiveRequestsAsync(decimal employeeId, LeaveStatusIds statuses);
 
     // request.StatusId must already be set to the Pending id by the caller.
     Task CreateRequestAsync(LeaveRequest request);
@@ -28,13 +28,13 @@ public interface ILeaveRepository
     Task ApproveAsync(LeaveRequest request, LeaveStatusIds statuses);
 
     // Pending -> Rejected. Nothing moves on the balance: nothing was consumed.
-    Task RejectAsync(double requestId, LeaveStatusIds statuses);
+    Task RejectAsync(decimal requestId, LeaveStatusIds statuses);
 
     // Pending/Approved -> Cancelled. An approved cancellation gives the days
     // back; a pending one never took any.
     Task CancelAsync(LeaveRequest request, LeaveStatusIds statuses);
 
-    Task<IEnumerable<LeaveBalance>> GetBalancesAsync(double employeeId, int year);
+    Task<IEnumerable<LeaveBalance>> GetBalancesAsync(decimal employeeId, int year);
 
     // Entitlement only: used_days is written by ApproveAsync/CancelAsync and
     // never by the form that sets the allowance.

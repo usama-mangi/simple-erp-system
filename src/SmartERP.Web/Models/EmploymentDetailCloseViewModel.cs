@@ -8,7 +8,7 @@ namespace SmartERP.Web.Models;
 public class EmploymentDetailCloseViewModel
 {
     [Required(ErrorMessage = "Invalid employee provided.")]
-    public double EmployeeId { get; set; }
+    public decimal EmployeeId { get; set; }
 
     [Required(ErrorMessage = "Please provide the end date.")]
     [DateRangeInPast(null, ErrorMessage = "End date must be today or a past date.")]

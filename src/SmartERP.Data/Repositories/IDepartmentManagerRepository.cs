@@ -4,9 +4,9 @@ namespace SmartERP.Data.Repositories;
 
 public interface IDepartmentManagerRepository
 {
-    Task<DepartmentManager?> GetCurrentByDepartmentAsync(double departmentId);
-    Task<IEnumerable<DepartmentManager>> GetHistoryAsync(double departmentId);
-    Task<DepartmentManager?> GetByIdAsync(double id);
+    Task<DepartmentManager?> GetCurrentByDepartmentAsync(decimal departmentId);
+    Task<IEnumerable<DepartmentManager>> GetHistoryAsync(decimal departmentId);
+    Task<DepartmentManager?> GetByIdAsync(decimal id);
     Task AssignAsync(DepartmentManager assignment);
-    Task EndCurrentAsync(double departmentId, DateOnly endDate);
+    Task EndCurrentAsync(decimal departmentId, DateOnly endDate);
 }

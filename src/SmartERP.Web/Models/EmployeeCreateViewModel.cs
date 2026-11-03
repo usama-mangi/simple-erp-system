@@ -31,7 +31,7 @@ public class EmployeeCreateViewModel : IValidatableObject
 
     [Required(ErrorMessage = "Please select a gender.")]
     [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a valid gender.")]
-    public double GenderId { get; set; }
+    public decimal GenderId { get; set; }
 
     [Required(ErrorMessage = "Please provide an address.")]
     [MaxLength(100, ErrorMessage = "Address must be 100 or less characters.")]
@@ -43,7 +43,7 @@ public class EmployeeCreateViewModel : IValidatableObject
     public bool IncludeEmploymentDetails { get; set; }
 
     [Display(Name = "Position")]
-    public double PositionId { get; set; }
+    public decimal PositionId { get; set; }
 
     [Display(Name = "Salary")]
     [Range(0, (double)decimal.MaxValue, ErrorMessage = "Salary cannot be negative.")]
@@ -54,15 +54,15 @@ public class EmployeeCreateViewModel : IValidatableObject
     public DateOnly StartDate { get; set; }
 
     [Display(Name = "Department")]
-    public double DepartmentId { get; set; }
+    public decimal DepartmentId { get; set; }
 
     [Display(Name = "Employment type")]
     [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a valid employment type.")]
-    public double EmploymentTypeId { get; set; }
+    public decimal EmploymentTypeId { get; set; }
 
     [Display(Name = "Employment status")]
     [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a valid employment status.")]
-    public double EmploymentStatusId { get; set; }
+    public decimal EmploymentStatusId { get; set; }
 
     // Detail-only constraints live here instead of per-property attributes:
     // Required/Range on DepartmentId and salary would also fire when the user

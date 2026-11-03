@@ -18,7 +18,7 @@ public class DepartmentManagersController(
 ) : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> Index(double departmentId)
+    public async Task<IActionResult> Index(decimal departmentId)
     {
         try
         {
@@ -43,7 +43,7 @@ public class DepartmentManagersController(
     }
 
     [HttpGet]
-    public async Task<IActionResult> Create(double departmentId)
+    public async Task<IActionResult> Create(decimal departmentId)
     {
         try
         {

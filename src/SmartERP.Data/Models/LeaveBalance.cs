@@ -6,10 +6,10 @@ namespace SmartERP.Data.Models;
 // entitlement form.
 public class LeaveBalance
 {
-    public double Id { get; set; }
-    public double EmployeeId { get; set; }
+    public decimal Id { get; set; }
+    public decimal EmployeeId { get; set; }
     public string EmployeeName { get; set; } = string.Empty;
-    public double LeaveTypeId { get; set; }
+    public decimal LeaveTypeId { get; set; }
     public string LeaveTypeTitle { get; set; } = string.Empty;
     public int Year { get; set; }
     public double EntitlementDays { get; set; }

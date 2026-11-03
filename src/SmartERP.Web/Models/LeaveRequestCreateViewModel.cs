@@ -5,11 +5,11 @@ namespace SmartERP.Web.Models;
 public class LeaveRequestCreateViewModel : IValidatableObject
 {
     [Required(ErrorMessage = "Invalid employee provided.")]
-    public double EmployeeId { get; set; }
+    public decimal EmployeeId { get; set; }
 
     [Display(Name = "Leave type")]
     [Range(1, (double)decimal.MaxValue, ErrorMessage = "Please select a leave type.")]
-    public double LeaveTypeId { get; set; }
+    public decimal LeaveTypeId { get; set; }
 
     // Leave is usually booked ahead, so a future start date is the normal
     // case here rather than an error to reject.

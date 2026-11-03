@@ -7,8 +7,8 @@ namespace SmartERP.Web.Models;
 public class EmploymentTransferDepartmentViewModel
 {
     [Required(ErrorMessage = "Invalid employee provided.")]
-    public double EmployeeId { get; set; }
+    public decimal EmployeeId { get; set; }
 
     [Range(1, double.MaxValue, ErrorMessage = "Please choose a department.")]
-    public double DepartmentId { get; set; }
+    public decimal DepartmentId { get; set; }
 }

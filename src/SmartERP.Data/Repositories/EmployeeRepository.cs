@@ -51,7 +51,7 @@ public class EmployeeRepository(
         }
     }
 
-    public async Task<EmployeeWithDetails?> GetByIdAsync(double id)
+    public async Task<EmployeeWithDetails?> GetByIdAsync(decimal id)
     {
         // LEFT JOIN: an employee may exist without any employment details row yet.
         // The end_date IS NULL filter pins the join to the current assignment;
@@ -120,7 +120,7 @@ public class EmployeeRepository(
             command.Parameters.Add(":Email", OracleDbType.Varchar2, employee.Email, ParameterDirection.Input);
             command.Parameters.Add(":Phone", OracleDbType.Varchar2, employee.Phone, ParameterDirection.Input);
             command.Parameters.Add(":DateOfBirth", OracleDbType.Date, employee.DateOfBirth, ParameterDirection.Input);
-            command.Parameters.Add(":GenderId", OracleDbType.Double, employee.GenderId, ParameterDirection.Input);
+            command.Parameters.Add(":GenderId", OracleDbType.Decimal, employee.GenderId, ParameterDirection.Input);
             command.Parameters.Add(":Address", OracleDbType.Varchar2, employee.Address, ParameterDirection.Input);
 
             await command.ExecuteNonQueryAsync();
@@ -171,7 +171,7 @@ public class EmployeeRepository(
                 empCommand.Parameters.Add(":Email", OracleDbType.Varchar2, employee.Email, ParameterDirection.Input);
                 empCommand.Parameters.Add(":Phone", OracleDbType.Varchar2, employee.Phone, ParameterDirection.Input);
                 empCommand.Parameters.Add(":DateOfBirth", OracleDbType.Date, employee.DateOfBirth, ParameterDirection.Input);
-                empCommand.Parameters.Add(":GenderId", OracleDbType.Double, employee.GenderId, ParameterDirection.Input);
+                empCommand.Parameters.Add(":GenderId", OracleDbType.Decimal, employee.GenderId, ParameterDirection.Input);
                 empCommand.Parameters.Add(":Address", OracleDbType.Varchar2, employee.Address, ParameterDirection.Input);
                 var newIdParam = empCommand.Parameters.Add(
                     new OracleParameter(":NewId", OracleDbType.Int64) { Direction = ParameterDirection.Output }
@@ -182,13 +182,13 @@ public class EmployeeRepository(
                     BindByName = true,
                     Transaction = (OracleTransaction)transaction
                 };
-                detCommand.Parameters.Add(":PositionId", OracleDbType.Double, employee.PositionId, ParameterDirection.Input);
+                detCommand.Parameters.Add(":PositionId", OracleDbType.Decimal, employee.PositionId, ParameterDirection.Input);
                 detCommand.Parameters.Add(":Salary", OracleDbType.Double, employee.Salary, ParameterDirection.Input);
                 detCommand.Parameters.Add(":StartDate", OracleDbType.Date, employee.StartDate, ParameterDirection.Input);
                 detCommand.Parameters.Add(":EndDate", OracleDbType.Date, (object?)employee.EndDate ?? DBNull.Value, ParameterDirection.Input);
-                detCommand.Parameters.Add(":DepartmentId", OracleDbType.Double, employee.DepartmentId, ParameterDirection.Input);
-                detCommand.Parameters.Add(":EmploymentTypeId", OracleDbType.Double, employee.EmploymentTypeId, ParameterDirection.Input);
-                detCommand.Parameters.Add(":EmploymentStatusId", OracleDbType.Double, employee.EmploymentStatusId, ParameterDirection.Input);
+                detCommand.Parameters.Add(":DepartmentId", OracleDbType.Decimal, employee.DepartmentId, ParameterDirection.Input);
+                detCommand.Parameters.Add(":EmploymentTypeId", OracleDbType.Decimal, employee.EmploymentTypeId, ParameterDirection.Input);
+                detCommand.Parameters.Add(":EmploymentStatusId", OracleDbType.Decimal, employee.EmploymentStatusId, ParameterDirection.Input);
 
                 await empCommand.ExecuteNonQueryAsync();
 
@@ -201,8 +201,8 @@ public class EmployeeRepository(
                 if (returnedId.IsNull)
                     throw new InvalidOperationException("Employee insert did not return the generated identity id.");
 
-                employee.Id = (double)returnedId;
-                detCommand.Parameters.Add(":EmployeeId", OracleDbType.Double, employee.Id, ParameterDirection.Input);
+                employee.Id = returnedId.Value;
+                detCommand.Parameters.Add(":EmployeeId", OracleDbType.Decimal, employee.Id, ParameterDirection.Input);
 
                 await detCommand.ExecuteNonQueryAsync();
 
@@ -282,13 +282,13 @@ public class EmployeeRepository(
                     BindByName = true,
                     Transaction = (OracleTransaction)transaction
                 };
-                empCommand.Parameters.Add(":Id", OracleDbType.Double, employee.Id, ParameterDirection.Input);
+                empCommand.Parameters.Add(":Id", OracleDbType.Decimal, employee.Id, ParameterDirection.Input);
                 empCommand.Parameters.Add(":FirstName", OracleDbType.Varchar2, employee.FirstName, ParameterDirection.Input);
                 empCommand.Parameters.Add(":LastName", OracleDbType.Varchar2, employee.LastName, ParameterDirection.Input);
                 empCommand.Parameters.Add(":Email", OracleDbType.Varchar2, employee.Email, ParameterDirection.Input);
                 empCommand.Parameters.Add(":Phone", OracleDbType.Varchar2, employee.Phone, ParameterDirection.Input);
                 empCommand.Parameters.Add(":DateOfBirth", OracleDbType.Date, employee.DateOfBirth, ParameterDirection.Input);
-                empCommand.Parameters.Add(":GenderId", OracleDbType.Double, employee.GenderId, ParameterDirection.Input);
+                empCommand.Parameters.Add(":GenderId", OracleDbType.Decimal, employee.GenderId, ParameterDirection.Input);
                 empCommand.Parameters.Add(":Address", OracleDbType.Varchar2, employee.Address, ParameterDirection.Input);
 
                 using var detCommand = new OracleCommand(detQuery, (OracleConnection)connection)
@@ -296,17 +296,17 @@ public class EmployeeRepository(
                     BindByName = true,
                     Transaction = (OracleTransaction)transaction
                 };
-                detCommand.Parameters.Add(":Id", OracleDbType.Double, employee.Id, ParameterDirection.Input);
-                detCommand.Parameters.Add(":PositionId", OracleDbType.Double, employee.PositionId, ParameterDirection.Input);
+                detCommand.Parameters.Add(":Id", OracleDbType.Decimal, employee.Id, ParameterDirection.Input);
+                detCommand.Parameters.Add(":PositionId", OracleDbType.Decimal, employee.PositionId, ParameterDirection.Input);
                 detCommand.Parameters.Add(":Salary", OracleDbType.Double, employee.Salary, ParameterDirection.Input);
                 detCommand.Parameters.Add(":StartDate", OracleDbType.Date, employee.StartDate, ParameterDirection.Input);
-                detCommand.Parameters.Add(":DepartmentId", OracleDbType.Double, employee.DepartmentId, ParameterDirection.Input);
-                detCommand.Parameters.Add(":EmploymentTypeId", OracleDbType.Double, employee.EmploymentTypeId, ParameterDirection.Input);
-                detCommand.Parameters.Add(":EmploymentStatusId", OracleDbType.Double, employee.EmploymentStatusId, ParameterDirection.Input);
+                detCommand.Parameters.Add(":DepartmentId", OracleDbType.Decimal, employee.DepartmentId, ParameterDirection.Input);
+                detCommand.Parameters.Add(":EmploymentTypeId", OracleDbType.Decimal, employee.EmploymentTypeId, ParameterDirection.Input);
+                detCommand.Parameters.Add(":EmploymentStatusId", OracleDbType.Decimal, employee.EmploymentStatusId, ParameterDirection.Input);
 
                 // Read the open row's current status under a row lock so a concurrent
                 // edit cannot race the transition we are about to record.
-                double? oldStatus = null;
+                decimal? oldStatus = null;
                 using (var statusCommand = new OracleCommand(
                     "SELECT employment_status_id FROM employment_details WHERE employee_id = :Id AND end_date IS NULL FOR UPDATE",
                     (OracleConnection)connection)
@@ -315,15 +315,15 @@ public class EmployeeRepository(
                     Transaction = (OracleTransaction)transaction
                 })
                 {
-                    statusCommand.Parameters.Add(":Id", OracleDbType.Double, employee.Id, ParameterDirection.Input);
+                    statusCommand.Parameters.Add(":Id", OracleDbType.Decimal, employee.Id, ParameterDirection.Input);
                     var result = await statusCommand.ExecuteScalarAsync();
                     if (result is not null and not DBNull)
                     {
                         oldStatus = result switch
                         {
-                            decimal d => (double)d,
-                            OracleDecimal od => od.IsNull ? null : (double?)od.Value,
-                            _ => Convert.ToDouble(result)
+                            decimal d => d,
+                            OracleDecimal od => od.IsNull ? null : od.Value,
+                            _ => Convert.ToDecimal(result)
                         };
                     }
                 }
@@ -369,7 +369,7 @@ public class EmployeeRepository(
         }
     }
 
-    public async Task<bool> HasDependenciesAsync(double id)
+    public async Task<bool> HasDependenciesAsync(decimal id)
     {
         // One round-trip: both child-table counts in a single scalar.
         // employment_details holds every job row (open and closed history),
@@ -417,7 +417,7 @@ public class EmployeeRepository(
         }
     }
 
-    public async Task DeleteAsync(double id)
+    public async Task DeleteAsync(decimal id)
     {
         // Soft delete: is_deleted=1 keeps every child FK intact and consistent.
         // GetAllAsync / GetByIdAsync hide rows through the is_deleted = 0 filter,
@@ -435,7 +435,7 @@ public class EmployeeRepository(
             using var connection = await _dbConnection.CreateOpenConnectionAsync();
             using var command = new OracleCommand(query, (OracleConnection)connection);
 
-            command.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
+            command.Parameters.Add(":Id", OracleDbType.Decimal, id, ParameterDirection.Input);
 
             await command.ExecuteNonQueryAsync();
         }
@@ -448,7 +448,7 @@ public class EmployeeRepository(
         }
     }
 
-    public async Task DeleteWithDetailsAsync(double id)
+    public async Task DeleteWithDetailsAsync(decimal id)
     {
         string statusEventQuery = @"
             DELETE FROM
@@ -505,42 +505,42 @@ public class EmployeeRepository(
                 using (var statusEventCommand = new OracleCommand(statusEventQuery, (OracleConnection)connection))
                 {
                     statusEventCommand.Transaction = (OracleTransaction)transaction;
-                    statusEventCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
+                    statusEventCommand.Parameters.Add(":Id", OracleDbType.Decimal, id, ParameterDirection.Input);
                     await statusEventCommand.ExecuteNonQueryAsync();
                 }
 
                 using (var detCommand = new OracleCommand(detQuery, (OracleConnection)connection))
                 {
                     detCommand.Transaction = (OracleTransaction)transaction;
-                    detCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
+                    detCommand.Parameters.Add(":Id", OracleDbType.Decimal, id, ParameterDirection.Input);
                     await detCommand.ExecuteNonQueryAsync();
                 }
 
                 using (var mgrCommand = new OracleCommand(mgrQuery, (OracleConnection)connection))
                 {
                     mgrCommand.Transaction = (OracleTransaction)transaction;
-                    mgrCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
+                    mgrCommand.Parameters.Add(":Id", OracleDbType.Decimal, id, ParameterDirection.Input);
                     await mgrCommand.ExecuteNonQueryAsync();
                 }
 
                 using (var leaveRequestCommand = new OracleCommand(leaveRequestQuery, (OracleConnection)connection))
                 {
                     leaveRequestCommand.Transaction = (OracleTransaction)transaction;
-                    leaveRequestCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
+                    leaveRequestCommand.Parameters.Add(":Id", OracleDbType.Decimal, id, ParameterDirection.Input);
                     await leaveRequestCommand.ExecuteNonQueryAsync();
                 }
 
                 using (var leaveBalanceCommand = new OracleCommand(leaveBalanceQuery, (OracleConnection)connection))
                 {
                     leaveBalanceCommand.Transaction = (OracleTransaction)transaction;
-                    leaveBalanceCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
+                    leaveBalanceCommand.Parameters.Add(":Id", OracleDbType.Decimal, id, ParameterDirection.Input);
                     await leaveBalanceCommand.ExecuteNonQueryAsync();
                 }
 
                 using (var empCommand = new OracleCommand(empQuery, (OracleConnection)connection))
                 {
                     empCommand.Transaction = (OracleTransaction)transaction;
-                    empCommand.Parameters.Add(":Id", OracleDbType.Double, id, ParameterDirection.Input);
+                    empCommand.Parameters.Add(":Id", OracleDbType.Decimal, id, ParameterDirection.Input);
                     await empCommand.ExecuteNonQueryAsync();
                 }
 
@@ -567,13 +567,13 @@ public class EmployeeRepository(
 
         return new Employee
         {
-            Id = reader.GetDouble(reader.GetOrdinal("id")),
+            Id = reader.GetDecimal(reader.GetOrdinal("id")),
             FirstName = reader.GetString(reader.GetOrdinal("first_name")),
             LastName = reader.GetString(reader.GetOrdinal("last_name")),
             Email = reader.GetString(reader.GetOrdinal("email")),
             Phone = reader.GetString(reader.GetOrdinal("phone")),
             DateOfBirth = reader.GetDateTime(reader.GetOrdinal("date_of_birth")),
-            GenderId = reader.GetDouble(reader.GetOrdinal("gender_id")),
+            GenderId = reader.GetDecimal(reader.GetOrdinal("gender_id")),
             Address = reader.GetString(reader.GetOrdinal("address")),
             CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
             UpdatedAt = reader.IsDBNull(updatedAtOrdinal) ? default : reader.GetDateTime(updatedAtOrdinal)
@@ -607,24 +607,24 @@ public class EmployeeRepository(
 
         return new EmployeeWithDetails
         {
-            Id = reader.GetDouble(reader.GetOrdinal("employee_id")),
+            Id = reader.GetDecimal(reader.GetOrdinal("employee_id")),
             FirstName = reader.GetString(reader.GetOrdinal("first_name")),
             LastName = reader.GetString(reader.GetOrdinal("last_name")),
             Email = reader.GetString(reader.GetOrdinal("email")),
             Phone = reader.GetString(reader.GetOrdinal("phone")),
             DateOfBirth = reader.GetDateTime(reader.GetOrdinal("date_of_birth")),
-            GenderId = reader.GetDouble(reader.GetOrdinal("gender_id")),
+            GenderId = reader.GetDecimal(reader.GetOrdinal("gender_id")),
             Address = reader.GetString(reader.GetOrdinal("address")),
             HasEmploymentDetails = hasDetails,
-            PositionId = hasDetails ? reader.GetDouble(reader.GetOrdinal("position_id")) : 0,
+            PositionId = hasDetails ? reader.GetDecimal(reader.GetOrdinal("position_id")) : 0,
             PositionName = hasDetails ? reader.GetString(reader.GetOrdinal("position_name")) : string.Empty,
             Salary = hasDetails ? reader.GetDouble(reader.GetOrdinal("salary")) : 0,
             StartDate = hasDetails ? reader.GetDateTime(reader.GetOrdinal("start_date")) : default,
             EndDate = !hasDetails || reader.IsDBNull(endDateOrdinal) ? null : reader.GetDateTime(endDateOrdinal),
-            DepartmentId = hasDetails ? reader.GetDouble(reader.GetOrdinal("department_id")) : 0,
+            DepartmentId = hasDetails ? reader.GetDecimal(reader.GetOrdinal("department_id")) : 0,
             DepartmentName = hasDetails ? reader.GetString(reader.GetOrdinal("department_name")) : string.Empty,
-            EmploymentTypeId = hasDetails ? reader.GetDouble(reader.GetOrdinal("employment_type_id")) : 0,
-            EmploymentStatusId = hasDetails ? reader.GetDouble(reader.GetOrdinal("employment_status_id")) : 0,
+            EmploymentTypeId = hasDetails ? reader.GetDecimal(reader.GetOrdinal("employment_type_id")) : 0,
+            EmploymentStatusId = hasDetails ? reader.GetDecimal(reader.GetOrdinal("employment_status_id")) : 0,
             CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
             UpdatedAt = updatedAt
         };

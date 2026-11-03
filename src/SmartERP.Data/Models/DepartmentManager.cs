@@ -4,10 +4,10 @@ namespace SmartERP.Data.Models;
 // StartDate and EndDate. Closed rows are history.
 public class DepartmentManager
 {
-    public double Id { get; set; }
-    public double DepartmentId { get; set; }
+    public decimal Id { get; set; }
+    public decimal DepartmentId { get; set; }
     public string DepartmentName { get; set; } = string.Empty;
-    public double ManagerId { get; set; }
+    public decimal ManagerId { get; set; }
     public string ManagerName { get; set; } = string.Empty;
     public DateTime StartDate { get; set; }
     public DateTime? EndDate { get; set; }

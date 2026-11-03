@@ -1,3 +1,3 @@
 namespace SmartERP.Data.Models;
 
-public record LookupItem(double Id, string Title);
+public record LookupItem(decimal Id, string Title);
