@@ -24,6 +24,7 @@ public class StatisticsRepository(
     private const int ProbationDaysBeforeAlert = 90;
 
     private const string ProbationStatus = "Probation";
+    private const int ExpiryWatchDays = 30;
 
     private static readonly string[] PendingExitStatuses = ["On Leave", "Notice Period"];
 
@@ -203,6 +204,28 @@ public class StatisticsRepository(
     // Approved requests whose range covers today. The employment_details join
     // is a LEFT one on purpose: someone on leave without an open assignment
     // still belongs on the list, just without a position to show.
+    // Documents expiring within the watch window. Lapsed rows stay in the
+    // list with negative days_left so HR sees the lapse, not just the cliff.
+    private const string ExpiringDocumentsQuery = @"
+        SELECT
+            e.id                               AS employee_id,
+            e.first_name || ' ' || e.last_name AS employee_name,
+            d.title                            AS document_title,
+            t.title                            AS type_title,
+            d.expires_at                       AS expires_at,
+            TRUNC(d.expires_at) - TRUNC(SYSDATE) AS days_left
+        FROM
+            documents d
+        JOIN
+            document_types t ON t.id = d.type_id
+        JOIN
+            employees e ON e.id = d.employee_id AND e.is_deleted = 0
+        WHERE
+            d.expires_at IS NOT NULL
+            AND d.expires_at <= TRUNC(SYSDATE) + :WindowDays
+        ORDER BY
+            d.expires_at";
+
     private const string OnLeaveTodayQuery = @"
         SELECT
             e.first_name || ' ' || e.last_name AS employee_name,
@@ -414,6 +437,7 @@ public class StatisticsRepository(
             var pendingExits = new List<WatchlistEntry>();
             var unmanaged = new List<UnmanagedDepartment>();
             var onLeaveToday = new List<WatchlistEntry>();
+            var expiring = new List<ExpiringDocument>();
 
             using (var connection = await _dbConnection.CreateOpenConnectionAsync())
             {
@@ -468,9 +492,28 @@ public class StatisticsRepository(
                         onLeaveToday.Add(MapWatchlistEntry(reader));
                     }
                 }
+
+                using (var command = new OracleCommand(ExpiringDocumentsQuery, (OracleConnection)connection))
+                {
+                    command.BindByName = true;
+                    command.Parameters.Add("WindowDays", OracleDbType.Int32, ExpiryWatchDays, ParameterDirection.Input);
+
+                    using var reader = await command.ExecuteReaderAsync();
+                    while (await reader.ReadAsync())
+                    {
+                        expiring.Add(new ExpiringDocument(
+                            reader.GetDecimal(reader.GetOrdinal("employee_id")),
+                            reader.GetString(reader.GetOrdinal("employee_name")),
+                            reader.GetString(reader.GetOrdinal("document_title")),
+                            reader.GetString(reader.GetOrdinal("type_title")),
+                            reader.GetDateTime(reader.GetOrdinal("expires_at")),
+                            Convert.ToInt32(reader.GetDecimal(reader.GetOrdinal("days_left")))
+                        ));
+                    }
+                }
             }
 
-            return new Watchlists(probation, pendingExits, unmanaged, onLeaveToday);
+            return new Watchlists(probation, pendingExits, unmanaged, onLeaveToday, expiring);
         }
         catch (OracleException ex)
         {

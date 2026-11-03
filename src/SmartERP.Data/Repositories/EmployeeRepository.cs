@@ -371,9 +371,10 @@ public class EmployeeRepository(
 
     public async Task<bool> HasDependenciesAsync(decimal id)
     {
-        // One round-trip: both child-table counts in a single scalar.
+        // One round-trip: every blocking table in a single scalar.
         // employment_details holds every job row (open and closed history),
-        // department_managers every management assignment.
+        // department_managers every management assignment, and leave_requests,
+        // leave_balances and documents are children of the employee too.
         string query = @"
             SELECT
                 ( SELECT COUNT(*)
@@ -381,7 +382,16 @@ public class EmployeeRepository(
                    WHERE employee_id = :Id ) +
                 ( SELECT COUNT(*)
                     FROM department_managers
-                   WHERE manager_id = :Id ) AS dep_count
+                   WHERE manager_id = :Id ) +
+                ( SELECT COUNT(*)
+                    FROM leave_requests
+                   WHERE employee_id = :Id ) +
+                ( SELECT COUNT(*)
+                    FROM leave_balances
+                   WHERE employee_id = :Id ) +
+                ( SELECT COUNT(*)
+                    FROM documents
+                   WHERE employee_id = :Id ) AS dep_count
             FROM dual";
 
         try
@@ -461,8 +471,9 @@ public class EmployeeRepository(
         // rollback restores all of them, so the employee either survives
         // fully or vanishes fully. ChildFoundException cannot fire on this
         // path because no children remain when the employees delete runs.
-        // Leave rows are children too: FK_LR_EMPLOYEE / FK_BAL_EMPLOYEE would
-        // otherwise block the final delete for anyone with leave history.
+        // Leave rows and documents are children too: FK_LR_EMPLOYEE /
+        // FK_BAL_EMPLOYEE / FK_DOC_EMPLOYEE would otherwise block the final
+        // delete for anyone with leave history or vaulted documents.
         string detQuery = @"
             DELETE FROM
                 employment_details
@@ -484,6 +495,12 @@ public class EmployeeRepository(
         string leaveBalanceQuery = @"
             DELETE FROM
                 leave_balances
+            WHERE
+                employee_id = :Id";
+
+        string documentQuery = @"
+            DELETE FROM
+                documents
             WHERE
                 employee_id = :Id";
 
@@ -535,6 +552,13 @@ public class EmployeeRepository(
                     leaveBalanceCommand.Transaction = (OracleTransaction)transaction;
                     leaveBalanceCommand.Parameters.Add(":Id", OracleDbType.Decimal, id, ParameterDirection.Input);
                     await leaveBalanceCommand.ExecuteNonQueryAsync();
+                }
+
+                using (var documentCommand = new OracleCommand(documentQuery, (OracleConnection)connection))
+                {
+                    documentCommand.Transaction = (OracleTransaction)transaction;
+                    documentCommand.Parameters.Add(":Id", OracleDbType.Decimal, id, ParameterDirection.Input);
+                    await documentCommand.ExecuteNonQueryAsync();
                 }
 
                 using (var empCommand = new OracleCommand(empQuery, (OracleConnection)connection))

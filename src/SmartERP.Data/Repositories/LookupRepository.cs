@@ -47,6 +47,11 @@ public class LookupRepository(
           FROM leave_statuses
       ORDER BY id";
 
+    private const string DocumentTypeQuery = @"
+        SELECT id, title
+          FROM document_types
+      ORDER BY title";
+
     public async Task<IEnumerable<LookupItem>> GetGendersAsync()
         => await ReadAsync(GenderQuery);
 
@@ -64,6 +69,9 @@ public class LookupRepository(
 
     public async Task<IEnumerable<LookupItem>> GetLeaveStatusesAsync()
         => await ReadAsync(LeaveStatusQuery);
+
+    public async Task<IEnumerable<LookupItem>> GetDocumentTypesAsync()
+        => await ReadAsync(DocumentTypeQuery);
 
     private async Task<IEnumerable<LookupItem>> ReadAsync(string query)
     {

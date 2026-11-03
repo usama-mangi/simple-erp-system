@@ -7,5 +7,6 @@ public record Watchlists(
     IReadOnlyList<WatchlistEntry> Probation,
     IReadOnlyList<WatchlistEntry> PendingExits,
     IReadOnlyList<UnmanagedDepartment> UnmanagedDepartments,
-    IReadOnlyList<WatchlistEntry> OnLeaveToday
+    IReadOnlyList<WatchlistEntry> OnLeaveToday,
+    IReadOnlyList<ExpiringDocument> ExpiringDocuments
 );

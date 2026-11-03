@@ -17,4 +17,6 @@ public interface ILookupRepository
     // Pending owns id 1 in the seed; callers look it up by title, never by
     // assuming the number.
     Task<IEnumerable<LookupItem>> GetLeaveStatusesAsync();
+
+    Task<IEnumerable<LookupItem>> GetDocumentTypesAsync();
 }
