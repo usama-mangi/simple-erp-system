@@ -105,6 +105,11 @@
       "text": "Ids are decimal everywhere (TASK-05): every id property/param/dictionary key is decimal; id params bind OracleDbType.Decimal; id columns read via GetDecimal (NUMBER with no scale, ODP.NET returns decimal, ExecuteScalar gives decimal). Measures stay double: Salary, payroll/deltas/percents, Entitlement/Used/RemainingDays, Dashboard FormatNumber, [Range] bounds. Plain identity NUMBER has no scale so rendered ids are plain integers and form round-trips bind cleanly. Hidden form inputs and asp-route-id need no changes.",
       "cat": "architecture",
       "updated": "2026-11-03T06:25:13.383812+00:00"
+    },
+    "dept-delete-contract": {
+      "text": "Departments have NO soft delete: DELETE is hard and blocked by FK (ORA-2292) from employment_details (open+closed rows), department_managers, or child departments (no ON DELETE actions anywhere). Department/Delete GET page disables the destructive submit and lists blockers when HasDependenciesAsync hits; POST double-checks via ORA-2292 -> ChildFoundException -> TempData message, row survives. Missing-Id POST surfaces as 404 (GetByIdAsync(0) -> NotFound), matching employee delete. The 11-03 IOracleExceptionHandler migration commit had missed AppUserRepository (concrete ctor, concrete type unregistered) which broke app startup in Development; fixed by taking IOracleExceptionHandler.",
+      "cat": "architecture",
+      "updated": "2026-11-03T07:12:37.255529+00:00"
     }
   }
 }

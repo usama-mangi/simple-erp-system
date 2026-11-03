@@ -10,6 +10,12 @@ public interface IDepartmentRepository
     Task UpdateAsync(Department department);
     Task<string?> DeleteAsync(decimal id);
 
+    // True when any row still references this department: job rows in
+    // employment_details (open and closed), management assignments in
+    // department_managers, or departments reporting to it. A hard delete
+    // fails with ORA-2292 while any of these exist.
+    Task<bool> HasDependenciesAsync(decimal id);
+
     // Every department ordered depth-first (parents before their reports),
     // with open headcount for the node and for its whole subtree.
     Task<IEnumerable<DepartmentNode>> GetHierarchyAsync();

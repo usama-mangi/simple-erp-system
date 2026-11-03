@@ -77,10 +77,7 @@
                                     <div class="register-actions">
                                         <a asp-controller="DepartmentManagers" asp-action="Index" asp-route-departmentId="@dept.Id" class="btn btn-stamp">Managers</a>
                                         <a asp-controller="Department" asp-action="Update" asp-route-id="@dept.Id" class="btn btn-stamp">Update</a>
-                                        <form asp-controller="Department" asp-action="Delete" asp-route-id="@dept.Id" method="post" class="d-inline"
-                                              onsubmit="return confirm('Remove this department from the register?')">
-                                            <button type="submit" class="btn btn-stamp btn-stamp--reject">Delete</button>
-                                        </form>
+                                        <a asp-controller="Department" asp-action="Delete" asp-route-id="@dept.Id" class="btn btn-stamp btn-stamp--reject">Delete</a>
                                     </div>
                                 </td>
                             </tr>

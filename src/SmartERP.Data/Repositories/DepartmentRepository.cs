@@ -5,6 +5,7 @@ using SmartERP.Data.Exceptions;
 using SmartERP.Data.ExceptionHandlers;
 using SmartERP.Data.Exceptions.Constraint.Department;
 using SmartERP.Data.Models;
+using Oracle.ManagedDataAccess.Types;
 
 namespace SmartERP.Data.Repositories;
 
@@ -166,6 +167,52 @@ public class DepartmentRepository(IDbConnectionFactory _dbConnection, IOracleExc
                     new DepartmentParentSelfException(ex)
                 ])
                 .HandleUpdateExceptions(ex);
+            throw new DatabaseAccessException(ex);
+        }
+    }
+
+    public async Task<bool> HasDependenciesAsync(decimal id)
+    {
+        // One round-trip, mirroring the employee check: all three blocker
+        // tables in a single scalar over dual.
+        string query = @"
+            SELECT
+                ( SELECT COUNT(*)
+                    FROM employment_details
+                   WHERE department_id = :Id ) +
+                ( SELECT COUNT(*)
+                    FROM department_managers
+                   WHERE department_id = :Id ) +
+                ( SELECT COUNT(*)
+                    FROM departments
+                   WHERE parent_department_id = :Id ) AS dep_count
+            FROM dual";
+
+        try
+        {
+            using var connection = await _dbConnection.CreateOpenConnectionAsync();
+            using var command = new OracleCommand(query, (OracleConnection)connection);
+
+            command.BindByName = true;
+            command.Parameters.Add(new OracleParameter(":Id", OracleDbType.Decimal) { Value = id });
+
+            var result = await command.ExecuteScalarAsync();
+
+            var count = result switch
+            {
+                null => 0m,
+                decimal d => d,
+                OracleDecimal od => od.IsNull ? 0m : od.Value,
+                _ => Convert.ToDecimal(result)
+            };
+
+            return count > 0;
+        }
+        catch (OracleException ex)
+        {
+            _oracleExceptionHandler
+                .HandlePermissionExceptions(ex)
+                .HandleReadExceptions(ex);
             throw new DatabaseAccessException(ex);
         }
     }

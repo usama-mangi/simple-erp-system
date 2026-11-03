@@ -50,7 +50,7 @@
     {
       "id": "TASK-06",
       "title": "Complete department delete flow (missing Delete.cshtml and GET action)",
-      "status": "active",
+      "status": "closed",
       "dependencies": [],
       "notes": "DepartmentController POST Delete returns View(model) on invalid ModelState but Views/Department/Delete.cshtml does not exist and no GET Delete action is defined. Add confirmation view mirroring Employee Delete."
     },
@@ -140,8 +140,15 @@
     }
   ],
   "log": {
-    "last_updated": "2026-11-03T06:50:26.684075+00:00",
+    "last_updated": "2026-11-03T07:12:37.099483+00:00",
     "recent_changes": [
+      {
+        "action": "update",
+        "task": "TASK-06",
+        "old_status": "active",
+        "new_status": "closed",
+        "at": "2026-11-03T07:12:37.099457+00:00"
+      },
       {
         "action": "update",
         "task": "TASK-06",
@@ -189,13 +196,6 @@
         "old_status": "active",
         "new_status": "closed",
         "at": "2026-11-02T06:55:29.315541+00:00"
-      },
-      {
-        "action": "update",
-        "task": "TASK-15",
-        "old_status": "to-do",
-        "new_status": "active",
-        "at": "2026-11-02T06:42:12.567308+00:00"
       }
     ]
   }

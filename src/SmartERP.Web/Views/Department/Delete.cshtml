@@ -1,0 +1,79 @@
+@model DepartmentDeleteViewModel;
+@{
+    ViewData["Title"] = $"Delete department - {Model.DisplayName}";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
+}
+
+<div class="register-surface">
+    <a class="register-back" asp-controller="Department" asp-action="Index">Back to register</a>
+
+    <div class="register-header mb-3">
+        <h1 class="register-title">Delete department</h1>
+        @if (Model.HasDependencies)
+        {
+            <p class="register-subtitle mb-1">@Model.DisplayName cannot be deleted yet. Employment assignments, management history or sub-departments would block a hard delete.</p>
+        }
+        else
+        {
+            <p class="register-subtitle mb-1">@Model.DisplayName is removed from the register permanently. There is no undo.</p>
+        }
+        <p class="register-meta mb-0">RECORD #@Model.Id</p>
+    </div>
+
+    <div class="register-panel mb-3">
+        <dl class="record-sheet">
+            <dt>Code</dt>
+            <dd>@Model.Code</dd>
+
+            <dt>Name</dt>
+            <dd>@Model.DisplayName</dd>
+
+            <dt>Reports to</dt>
+            <dd>@(Model.ParentName ?? "Top-level department")</dd>
+
+            <dt>Location</dt>
+            <dd>@Model.Location</dd>
+
+            <dt>Established</dt>
+            <dd><span class="register-dates">@Model.Established.ToString("yyyy-MM-dd")</span></dd>
+
+            <dt>Dependent records</dt>
+            <dd>
+                @if (Model.HasDependencies)
+                {
+                    <span>Employment assignments, management history or sub-departments</span>
+                }
+                else
+                {
+                    <span>None</span>
+                }
+            </dd>
+        </dl>
+    </div>
+
+    @if (Model.HasDependencies)
+    {
+        <div class="alert register-warn mb-3" role="alert">
+            <span class="warn-word">Dependents</span>
+            This delete cannot go ahead. Employment assignments, management history or
+            sub-departments still reference this department. Remove or reassign them first,
+            then come back and delete it.
+        </div>
+        <button type="button" class="btn btn-stamp btn-stamp--reject" disabled>Delete department</button>
+    }
+    else
+    {
+        <form asp-action="Delete" asp-route-id="@Model.Id" method="post"
+              onsubmit="return confirm('Delete this department permanently? It is removed from the register.');">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="submit" class="btn btn-stamp btn-stamp--reject">Delete department</button>
+                <a asp-action="Index" class="btn btn-stamp">Keep the record</a>
+            </div>
+        </form>
+    }
+</div>

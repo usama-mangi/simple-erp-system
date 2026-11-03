@@ -214,11 +214,40 @@ public class DepartmentController(
         }
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Delete(decimal id)
+    {
+        try
+        {
+            var department = await _context.GetByIdAsync(id);
+
+            if (department == null) return NotFound();
+
+            return View(new DepartmentDeleteViewModel
+            {
+                Id = department.Id,
+                DisplayName = department.Name,
+                Code = department.Code,
+                ParentName = department.ParentName,
+                Location = department.Location,
+                Established = department.Established,
+                HasDependencies = await _context.HasDependenciesAsync(id)
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            TempData["ErrorMessage"] = UserMessages.GenericFailure;
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(DepartmentDeleteViewModel model)
     {
-        if (!ModelState.IsValid) return View(model);
+        if (!ModelState.IsValid) return RedirectToAction(nameof(Index));
         try
         {
             Department? dept = await _context.GetByIdAsync(model.Id);
