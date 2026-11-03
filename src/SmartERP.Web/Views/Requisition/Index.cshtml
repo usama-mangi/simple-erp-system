@@ -1,0 +1,98 @@
+@model SmartERP.Web.Models.RequisitionIndexViewModel
+
+@{
+    ViewData["Title"] = "Requisitions";
+}
+
+<div class="register-surface">
+    <div class="register-header mb-3">
+        <h1 class="register-title">Requisitions</h1>
+        <p class="register-subtitle mb-0">
+            Job openings and hiring requirements.
+        </p>
+    </div>
+
+    <div class="register-panel">
+        <form asp-action="Create" method="get" class="mb-3" style="max-width: 400px;">
+            <div class="field">
+                <select asp-items="(IEnumerable<SelectListItem>)@ViewData["Departments"]"
+                        class="form-select form-select-sm">
+                    <option value="">All departments</option>
+                </select>
+            </div>
+            <div class="field">
+                <select asp-items="(IEnumerable<SelectListItem>)@ViewData["Positions"]"
+                        class="form-select form-select-sm">
+                    <option value="">All positions</option>
+                </select>
+            </div>
+            <div class="field">
+                <select asp-items="(IEnumerable<SelectListItem>)@ViewData["Statuses"]"
+                        class="form-select form-select-sm">
+                    <option value="">All statuses</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-sm btn-register">Filter</button>
+        </form>
+
+        @if (Model.Requisitions.Any())
+        {
+            <div class="table-responsive">
+                <table class="register-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Department</th>
+                            <th>Position</th>
+                            <th>Salary</th>
+                            <th>Openings</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var req in Model.Requisitions)
+                        {
+                            <tr>
+                                <td>@req.Title</td>
+                                <td>@req.DepartmentName</td>
+                                <td>@req.PositionTitle</td>
+                                <td>@req.Salary</td>
+                                <td>@req.Openings</td>
+                                <td>@req.StatusTitle</td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@req.Id" class="text-primary">Edit</a>
+                                    <form asp-action="Delete" asp-route-id="@req.Id" method="post" style="display:inline;">
+                                        <button type="submit" class="text-danger"
+                                                onclick="return confirm('Are you sure?');">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        <tr>
+                            <td colspan="7" class="text-muted">
+                                No requisitions found.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mb-3">
+                No requisitions recorded yet.
+            </div>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

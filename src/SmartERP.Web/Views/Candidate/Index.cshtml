@@ -1,0 +1,81 @@
+@model SmartERP.Web.Models.CandidateIndexViewModel
+
+@{
+    ViewData["Title"] = "Candidates";
+}
+
+<div class="register-surface">
+    <div class="register-header mb-3">
+        <h1 class="register-title">Candidates</h1>
+        <p class="register-subtitle mb-0">
+            Applicant profiles in the recruitment pipeline.
+        </p>
+    </div>
+
+    <div class="register-panel">
+        <form asp-action="Create" method="get" class="mb-3" style="max-width: 400px;">
+            <select asp-items="(IEnumerable<SelectListItem>)@ViewData["Statuses"]" class="form-select form-select-sm">
+                <option value="">All statuses</option>
+            </select>
+            <button type="submit" class="btn btn-sm btn-register">Filter</button>
+        </form>
+
+        @if (Model.Candidates.Any())
+        {
+            <div class="table-responsive">
+                <table class="register-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Source</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cand in Model.Candidates)
+                        {
+                            <tr>
+                                <td>@cand.FirstName @cand.LastName</td>
+                                <td>@cand.Email</td>
+                                <td>@cand.Phone</td>
+                                <td>@cand.Source</td>
+                                <td>@cand.StatusTitle</td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@cand.Id" class="text-primary">Edit</a>
+                                    <form asp-action="Delete" asp-route-id="@cand.Id" method="post" style="display:inline;">
+                                        <button type="submit" class="text-danger"
+                                                onclick="return confirm('Are you sure?');">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        <tr>
+                            <td colspan="6" class="text-muted">
+                                No candidates recorded yet.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mb-3">
+                No candidates recorded yet.
+            </div>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
