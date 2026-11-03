@@ -9,7 +9,7 @@ namespace SmartERP.Data.Repositories;
 
 public class StatisticsRepository(
     IDbConnectionFactory _dbConnection,
-    OracleExceptionHandler _oracleExceptionHandler
+    IOracleExceptionHandler _oracleExceptionHandler
 ) : IStatisticsRepository
 {
     // Trend window: 24 month-end points. Long enough that the seeded career

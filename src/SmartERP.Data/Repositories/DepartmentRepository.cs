@@ -8,7 +8,7 @@ using SmartERP.Data.Models;
 
 namespace SmartERP.Data.Repositories;
 
-public class DepartmentRepository(IDbConnectionFactory _dbConnection, OracleExceptionHandler _oracleExceptionHandler) : IDepartmentRepository
+public class DepartmentRepository(IDbConnectionFactory _dbConnection, IOracleExceptionHandler _oracleExceptionHandler) : IDepartmentRepository
 {
     private const string DepartmentColumns = @"
                 d.id, d.name, d.code, d.location, d.established,

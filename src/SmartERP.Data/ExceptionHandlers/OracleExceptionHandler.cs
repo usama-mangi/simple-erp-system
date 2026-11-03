@@ -9,9 +9,9 @@ using SmartERP.Data.Exceptions.Update;
 
 namespace SmartERP.Data.ExceptionHandlers;
 
-public class OracleExceptionHandler()
+public class OracleExceptionHandler : IOracleExceptionHandler
 {
-    public OracleExceptionHandler HandlePermissionExceptions(OracleException ex)
+    public IOracleExceptionHandler HandlePermissionExceptions(OracleException ex)
     {
         return ex.Number switch
         {
@@ -21,7 +21,7 @@ public class OracleExceptionHandler()
         };
     }
 
-    public OracleExceptionHandler HandleConstraintExceptions(OracleException ex, ConstraintException[] constraintException)
+    public IOracleExceptionHandler HandleConstraintExceptions(OracleException ex, ConstraintException[] constraintException)
     {
         foreach (var constraint in constraintException)
         {
@@ -38,7 +38,7 @@ public class OracleExceptionHandler()
         return this;
     }
 
-    public OracleExceptionHandler HandleReadExceptions(OracleException ex)
+    public IOracleExceptionHandler HandleReadExceptions(OracleException ex)
     {
         return ex.Number switch
         {
@@ -48,7 +48,7 @@ public class OracleExceptionHandler()
         };
     }
 
-    public OracleExceptionHandler HandleCreateExceptions(OracleException ex)
+    public IOracleExceptionHandler HandleCreateExceptions(OracleException ex)
     {
         return ex.Number switch
         {
@@ -59,7 +59,7 @@ public class OracleExceptionHandler()
         };
     }
 
-    public OracleExceptionHandler HandleUpdateExceptions(OracleException ex)
+    public IOracleExceptionHandler HandleUpdateExceptions(OracleException ex)
     {
         return ex.Number switch
         {
@@ -69,7 +69,7 @@ public class OracleExceptionHandler()
         };
     }
 
-    public OracleExceptionHandler HandleDeleteExceptions(OracleException ex)
+    public IOracleExceptionHandler HandleDeleteExceptions(OracleException ex)
     {
         return ex.Number switch
         {

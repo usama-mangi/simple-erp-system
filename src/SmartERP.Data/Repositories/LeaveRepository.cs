@@ -16,7 +16,7 @@ namespace SmartERP.Data.Repositories;
 // rolls the decision back with it.
 public class LeaveRepository(
     IDbConnectionFactory _dbConnection,
-    OracleExceptionHandler _oracleExceptionHandler
+    IOracleExceptionHandler _oracleExceptionHandler
 ) : ILeaveRepository
 {
     // is_deleted = 0 rides along on the join: a soft-deleted employee's leave

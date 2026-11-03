@@ -12,7 +12,7 @@ namespace SmartERP.Data.Repositories;
 
 public class EmployeeRepository(
     IDbConnectionFactory _dbConnection,
-    OracleExceptionHandler _oracleExceptionHandler
+    IOracleExceptionHandler _oracleExceptionHandler
 ) : IEmployeeRepository
 {
     public async Task<IEnumerable<Employee>> GetAllAsync()

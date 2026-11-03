@@ -12,7 +12,7 @@ namespace SmartERP.Data.Repositories;
 // inserts, so enum positions must never be assumed in UI bindings.
 public class LookupRepository(
     IDbConnectionFactory _dbConnection,
-    OracleExceptionHandler _oracleExceptionHandler
+    IOracleExceptionHandler _oracleExceptionHandler
 ) : ILookupRepository
 {
     private const string GenderQuery = @"

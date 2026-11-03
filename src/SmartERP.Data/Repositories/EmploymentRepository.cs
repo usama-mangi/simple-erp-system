@@ -14,7 +14,7 @@ namespace SmartERP.Data.Repositories;
 
 public class EmploymentRepository(
     IDbConnectionFactory _dbConnection,
-    OracleExceptionHandler _oracleExceptionHandler
+    IOracleExceptionHandler _oracleExceptionHandler
 ) : IEmploymentRepository
 {
     private const string SelectColumns = @"

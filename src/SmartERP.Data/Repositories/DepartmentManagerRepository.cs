@@ -3,11 +3,9 @@ using Oracle.ManagedDataAccess.Client;
 using SmartERP.Data.Abstractions;
 using SmartERP.Data.ExceptionHandlers;
 using SmartERP.Data.Exceptions;
-using SmartERP.Data.Exceptions.Constraint;
 using SmartERP.Data.Exceptions.Constraint.DepartmentManager;
 using SmartERP.Data.Exceptions.Constraint.EmployeeDetail;
 using SmartERP.Data.Exceptions.Read;
-using SmartERP.Data.Exceptions.Update;
 using SmartERP.Data.Models;
 
 namespace SmartERP.Data.Repositories;
@@ -17,7 +15,7 @@ namespace SmartERP.Data.Repositories;
 // department, so that guard is intentionally left to the unique index only.
 public class DepartmentManagerRepository(
     IDbConnectionFactory _dbConnection,
-    OracleExceptionHandler _oracleExceptionHandler
+    IOracleExceptionHandler _oracleExceptionHandler
 ) : IDepartmentManagerRepository
 {
     private const string SelectColumns = @"

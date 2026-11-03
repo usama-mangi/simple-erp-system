@@ -12,7 +12,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddSingleton<IConnectionContext, ConnectionContext>();
 builder.Services.AddSingleton<IDbConnectionFactory, OracleDbConnection>();
-builder.Services.AddSingleton<OracleExceptionHandler>();
+builder.Services.AddSingleton<IOracleExceptionHandler, OracleExceptionHandler>();
 
 builder.Services.AddScoped<ICurrentUser, HttpContextCurrentUser>();
 builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
