@@ -7,7 +7,7 @@ using SmartERP.Data.Models;
 
 namespace SmartERP.Data.Repositories;
 
-public class AppUserRepository(IDbConnectionFactory db, OracleExceptionHandler handler) : IAppUserRepository
+public class AppUserRepository(IDbConnectionFactory db, IOracleExceptionHandler handler) : IAppUserRepository
 {
     public async Task<AppUser?> GetByUsernameAsync(string username)
     {
