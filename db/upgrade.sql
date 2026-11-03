@@ -13,3 +13,7 @@
 @./migrations/006_documents.sql
 @./migrations/007_review_cycles.sql
 @./migrations/008_manager_reviews.sql
+@./migrations/009_application_stages.sql
+@./migrations/010_requisitions.sql
+@./migrations/011_candidates.sql
+@./migrations/012_applications.sql

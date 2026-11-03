@@ -19,4 +19,7 @@ public interface ILookupRepository
     Task<IEnumerable<LookupItem>> GetLeaveStatusesAsync();
 
     Task<IEnumerable<LookupItem>> GetDocumentTypesAsync();
+
+    // Application pipeline stages (for requisitions and candidates)
+    Task<IEnumerable<LookupItem>> GetApplicationStagesAsync();
 }

@@ -1,96 +1,73 @@
 using System.Data;
 using Oracle.ManagedDataAccess.Client;
 using SmartERP.Data.Abstractions;
-using SmartERP.Data.Exceptions;
 using SmartERP.Data.ExceptionHandlers;
+using SmartERP.Data.Exceptions;
 using SmartERP.Data.Models;
 
 namespace SmartERP.Data.Repositories;
 
-// Lookup tables (genders, employment_types, employment_status) are the source of
-// truth for their own ids: identity sequences can drift across rebuilds and
-// inserts, so enum positions must never be assumed in UI bindings.
-public class LookupRepository(
-    IDbConnectionFactory _dbConnection,
-    IOracleExceptionHandler _oracleExceptionHandler
-) : ILookupRepository
+public class LookupRepository(IDbConnectionFactory _dbConnection, IOracleExceptionHandler _oracleExceptionHandler) : ILookupRepository
 {
-    private const string GenderQuery = @"
-        SELECT id, title
-          FROM genders
-      ORDER BY id";
-
-    private const string EmploymentTypeQuery = @"
-        SELECT id, title
-          FROM employment_types
-      ORDER BY id";
-
-    private const string EmploymentStatusQuery = @"
-        SELECT id, title
-          FROM employment_status
-      ORDER BY id";
-
-    private const string PositionsQuery = @"
-        SELECT id, title
-          FROM positions
-      ORDER BY title";
-
-    private const string LeaveTypeQuery = @"
-        SELECT id, title
-          FROM leave_types
-      ORDER BY title";
-
-    // Ordered by id, not title: Pending seeds as id 1 and callers resolve it
-    // by title, so keeping the seed order visible makes the binding obvious.
-    private const string LeaveStatusQuery = @"
-        SELECT id, title
-          FROM leave_statuses
-      ORDER BY id";
-
-    private const string DocumentTypeQuery = @"
-        SELECT id, title
-          FROM document_types
-      ORDER BY title";
-
     public async Task<IEnumerable<LookupItem>> GetGendersAsync()
-        => await ReadAsync(GenderQuery);
+    {
+        return await GetItemsAsync("genders", "title");
+    }
 
     public async Task<IEnumerable<LookupItem>> GetEmploymentTypesAsync()
-        => await ReadAsync(EmploymentTypeQuery);
+    {
+        return await GetItemsAsync("employment_types", "title");
+    }
 
     public async Task<IEnumerable<LookupItem>> GetEmploymentStatusesAsync()
-        => await ReadAsync(EmploymentStatusQuery);
+    {
+        return await GetItemsAsync("employment_status", "title");
+    }
 
     public async Task<IEnumerable<LookupItem>> GetPositionsAsync()
-        => await ReadAsync(PositionsQuery);
+    {
+        return await GetItemsAsync("positions", "title");
+    }
 
     public async Task<IEnumerable<LookupItem>> GetLeaveTypesAsync()
-        => await ReadAsync(LeaveTypeQuery);
+    {
+        return await GetItemsAsync("leave_types", "title");
+    }
 
     public async Task<IEnumerable<LookupItem>> GetLeaveStatusesAsync()
-        => await ReadAsync(LeaveStatusQuery);
+    {
+        return await GetItemsAsync("leave_statuses", "title");
+    }
 
     public async Task<IEnumerable<LookupItem>> GetDocumentTypesAsync()
-        => await ReadAsync(DocumentTypeQuery);
-
-    private async Task<IEnumerable<LookupItem>> ReadAsync(string query)
     {
-        var items = new List<LookupItem>();
+        return await GetItemsAsync("document_types", "title");
+    }
+
+    public async Task<IEnumerable<LookupItem>> GetApplicationStagesAsync()
+    {
+        return await GetItemsAsync("application_stages", "title");
+    }
+
+    private async Task<IEnumerable<LookupItem>> GetItemsAsync(string tableName, string titleColumn)
+    {
+        string query = $"SELECT id, {titleColumn} FROM {tableName}";
 
         try
         {
-            using (var connection = await _dbConnection.CreateOpenConnectionAsync())
-            using (var command = new OracleCommand(query, (OracleConnection)connection))
-            using (var reader = await command.ExecuteReaderAsync())
+            using var connection = await _dbConnection.CreateOpenConnectionAsync();
+            using var command = new OracleCommand(query, (OracleConnection)connection);
+
+            using var reader = await command.ExecuteReaderAsync();
+
+            var items = new List<LookupItem>();
+            while (await reader.ReadAsync())
             {
-                while (await reader.ReadAsync())
-                {
-                    items.Add(new LookupItem
-                    (
-                        Id: reader.GetDecimal(reader.GetOrdinal("id")),
-                        Title: reader.GetString(reader.GetOrdinal("title"))
-                    ));
-                }
+                items.Add(new LookupItem
+                (
+                    reader.GetDecimal(reader.GetOrdinal("id")),
+                    reader.GetString(reader.GetOrdinal(titleColumn))
+                ));
             }
 
             return items;
