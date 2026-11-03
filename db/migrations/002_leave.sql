@@ -1,7 +1,7 @@
--- 07_leave.sql
+-- migrations/002_leave.sql
 -- One-shot migration for databases built by scripts 01..04 BEFORE the leave
--- domain existed. A full rebuild (00_drop, 01_schema, 02_procedures,
--- 03_triggers, 04_seed) already produces the target shape, so every step
+-- domain existed. A full rebuild (drop, schema, procedures,
+-- triggers, seed) already produces the target shape, so every step
 -- below is guarded and re-running this file is a no-op.
 --
 -- Steps:
@@ -12,7 +12,7 @@
 --   5. uq_lr_open_request, the one-open-request-per-employee index
 --   6. verify
 --
--- No sample request rows here: 04_seed's samples are sysdate-relative, and
+-- No sample request rows here: seed's samples are sysdate-relative, and
 -- re-running a migration against a populated database would stack a fresh
 -- "on leave today" row on every run. The populated database gets its demo
 -- data through the UI instead.

@@ -181,3 +181,46 @@ begin
    end if;
 end;
 /
+create or replace trigger trg_audit_document_types
+after insert or update or delete on document_types
+for each row
+begin
+   if inserting then
+      insert into audit_log (table_name, pk_value, action, changed_by)
+      values ('DOCUMENT_TYPES', :new.id, 'INSERT', nvl(sys_context('USERENV','CLIENT_IDENTIFIER'), 'anonymous'));
+   elsif updating then
+      insert into audit_log (table_name, pk_value, action, changed_by)
+      values ('DOCUMENT_TYPES', :new.id, 'UPDATE', nvl(sys_context('USERENV','CLIENT_IDENTIFIER'), 'anonymous'));
+   elsif deleting then
+      insert into audit_log (table_name, pk_value, action, changed_by)
+      values ('DOCUMENT_TYPES', :old.id, 'DELETE', nvl(sys_context('USERENV','CLIENT_IDENTIFIER'), 'anonymous'));
+   end if;
+end;
+/
+
+create or replace trigger trg_audit_documents
+after insert or update or delete on documents
+for each row
+begin
+   if inserting then
+      insert into audit_log (table_name, pk_value, action, changed_by)
+      values ('DOCUMENTS', :new.id, 'INSERT', nvl(sys_context('USERENV','CLIENT_IDENTIFIER'), 'anonymous'));
+   elsif updating then
+      insert into audit_log (table_name, pk_value, action, changed_by)
+      values ('DOCUMENTS', :new.id, 'UPDATE', nvl(sys_context('USERENV','CLIENT_IDENTIFIER'), 'anonymous'));
+   elsif deleting then
+      insert into audit_log (table_name, pk_value, action, changed_by)
+      values ('DOCUMENTS', :old.id, 'DELETE', nvl(sys_context('USERENV','CLIENT_IDENTIFIER'), 'anonymous'));
+   end if;
+end;
+/
+create or replace trigger trg_set_documents_updated_at before
+   update on documents
+   for each row
+   when ( new.updated_at is null
+       or old.updated_at is null
+       or new.updated_at = old.updated_at )
+begin
+   :new.updated_at := systimestamp;
+end;
+/

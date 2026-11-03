@@ -2,6 +2,9 @@ drop index if exists uq_dept_current_manager;
 drop index if exists uq_det_current_job;
 drop index if exists uq_lr_open_request;
 
+drop table if exists documents;
+drop table if exists document_types;
+
 drop table if exists status_events;
 drop table if exists department_managers;
 drop table if exists employment_details;

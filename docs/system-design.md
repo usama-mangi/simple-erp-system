@@ -53,12 +53,12 @@ Browser (Razor views, form posts)
       EmploymentRepository, DepartmentManagerRepository, LookupRepository (to add)
       OracleExceptionHandler: OracleException -> typed Exceptions/*
       OracleDbConnection: IDbConnectionFactory over ODP.NET
-  -> Oracle (db/01_schema.sql is the source of truth)
+  -> Oracle (db/schema.sql is the source of truth)
 ```
 
 Single point of failure: the Oracle instance connection string. It is also the most-often-failing component (wrong credentials, listener down, schema not rebuilt). The failure path already funnels every open failure into the repository catch/throw; what is missing is a friendly render of that failure on the page instead of a 500.
 
-Most-often-failing component in practice: human queries against schema drift. The `employee_details`/`e.department_id` mismatch in `EmployeeRepository.GetByIdAsync` is exactly this failure class. Rule going forward: schema names come from `db/01_schema.sql`, never from memory.
+Most-often-failing component in practice: human queries against schema drift. The `employee_details`/`e.department_id` mismatch in `EmployeeRepository.GetByIdAsync` is exactly this failure class. Rule going forward: schema names come from `db/schema.sql`, never from memory.
 
 ## 4. Data flow and contract
 

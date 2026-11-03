@@ -214,7 +214,7 @@ create unique index uq_dept_current_manager on
    );
 
 -- One open (Pending) leave request per employee, the leave-domain twin of
--- uq_det_current_job. The literal 1 is leave_statuses.Pending's id: 04_seed
+-- uq_det_current_job. The literal 1 is leave_statuses.Pending's id: seed
 -- inserts Pending first and guards that it lands on 1, because this index
 -- expression cannot join to the statuses table.
 create unique index uq_lr_open_request on
@@ -233,6 +233,42 @@ create unique index uq_lr_open_request on
 -- Ora@x.com vs ora@x.com is one subscriber, not two.
 create unique index uq_employees_email_lower on
    employees ( lower(email) );
+
+create table if not exists document_types (
+   id         number generated always as identity,
+   title      varchar2(60) not null,
+   created_at timestamp default systimestamp not null,
+   updated_at timestamp,
+   constraint pk_document_type_id primary key ( id ),
+   constraint uq_document_types_title unique ( title )
+);
+
+create table if not exists documents (
+   id           number generated always as identity,
+   employee_id  number not null,
+   type_id      number not null,
+   title        varchar2(120) not null,
+   issued_on    date,
+   expires_at   date,
+   note         varchar2(500),
+   created_at   timestamp default systimestamp not null,
+   updated_at   timestamp,
+   constraint pk_document_id primary key ( id ),
+   constraint fk_doc_employee foreign key ( employee_id )
+      references employees ( id ),
+   constraint fk_doc_type foreign key ( type_id )
+      references document_types ( id ),
+   constraint chk_doc_dates check ( expires_at is null
+       or issued_on is null
+       or expires_at >= issued_on )
+);
+
+create index if not exists ix_documents_employee on
+   documents ( employee_id );
+
+create index if not exists ix_documents_expires on
+   documents ( expires_at );
+
 create table if not exists app_users (
    id            number generated always as identity,
    employee_id   number not null,

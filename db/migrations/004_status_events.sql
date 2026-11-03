@@ -1,7 +1,7 @@
--- 09_status_events.sql
+-- migrations/004_status_events.sql
 -- One-shot migration for databases built by scripts 01..04 BEFORE status churn
--- history existed. A full rebuild (00_drop, 01_schema, 02_procedures, 03_triggers,
--- 04_seed) already produces the target shape, so every step below is guarded and
+-- history existed. A full rebuild (drop, schema, procedures, triggers,
+-- seed) already produces the target shape, so every step below is guarded and
 -- re-running this file is a no-op.
 --
 -- Steps:

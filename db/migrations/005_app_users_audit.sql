@@ -1,4 +1,4 @@
--- 10_app_users_audit.sql
+-- migrations/005_app_users_audit.sql
 -- One-shot migration for databases built before app_users/audit_log existed.
 -- Guarded and re-runnable.
 

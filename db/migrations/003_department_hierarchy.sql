@@ -1,7 +1,7 @@
--- 08_department_hierarchy.sql
+-- migrations/003_department_hierarchy.sql
 -- One-shot migration for databases built by scripts 01..04 BEFORE departments
--- had a reporting line. A full rebuild (00_drop, 01_schema, 02_procedures,
--- 03_triggers, 04_seed) already produces the target shape, so every step
+-- had a reporting line. A full rebuild (drop, schema, procedures,
+-- triggers, seed) already produces the target shape, so every step
 -- below is guarded and re-running this file is a no-op.
 --
 -- Steps:
