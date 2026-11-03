@@ -41,6 +41,14 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Leave"
                                asp-action="Index">Leave</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Requisition"
+                               asp-action="Index">Requisitions</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Candidate"
+                               asp-action="Index">Candidates</a>
+                        </li>
                     </ul>
                     <ul class="navbar-nav">
                         @if (User.Identity?.IsAuthenticated == true)
@@ -55,12 +63,15 @@
                                 </form>
                             </li>
                         }
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Review"
+                               asp-action="Index">Performance Reviews</a>
+                        }
                         else
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Auth" asp-action="Login">Sign in</a>
-                            </li>
-                        }
+                            }
                     </ul>
                 </div>
             </div>

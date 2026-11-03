@@ -1,0 +1,57 @@
+@model SmartERP.Web.Models.EmploymentDetailCreateViewModel
+
+@{
+    ViewData["Title"] = "Hire Candidate";
+}
+
+<div class="register-surface">
+    <div class="register-header mb-3">
+        <h1 class="register-title">Hire Candidate</h1>
+        <p class="register-subtitle mb-0">
+            Convert a candidate to an employee.
+        </p>
+    </div>
+
+    <div class="register-panel register-form">
+        <form asp-action="Hire" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <input type="hidden" asp-for="EmployeeId" />
+
+            <div class="field">
+                <label asp-for="PositionId" class="control-label"></label>
+                <select asp-for="PositionId" asp-items="(IEnumerable<SelectListItem>)@ViewData["Positions"]" class="form-select">
+                    <option value="">Select position</option>
+                </select>
+                <span asp-validation-for="PositionId" class="text-danger"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="Salary" class="control-label"></label>
+                <input asp-for="Salary" type="number" min="0" class="form-control" />
+                <span asp-validation-for="Salary" class="text-danger"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="StartDate" class="control-label"></label>
+                <input asp-for="StartDate" type="date" class="form-control" />
+                <span asp-validation-for="StartDate" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-register">Hire Candidate</button>
+                <a asp-action="Index" class="btn btn-stamp">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

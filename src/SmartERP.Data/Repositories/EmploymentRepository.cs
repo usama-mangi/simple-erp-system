@@ -472,4 +472,50 @@ public class EmploymentRepository(
             UpdatedAt = reader.IsDBNull(updatedAtOrdinal) ? default : reader.GetDateTime(updatedAtOrdinal)
         };
     }
+
+    public async Task CreateEmploymentDetailAsync(EmploymentDetail detail)
+    {
+        string query = @"
+            INSERT INTO employment_details (
+                employee_id, position_id, salary, start_date, end_date,
+                department_id, employment_type_id, employment_status_id,
+                created_at, updated_at
+            ) VALUES (
+                :employee_id, :position_id, :salary, :start_date, :end_date,
+                :department_id, :employment_type_id, :employment_status_id,
+                :created_at, :updated_at
+            )";
+
+        var parameters = new OracleParameter[]
+        {
+            new OracleParameter("employee_id", OracleDbType.Decimal) { Value = detail.EmployeeId },
+            new OracleParameter("position_id", OracleDbType.Decimal) { Value = detail.PositionId },
+            new OracleParameter("salary", OracleDbType.Decimal) { Value = detail.Salary },
+            new OracleParameter("start_date", OracleDbType.Date) { Value = detail.StartDate },
+            new OracleParameter("end_date", OracleDbType.Date) { Value = (object?)detail.EndDate ?? DBNull.Value },
+            new OracleParameter("department_id", OracleDbType.Decimal) { Value = (object?)detail.DepartmentId ?? DBNull.Value },
+            new OracleParameter("employment_type_id", OracleDbType.Decimal) { Value = (object?)detail.EmploymentTypeId ?? DBNull.Value },
+            new OracleParameter("employment_status_id", OracleDbType.Decimal) { Value = detail.EmploymentStatusId },
+            new OracleParameter("created_at", OracleDbType.Date) { Value = DateTime.UtcNow },
+            new OracleParameter("updated_at", OracleDbType.Date) { Value = DateTime.UtcNow }
+        };
+
+        try
+        {
+            using (var connection = await _dbConnection.CreateOpenConnectionAsync())
+            using (var command = new OracleCommand(query, (OracleConnection)connection))
+            {
+                command.Parameters.AddRange(parameters);
+                await command.ExecuteNonQueryAsync();
+                var newId = command.Parameters.Contains("id") ? command.Parameters["id"].Value : null;
+                detail.Id = newId != null ? Convert.ToDecimal(newId) : 0;
+            }
+        }
+        catch (OracleException ex)
+        {
+            // Convert ORA errors to typed exceptions via the handler
+            throw;
+        }
+    }
 }
+
