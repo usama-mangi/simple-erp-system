@@ -1,0 +1,93 @@
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using SmartERP.Web.Models
+
+@model ReviewCreateViewModel
+
+@{
+    ViewData["Title"] = "Create review";
+}
+
+<div class="register-surface">
+    <div class="register-header mb-3">
+        <h1 class="register-title">Create performance review</h1>
+        <p class="register-subtitle mb-0">
+            Record a manager review for an employee within a review cycle.
+        </p>
+    </div>
+
+    <div class="register-panel register-form">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="field">
+                <label asp-for="EmployeeId" class="control-label"></label>
+                <select asp-for="EmployeeId" asp-items="(IEnumerable<SelectListItem>)@ViewData["Employees"]"
+                        class="form-select">
+                    <option value="">Select employee</option>
+                </select>
+                <span asp-validation-for="EmployeeId" class="text-danger"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="CycleId" class="control-label"></label>
+                <select asp-for="CycleId" asp-items="(IEnumerable<SelectListItem>)@ViewData["Cycles"]"
+                        class="form-select">
+                    <option value="">Select review cycle</option>
+                </select>
+                <span asp-validation-for="CycleId" class="text-danger"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="ReviewerId" class="control-label"></label>
+                <select asp-for="ReviewerId" asp-items="(IEnumerable<SelectListItem>)@ViewData["Reviewers"]"
+                        class="form-select">
+                    <option value="">Select reviewer</option>
+                </select>
+                <span asp-validation-for="ReviewerId" class="text-danger"></span>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6 field">
+                    <label asp-for="Rating" class="control-label"></label>
+                    <input asp-for="Rating" type="number" min="1" max="5" class="form-control" />
+                    <span asp-validation-for="Rating" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 field">
+                    <label asp-for="ReviewDate" class="control-label"></label>
+                    <input asp-for="ReviewDate" type="date" class="form-control" />
+                    <span asp-validation-for="ReviewDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="field">
+                <label asp-for="Comments" class="control-label"></label>
+                <textarea asp-for="Comments" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Comments" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="submit" class="btn btn-register">Submit review</button>
+                @if (Model.EmployeeId > 0)
+                {
+                    <a asp-action="Index" asp-route-employeeId="@Model.EmployeeId" class="btn btn-stamp">Back to
+                        register</a>
+                    }
+                else
+                    {
+                        <a asp-action="Index" class="btn btn-stamp">Back to register</a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @section Styles {
+        <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
+    }
+
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }

@@ -11,3 +11,5 @@
 @./migrations/004_status_events.sql
 @./migrations/005_app_users_audit.sql
 @./migrations/006_documents.sql
+@./migrations/007_review_cycles.sql
+@./migrations/008_manager_reviews.sql

@@ -1,0 +1,94 @@
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using SmartERP.Web.Models
+
+@model ReviewIndexViewModel
+
+@{
+    ViewData["Title"] = "Performance reviews";
+}
+
+<div class="register-surface">
+    <div class="register-header mb-3">
+        <h1 class="register-title">Performance reviews</h1>
+        <p class="register-subtitle mb-0">
+            Manager reviews and cycle overview for the performance appraisal process.
+        </p>
+    </div>
+
+    <div class="register-panel">
+        <form asp-action="Create" method="get" class="mb-3" style="max-width: 400px;">
+            <div class="field">
+                <label>Employee</label>
+                <select asp-for="EmployeeId" asp-items="(IEnumerable<SelectListItem>)@ViewData["Employees"]"
+                        class="form-select form-select-sm">
+                    <option value="">All employees</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Cycle</label>
+                <select asp-for="CycleId" asp-items="(IEnumerable<SelectListItem>)@ViewData["Cycles"]"
+                        class="form-select form-select-sm">
+                    <option value="">All cycles</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-sm btn-register">Filter</button>
+        </form>
+
+        @if (Model.EmployeeId.HasValue)
+        {
+            <div class="alert alert-info mb-3">
+                Reviewing: @Model.EmployeeName</div>
+            }
+
+            <div class="table-responsive">
+                <table class="register-table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Reviewer</th>
+                            <th>Cycle</th>
+                            <th>Rating</th>
+                            <th>Review Date</th>
+                            <th>Comments</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var review in Model.Reviews)
+                        {
+                            <tr>
+                                <td>@review.EmployeeName</td>
+                                <td>@review.ReviewerName</td>
+                                <td>@review.ReviewCycleTitle</td>
+                                <td>@review.Rating</td>
+                                <td>@review.ReviewDate.ToString("yyyy-MM-dd")</td>
+                                <td>@review.Comments</td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@review.Id" class="text-primary">Edit</a>
+                                    <form asp-action="Delete" asp-route-id="@review.Id" method="post" style="display:inline;">
+                                        <button type="submit" class="text-danger"
+                                                onclick="return confirm('Are you sure?');">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        <tr>
+                            <td colspan="7" class="text-muted">
+                                @(Model.Reviews.Any() ? "No reviews found for the selected filter" : "No reviews recorded yet.")
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @section Styles {
+        <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
+    }
+
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }
