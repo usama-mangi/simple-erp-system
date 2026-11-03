@@ -12,4 +12,12 @@
     <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.26.400" />
   </ItemGroup>
 
+  <ItemGroup>
+    <SonarQubeSetting Include="sonar.exclusions">
+      <Value>**/obj/**,**/bin/**</Value>
+    </SonarQubeSetting>
+    <SonarQubeSetting Include="sonar.cpd.exclusions">
+      <Value>**/obj/**,**/bin/**</Value>
+    </SonarQubeSetting>
+  </ItemGroup>
 </Project>

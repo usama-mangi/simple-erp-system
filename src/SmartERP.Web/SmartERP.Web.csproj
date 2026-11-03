@@ -11,4 +11,12 @@
     <UserSecretsId>f3739cd7-41e4-49fb-8376-89d5eaedae2d</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <SonarQubeSetting Include="sonar.exclusions">
+      <Value>**/wwwroot/lib/**,**/obj/**,**/bin/**</Value>
+    </SonarQubeSetting>
+    <SonarQubeSetting Include="sonar.cpd.exclusions">
+      <Value>**/wwwroot/lib/**,**/obj/**,**/bin/**</Value>
+    </SonarQubeSetting>
+  </ItemGroup>
 </Project>

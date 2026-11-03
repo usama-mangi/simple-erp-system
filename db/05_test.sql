@@ -1,4 +1,2 @@
 select *
-  from employees;
-select *
-  from departments;
+  from app_users;

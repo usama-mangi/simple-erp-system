@@ -120,7 +120,7 @@ using (
 when not matched then
 insert ( title )
 values
-   ( s.title )
+   ( s.title );
 /
 commit
 /
@@ -164,7 +164,7 @@ using (
 when not matched then
 insert ( title )
 values
-   ( s.title )
+   ( s.title );
 /
 commit
 /

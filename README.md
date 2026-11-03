@@ -24,6 +24,7 @@ SmartERP.slnx
 └── 08_department_hierarchy.sql # One-shot migration: existing installs gain departments.parent_department_id, its self-FK and no-self-parent check
 ├── 09_status_events.sql        # One-shot migration: existing installs gain status_events, its FKs and the transition check
 ├── 10_app_users_audit.sql  # One-shot migration: existing installs gain app_users and audit_log
+├── 11_realistic_seed.sql   # Optional large realistic seed for load/UX testing
 ```
 
 Rebuild the database after every schema change: run the chained scripts in filename order on every rebuild. Dropping a table drops its identity sequence too, so ids restart at 1 per rebuild; anyone hard-coding lookup or row ids in code instead of reading them from queries will drift. Schema-level migrations for already-populated databases live in numbered follow-up scripts (`06_positions.sql` is one: it backfills positions from the former free-text job_title column, repoints employment_details, drops job_title, and is re-runnable).

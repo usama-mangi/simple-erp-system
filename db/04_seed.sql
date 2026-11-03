@@ -391,10 +391,10 @@ using (
    )
    and ed.start_date = s.start_date
    and ed.position_id = (
-      select p.id
-        from positions p
-       where p.title = s.job_title
-    ) )
+   select p.id
+     from positions p
+    where p.title = s.job_title
+) )
 when not matched then
 insert (
    employee_id,
@@ -410,11 +410,12 @@ values
       select e.id
         from employees e
        where e.email = s.email
-   ),(
-      select p.id
-        from positions p
-       where p.title = s.job_title
    ),
+     (
+        select p.id
+          from positions p
+         where p.title = s.job_title
+     ),
      s.salary,
      s.start_date,
      s.end_date,
@@ -439,19 +440,28 @@ values
 -- 7a. SEED STATUS EVENTS (backfill from assignment history)
 -- =========================================================
 
-insert into status_events (employee_id, from_status_id, to_status_id, changed_at, note)
-select ed.employee_id,
-       lag(ed.employment_status_id) over (
-          partition by ed.employee_id
-          order by ed.start_date, ed.id ),
-       ed.employment_status_id,
-       cast(ed.start_date as timestamp),
-       'Backfilled from assignment history'
-  from employment_details ed
- where not exists (
-          select 1
-            from status_events se
-           where se.employee_id = ed.employee_id );
+insert into status_events (
+   employee_id,
+   from_status_id,
+   to_status_id,
+   changed_at,
+   note
+)
+   select ed.employee_id,
+          lag(ed.employment_status_id)
+          over(partition by ed.employee_id
+               order by ed.start_date,
+                        ed.id
+          ),
+          ed.employment_status_id,
+          cast(ed.start_date as timestamp),
+          'Backfilled from assignment history'
+     from employment_details ed
+    where not exists (
+      select 1
+        from status_events se
+       where se.employee_id = ed.employee_id
+   );
 
 -- =========================================================
 -- 8. SEED DEPARTMENT MANAGERS
@@ -518,12 +528,12 @@ values
 -- =========================================================
 
 insert into leave_statuses ( title )
-select 'Pending'
-  from dual
- where not exists (
-       select 1
-         from leave_statuses
-        where title = 'Pending'
+   select 'Pending'
+     from dual
+    where not exists (
+      select 1
+        from leave_statuses
+       where title = 'Pending'
    );
 
 merge into leave_statuses ls
@@ -555,8 +565,7 @@ begin
    if pending_id != 1 then
       raise_application_error(
          -20001,
-         'uq_lr_open_request binds leave_statuses id 1 to Pending, but Pending has id '
-            || pending_id
+         'uq_lr_open_request binds leave_statuses id 1 to Pending, but Pending has id ' || pending_id
       );
    end if;
 end;
@@ -616,10 +625,10 @@ using (
        where e.email = s.email
    )
    and lb.leave_type_id = (
-      select lt.id
-        from leave_types lt
-       where lt.title = s.type_title
-   )
+   select lt.id
+     from leave_types lt
+    where lt.title = s.type_title
+)
    and lb.year = extract(year from sysdate) )
 when not matched then
 insert (
@@ -633,11 +642,12 @@ values
       select e.id
         from employees e
        where e.email = s.email
-   ),(
-      select lt.id
-        from leave_types lt
-       where lt.title = s.type_title
    ),
+     (
+        select lt.id
+          from leave_types lt
+         where lt.title = s.type_title
+     ),
      extract(year from sysdate),
      s.entitlement,
      0 );
@@ -664,8 +674,17 @@ using (
    union all
    select 'ayesha.ahmed@example.com',
           'Sick',
-          trunc(sysdate, 'MM'),
-          least(trunc(sysdate, 'MM') + 2, trunc(sysdate)),
+          trunc(
+             sysdate,
+             'MM'
+          ),
+          least(
+             trunc(
+                sysdate,
+                'MM'
+             ) + 2,
+             trunc(sysdate)
+          ),
           'Approved',
           'Flu'
      from dual
@@ -683,10 +702,10 @@ using (
        where e.email = s.email
    )
    and lr.leave_type_id = (
-      select lt.id
-        from leave_types lt
-       where lt.title = s.type_title
-   )
+   select lt.id
+     from leave_types lt
+    where lt.title = s.type_title
+)
    and lr.start_date = s.start_date )
 when not matched then
 insert (
@@ -702,15 +721,17 @@ values
       select e.id
         from employees e
        where e.email = s.email
-   ),(
-      select lt.id
-        from leave_types lt
-       where lt.title = s.type_title
-   ),(
-      select ls.id
-        from leave_statuses ls
-       where ls.title = s.status
    ),
+     (
+        select lt.id
+          from leave_types lt
+         where lt.title = s.type_title
+     ),
+     (
+        select ls.id
+          from leave_statuses ls
+         where ls.title = s.status
+     ),
      s.start_date,
      s.end_date,
      s.reason,
@@ -718,8 +739,9 @@ values
         when s.status = 'Pending' then
             null
         else
-            systimestamp
-     end );
+           systimestamp
+     end
+   );
 
 
 -- =========================================================
@@ -732,20 +754,21 @@ values
 -- =========================================================
 
 update leave_balances lb
-   set used_days = (
-       select nvl(
-                 sum(lr.end_date - lr.start_date + 1),
-                 0
-              )
-         from leave_requests lr
-        where lr.employee_id = lb.employee_id
-          and lr.leave_type_id = lb.leave_type_id
-          and lr.status_id = (
-              select ls.id
-                from leave_statuses ls
-               where ls.title = 'Approved'
-          )
-          and extract(year from lr.start_date) = lb.year
+   set
+   used_days = (
+      select nvl(
+         sum(lr.end_date - lr.start_date + 1),
+         0
+      )
+        from leave_requests lr
+       where lr.employee_id = lb.employee_id
+         and lr.leave_type_id = lb.leave_type_id
+         and lr.status_id = (
+         select ls.id
+           from leave_statuses ls
+          where ls.title = 'Approved'
+      )
+         and extract(year from lr.start_date) = lb.year
    );
 
 
@@ -802,7 +825,7 @@ select 'Leave Types',
 union all
 select 'Leave Requests',
        count(*)
-  from leave_requests
+  from leave_requests;
 -- =========================================================
 -- 9. SEED APP USERS
 -- =========================================================
@@ -815,23 +838,29 @@ using (
      from dual
 ) s on ( au.username = s.username )
 when not matched then
-insert (employee_id, username, password_hash, role, is_active)
-values (
-   ( select e.id from employees e where e.email = s.email ),
-   s.username,
-   s.password_hash,
-   'Admin',
-   1 );
+insert (
+   employee_id,
+   username,
+   password_hash,
+   role,
+   is_active )
+values
+   ( (
+      select e.id
+        from employees e
+       where e.email = s.email
+   ),
+     s.username,
+     s.password_hash,
+     'Admin',
+     1 );
 
-union all
 select 'Leave Balances',
        count(*)
   from leave_balances;
-union all
 select 'App Users',
        count(*)
   from app_users;
-union all
 select 'Status Events',
        count(*)
   from status_events;
